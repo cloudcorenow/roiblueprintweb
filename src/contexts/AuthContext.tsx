@@ -63,7 +63,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ email, password })
       });
 
-      const data = await response.json();
+      if (!response.ok && response.status === 404) {
+        return { error: new Error('Authentication endpoint not found. Make sure the site is deployed.') };
+      }
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (jsonError) {
+        console.error('Failed to parse response:', jsonError);
+        return { error: new Error('Invalid response from server. The authentication API may not be deployed.') };
+      }
 
       if (!response.ok) {
         return { error: new Error(data.error || 'Failed to sign in') };
@@ -73,6 +83,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(data.user);
       return { error: null };
     } catch (error) {
+      console.error('Sign in error:', error);
       return { error: error as Error };
     }
   };

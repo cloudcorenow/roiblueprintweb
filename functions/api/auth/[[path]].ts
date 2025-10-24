@@ -34,7 +34,14 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   const { request, env } = context;
 
   if (request.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders, status: 200 });
+  }
+
+  if (!env.DB) {
+    return new Response(JSON.stringify({ error: 'Database not configured' }), {
+      status: 500,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    });
   }
 
   const url = new URL(request.url);
