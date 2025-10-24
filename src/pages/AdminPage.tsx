@@ -116,6 +116,44 @@ export default function AdminPage() {
     URL.revokeObjectURL(url);
   };
 
+  const handleDeleteGuideAccess = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this email?')) return;
+
+    try {
+      const response = await fetch(`/api/guide-access?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await loadEmails();
+      } else {
+        setError('Failed to delete email');
+      }
+    } catch (error) {
+      console.error('Error deleting email:', error);
+      setError('Failed to delete email');
+    }
+  };
+
+  const handleDeleteSubscription = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this subscription?')) return;
+
+    try {
+      const response = await fetch(`/api/newsletter?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await loadSubscriptions();
+      } else {
+        setError('Failed to delete subscription');
+      }
+    } catch (error) {
+      console.error('Error deleting subscription:', error);
+      setError('Failed to delete subscription');
+    }
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
@@ -193,20 +231,29 @@ export default function AdminPage() {
                     className="p-4 bg-success-50 rounded-lg border border-success-200"
                   >
                     <div className="flex items-start justify-between">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium text-neutral-900">{entry.email}</p>
                         <p className="text-sm text-success-700 font-semibold">Prequalification Assessment</p>
                         <p className="text-xs text-neutral-500 mt-1">
                           Started {entry.access_count} time{entry.access_count > 1 ? 's' : ''}
                         </p>
                       </div>
-                      <div className="text-right">
-                        <p className="text-xs text-neutral-500">
-                          First: {new Date(entry.created_at).toLocaleString()}
-                        </p>
-                        <p className="text-xs text-neutral-500">
-                          Last: {new Date(entry.last_accessed_at).toLocaleString()}
-                        </p>
+                      <div className="text-right flex items-start gap-3">
+                        <div>
+                          <p className="text-xs text-neutral-500">
+                            First: {new Date(entry.created_at).toLocaleString()}
+                          </p>
+                          <p className="text-xs text-neutral-500">
+                            Last: {new Date(entry.last_accessed_at).toLocaleString()}
+                          </p>
+                        </div>
+                        <button
+                          onClick={() => handleDeleteGuideAccess(entry.id)}
+                          className="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-red-100 rounded"
+                          title="Delete email"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -271,14 +318,23 @@ export default function AdminPage() {
                     className="p-4 bg-neutral-50 rounded-lg border border-neutral-200"
                   >
                     <div className="flex items-start justify-between">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium text-neutral-900">{entry.email}</p>
                         <p className="text-sm text-neutral-600">Guide: {entry.guide_name}</p>
                         <p className="text-xs text-neutral-500 mt-1">Access count: {entry.access_count}</p>
                       </div>
-                      <p className="text-xs text-neutral-500">
-                        {new Date(entry.created_at).toLocaleString()}
-                      </p>
+                      <div className="flex items-start gap-3">
+                        <p className="text-xs text-neutral-500">
+                          {new Date(entry.created_at).toLocaleString()}
+                        </p>
+                        <button
+                          onClick={() => handleDeleteGuideAccess(entry.id)}
+                          className="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-red-100 rounded"
+                          title="Delete email"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -334,13 +390,22 @@ export default function AdminPage() {
                     className="p-4 bg-neutral-50 rounded-lg border border-neutral-200"
                   >
                     <div className="flex items-start justify-between">
-                      <div>
+                      <div className="flex-1">
                         <p className="font-medium text-neutral-900">{entry.email}</p>
                         <p className="text-sm text-neutral-600">Source: {entry.source}</p>
                       </div>
-                      <p className="text-xs text-neutral-500">
-                        {new Date(entry.created_at).toLocaleString()}
-                      </p>
+                      <div className="flex items-start gap-3">
+                        <p className="text-xs text-neutral-500">
+                          {new Date(entry.created_at).toLocaleString()}
+                        </p>
+                        <button
+                          onClick={() => handleDeleteSubscription(entry.id)}
+                          className="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-red-100 rounded"
+                          title="Delete subscription"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

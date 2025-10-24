@@ -46,3 +46,24 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
     return Response.json({ error: 'Failed to fetch guide access emails' }, { status: 500 });
   }
 };
+
+export const onRequestDelete: PagesFunction<Env> = async (context) => {
+  try {
+    const url = new URL(context.request.url);
+    const id = url.searchParams.get('id');
+
+    if (!id) {
+      return Response.json({ error: 'ID is required' }, { status: 400 });
+    }
+
+    await context.env.DB
+      .prepare('DELETE FROM guide_access_emails WHERE id = ?')
+      .bind(id)
+      .run();
+
+    return Response.json({ success: true });
+  } catch (error) {
+    console.error('Error deleting guide access email:', error);
+    return Response.json({ error: 'Failed to delete guide access email' }, { status: 500 });
+  }
+};
