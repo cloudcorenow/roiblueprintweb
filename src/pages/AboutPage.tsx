@@ -25,18 +25,18 @@ export default function AboutPage() {
       image: "/Leandro.jpg"
     },
     {
-      name: "Yvette Oseguera",
-      title: "Chief Client Officer",
-      description: "As Chief Client Officer, Yvette leads all client relationships, ensuring practices receive guidance that respects clinical realities while identifying R&D documentation opportunities. Emergency room nurse with 20+ years of clinical experience, including management roles at USC focused on healthcare operations and clinical workflow optimization. AA in Nursing and BA in Communications from Cal State Fullerton.",
-      linkedIn: "#",
-      image: "/Yvette.jpeg"
-    },
-    {
       name: "Sali Burton",
       title: "Chief Innovation Officer",
       description: "As Chief Innovation Officer, Sali leads innovation strategy, helping behavioral health practices identify and optimize their clinical protocol development, data systems, and training methodologies as qualifying R&D activities. Board Certified Behavior Analyst with 10+ years in Applied Behavior Analysis and current founder of Burton Behavioral Interventions Corp. (BBIC). Master's in Education with Autism specialization from National University and Bachelor's in Business Management from Pepperdine University.",
       linkedIn: "#",
       image: "/Sali.jpg"
+    },
+    {
+      name: "Yvette Oseguera",
+      title: "Chief Client Officer",
+      description: "As Chief Client Officer, Yvette leads all client relationships, ensuring practices receive guidance that respects clinical realities while identifying R&D documentation opportunities. Emergency room nurse with 20+ years of clinical experience, including management roles at USC focused on healthcare operations and clinical workflow optimization. AA in Nursing and BA in Communications from Cal State Fullerton.",
+      linkedIn: "#",
+      image: "/Yvette.jpeg"
     },
     {
       name: "Monica Harris",
