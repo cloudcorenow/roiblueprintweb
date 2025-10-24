@@ -52,23 +52,31 @@ wrangler d1 execute roi-blueprint-db --file=./migrations/0002_create_guide_acces
 3. Click "Create a project"
 4. Connect your GitHub repository
 5. Configure build settings:
-   - Build command: `npm run build`
-   - Build output directory: `dist`
-   - Node version: `22`
+   - **Build command**: `npm run build`
+   - **Build output directory**: `dist`
+   - **Root directory**: `/` (leave empty)
+   - **Node version**: `22`
+   - **IMPORTANT**: Leave "Deploy command" EMPTY (Cloudflare Pages deploys automatically after build)
 6. Add D1 database binding:
-   - Go to Settings → Functions
-   - Add D1 database binding: `DB` → `roi-blueprint-db`
-7. Deploy
+   - After first deployment, go to Settings → Functions
+   - Scroll to "D1 database bindings"
+   - Add binding: Variable name: `DB`, D1 database: `roi-blueprint-db`
+7. Click "Save and Deploy"
 
-#### Option B: Direct Deploy with Wrangler
+#### Option B: Direct Deploy with Wrangler CLI
 
 ```bash
 # Build the project
 npm run build
 
-# Deploy to Cloudflare Pages
+# Deploy to Cloudflare Pages (first time)
 wrangler pages deploy dist --project-name=roi-blueprint
+
+# For subsequent deploys
+wrangler pages deploy dist
 ```
+
+**Note**: After first deploy via CLI, you need to bind the D1 database in the Cloudflare Dashboard under Settings → Functions.
 
 ### 5. Configure Production Environment
 
