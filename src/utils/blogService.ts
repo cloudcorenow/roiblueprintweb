@@ -1,19 +1,33 @@
-import { supabase } from './supabase';
+import { getD1, isD1Available } from './d1Client';
 import { BlogPost, BlogPostInput } from '../types/blog';
+
+function convertRowToBlogPost(row: any): BlogPost {
+  return {
+    ...row,
+    published: Boolean(row.published),
+    featured: Boolean(row.featured)
+  };
+}
 
 export const blogService = {
   async getAllPosts(): Promise<BlogPost[]> {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching posts:', error);
+      if (!isD1Available()) {
+        console.warn('D1 database not available');
         return [];
       }
-      return data || [];
+
+      const db = getD1();
+      const result = await db
+        .prepare('SELECT * FROM blog_posts ORDER BY created_at DESC')
+        .all();
+
+      if (!result.success) {
+        console.error('Error fetching posts:', result.error);
+        return [];
+      }
+
+      return (result.results || []).map(convertRowToBlogPost);
     } catch (error) {
       console.error('Error in getAllPosts:', error);
       return [];
@@ -22,17 +36,22 @@ export const blogService = {
 
   async getPublishedPosts(): Promise<BlogPost[]> {
     try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('published', true)
-        .order('published_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching published posts:', error);
+      if (!isD1Available()) {
+        console.warn('D1 database not available');
         return [];
       }
-      return data || [];
+
+      const db = getD1();
+      const result = await db
+        .prepare('SELECT * FROM blog_posts WHERE published = 1 ORDER BY published_at DESC')
+        .all();
+
+      if (!result.success) {
+        console.error('Error fetching published posts:', result.error);
+        return [];
+      }
+
+      return (result.results || []).map(convertRowToBlogPost);
     } catch (error) {
       console.error('Error in getPublishedPosts:', error);
       return [];
@@ -41,19 +60,22 @@ export const blogService = {
 
   async getPostBySlug(slug: string): Promise<BlogPost | null> {
     try {
-      if (!supabase) return null;
-
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('slug', slug)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching post by slug:', error);
+      if (!isD1Available()) {
+        console.warn('D1 database not available');
         return null;
       }
-      return data;
+
+      const db = getD1();
+      const result = await db
+        .prepare('SELECT * FROM blog_posts WHERE slug = ?')
+        .bind(slug)
+        .first();
+
+      if (!result) {
+        return null;
+      }
+
+      return convertRowToBlogPost(result);
     } catch (error) {
       console.error('Error in getPostBySlug:', error);
       return null;
@@ -62,20 +84,22 @@ export const blogService = {
 
   async getPostById(id: string): Promise<BlogPost | null> {
     try {
-      if (!supabase) return null;
-
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('id', id)
-        .eq('published', true)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching post by id:', error);
+      if (!isD1Available()) {
+        console.warn('D1 database not available');
         return null;
       }
-      return data;
+
+      const db = getD1();
+      const result = await db
+        .prepare('SELECT * FROM blog_posts WHERE id = ? AND published = 1')
+        .bind(id)
+        .first();
+
+      if (!result) {
+        return null;
+      }
+
+      return convertRowToBlogPost(result);
     } catch (error) {
       console.error('Error in getPostById:', error);
       return null;
@@ -84,22 +108,21 @@ export const blogService = {
 
   async getFeaturedPost(): Promise<BlogPost | null> {
     try {
-      if (!supabase) return null;
-
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('published', true)
-        .eq('featured', true)
-        .order('published_at', { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching featured post:', error);
+      if (!isD1Available()) {
+        console.warn('D1 database not available');
         return null;
       }
-      return data;
+
+      const db = getD1();
+      const result = await db
+        .prepare('SELECT * FROM blog_posts WHERE published = 1 AND featured = 1 ORDER BY published_at DESC LIMIT 1')
+        .first();
+
+      if (!result) {
+        return null;
+      }
+
+      return convertRowToBlogPost(result);
     } catch (error) {
       console.error('Error in getFeaturedPost:', error);
       return null;
@@ -108,20 +131,23 @@ export const blogService = {
 
   async getPostsByCategory(category: string): Promise<BlogPost[]> {
     try {
-      if (!supabase) return [];
-
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('*')
-        .eq('published', true)
-        .eq('category', category)
-        .order('published_at', { ascending: false });
-
-      if (error) {
-        console.error('Error fetching posts by category:', error);
+      if (!isD1Available()) {
+        console.warn('D1 database not available');
         return [];
       }
-      return data || [];
+
+      const db = getD1();
+      const result = await db
+        .prepare('SELECT * FROM blog_posts WHERE published = 1 AND category = ? ORDER BY published_at DESC')
+        .bind(category)
+        .all();
+
+      if (!result.success) {
+        console.error('Error fetching posts by category:', result.error);
+        return [];
+      }
+
+      return (result.results || []).map(convertRowToBlogPost);
     } catch (error) {
       console.error('Error in getPostsByCategory:', error);
       return [];
@@ -130,21 +156,42 @@ export const blogService = {
 
   async createPost(post: BlogPostInput): Promise<BlogPost | null> {
     try {
-      if (!supabase) {
+      if (!isD1Available()) {
         throw new Error('Database connection not available');
       }
 
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .insert([post])
-        .select()
-        .single();
+      const db = getD1();
+      const id = crypto.randomUUID();
 
-      if (error) {
-        console.error('Error creating post:', error);
-        throw error;
+      const result = await db
+        .prepare(`
+          INSERT INTO blog_posts (
+            id, title, slug, excerpt, content, category, author,
+            author_title, image, read_time, published, featured
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `)
+        .bind(
+          id,
+          post.title,
+          post.slug,
+          post.excerpt,
+          post.content,
+          post.category,
+          post.author,
+          post.author_title || '',
+          post.image,
+          post.read_time,
+          post.published ? 1 : 0,
+          post.featured ? 1 : 0
+        )
+        .run();
+
+      if (!result.success) {
+        console.error('Error creating post:', result.error);
+        throw new Error(result.error);
       }
-      return data;
+
+      return await this.getPostById(id);
     } catch (error) {
       console.error('Error in createPost:', error);
       throw error;
@@ -153,22 +200,37 @@ export const blogService = {
 
   async updatePost(id: string, post: Partial<BlogPostInput>): Promise<BlogPost | null> {
     try {
-      if (!supabase) {
+      if (!isD1Available()) {
         throw new Error('Database connection not available');
       }
 
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .update(post)
-        .eq('id', id)
-        .select()
-        .single();
+      const db = getD1();
+      const updates: string[] = [];
+      const values: any[] = [];
 
-      if (error) {
-        console.error('Error updating post:', error);
-        throw error;
+      Object.entries(post).forEach(([key, value]) => {
+        updates.push(`${key} = ?`);
+        if (key === 'published' || key === 'featured') {
+          values.push(value ? 1 : 0);
+        } else {
+          values.push(value);
+        }
+      });
+
+      updates.push('updated_at = datetime("now")');
+      values.push(id);
+
+      const result = await db
+        .prepare(`UPDATE blog_posts SET ${updates.join(', ')} WHERE id = ?`)
+        .bind(...values)
+        .run();
+
+      if (!result.success) {
+        console.error('Error updating post:', result.error);
+        throw new Error(result.error);
       }
-      return data;
+
+      return await this.getPostById(id);
     } catch (error) {
       console.error('Error in updatePost:', error);
       throw error;
@@ -177,18 +239,19 @@ export const blogService = {
 
   async deletePost(id: string): Promise<void> {
     try {
-      if (!supabase) {
+      if (!isD1Available()) {
         throw new Error('Database connection not available');
       }
 
-      const { error } = await supabase
-        .from('blog_posts')
-        .delete()
-        .eq('id', id);
+      const db = getD1();
+      const result = await db
+        .prepare('DELETE FROM blog_posts WHERE id = ?')
+        .bind(id)
+        .run();
 
-      if (error) {
-        console.error('Error deleting post:', error);
-        throw error;
+      if (!result.success) {
+        console.error('Error deleting post:', result.error);
+        throw new Error(result.error);
       }
     } catch (error) {
       console.error('Error in deletePost:', error);

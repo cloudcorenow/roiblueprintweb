@@ -1,0 +1,6 @@
+# Example environment variables for local development
+# Copy this file to .dev.vars and fill in your values
+
+# Cloudflare D1 Database
+# The database binding 'DB' is automatically configured via wrangler.toml
+# No environment variables needed for D1

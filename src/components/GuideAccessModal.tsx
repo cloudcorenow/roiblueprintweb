@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, Mail, ArrowRight, CheckCircle } from 'lucide-react';
-import { supabase } from '../utils/supabase';
 
 interface GuideAccessModalProps {
   isOpen: boolean;
@@ -30,32 +29,22 @@ export default function GuideAccessModal({
     setIsSubmitting(true);
 
     try {
-      const emailData = {
-        email,
-        guide_name: guideName,
-        submitted_at: new Date().toISOString(),
-      };
+      const response = await fetch('/api/guide-access', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          guide_name: guideName,
+        }),
+      });
 
-      if (supabase) {
-        const { error: dbError } = await supabase
-          .from('guide_access_emails')
-          .insert({
-            email,
-            guide_name: guideName,
-            last_accessed_at: new Date().toISOString(),
-          });
-
-        if (dbError && dbError.code !== '23505') {
-          console.warn('Database save failed, storing locally:', dbError.message);
-        }
+      if (!response.ok) {
+        throw new Error('Failed to save email');
       }
 
-      const existingEmails = JSON.parse(localStorage.getItem('guide_access_emails') || '[]');
-      existingEmails.push(emailData);
-      localStorage.setItem('guide_access_emails', JSON.stringify(existingEmails));
-
-      console.log('Guide Access Email Submitted:', emailData);
-      console.log('All Stored Emails:', existingEmails);
+      console.log('Guide Access Email Submitted:', { email, guide_name: guideName });
 
       setSuccess(true);
       setTimeout(() => {
