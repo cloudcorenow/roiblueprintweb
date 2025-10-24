@@ -52,6 +52,9 @@ export default function AdminPage() {
     }
   };
 
+  const prequalificationEmails = emails.filter(e => e.guide_name === 'prequalification-assessment');
+  const guideDownloadEmails = emails.filter(e => e.guide_name !== 'prequalification-assessment');
+
   const loadSubscriptions = async () => {
     try {
       const response = await fetch('/api/newsletter');
@@ -65,8 +68,24 @@ export default function AdminPage() {
     }
   };
 
+  const handleDownloadPrequalification = () => {
+    const text = prequalificationEmails.map(e =>
+      `${e.email} | Access Count: ${e.access_count} | First Submitted: ${new Date(e.created_at).toLocaleString()} | Last Accessed: ${new Date(e.last_accessed_at).toLocaleString()}`
+    ).join('\n');
+
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `prequalification-emails-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const handleDownload = () => {
-    const text = emails.map(e =>
+    const text = guideDownloadEmails.map(e =>
       `${e.email} | Guide: ${e.guide_name} | Access Count: ${e.access_count} | Created: ${new Date(e.created_at).toLocaleString()}`
     ).join('\n');
 
@@ -128,6 +147,84 @@ export default function AdminPage() {
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
+              <Mail className="w-6 h-6 text-success-600" />
+              <h2 className="text-2xl font-bold">Prequalification Submissions</h2>
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={loadData}
+                className="btn btn-outline flex items-center gap-2"
+                disabled={loading}
+              >
+                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                Refresh
+              </button>
+              {prequalificationEmails.length > 0 && (
+                <button
+                  onClick={handleDownloadPrequalification}
+                  className="btn btn-primary flex items-center gap-2"
+                >
+                  <Download className="w-4 h-4" />
+                  Download as Text
+                </button>
+              )}
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-8 text-neutral-500">
+              <RefreshCw className="w-8 h-8 mx-auto mb-3 text-neutral-300 animate-spin" />
+              <p>Loading...</p>
+            </div>
+          ) : prequalificationEmails.length === 0 ? (
+            <div className="text-center py-8 text-neutral-500">
+              <Mail className="w-12 h-12 mx-auto mb-3 text-neutral-300" />
+              <p>No prequalification submissions yet</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-neutral-600 mb-4">
+                Total submissions: <strong>{prequalificationEmails.length}</strong>
+              </p>
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {prequalificationEmails.map((entry) => (
+                  <div
+                    key={entry.id}
+                    className="p-4 bg-success-50 rounded-lg border border-success-200"
+                  >
+                    <div className="flex items-start justify-between">
+                      <div>
+                        <p className="font-medium text-neutral-900">{entry.email}</p>
+                        <p className="text-sm text-success-700 font-semibold">Prequalification Assessment</p>
+                        <p className="text-xs text-neutral-500 mt-1">
+                          Started {entry.access_count} time{entry.access_count > 1 ? 's' : ''}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs text-neutral-500">
+                          First: {new Date(entry.created_at).toLocaleString()}
+                        </p>
+                        <p className="text-xs text-neutral-500">
+                          Last: {new Date(entry.last_accessed_at).toLocaleString()}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-6 p-4 bg-success-50 rounded-lg border border-success-200">
+            <p className="text-sm text-success-800">
+              <strong>Status:</strong> Prequalification emails are captured when prospects start the assessment process.
+            </p>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
               <Mail className="w-6 h-6 text-primary-600" />
               <h2 className="text-2xl font-bold">Guide Access Emails</h2>
             </div>
@@ -140,7 +237,7 @@ export default function AdminPage() {
                 <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
                 Refresh
               </button>
-              {emails.length > 0 && (
+              {guideDownloadEmails.length > 0 && (
                 <button
                   onClick={handleDownload}
                   className="btn btn-primary flex items-center gap-2"
@@ -157,18 +254,18 @@ export default function AdminPage() {
               <RefreshCw className="w-8 h-8 mx-auto mb-3 text-neutral-300 animate-spin" />
               <p>Loading...</p>
             </div>
-          ) : emails.length === 0 ? (
+          ) : guideDownloadEmails.length === 0 ? (
             <div className="text-center py-8 text-neutral-500">
               <Mail className="w-12 h-12 mx-auto mb-3 text-neutral-300" />
-              <p>No email submissions yet</p>
+              <p>No guide download submissions yet</p>
             </div>
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-neutral-600 mb-4">
-                Total submissions: <strong>{emails.length}</strong>
+                Total submissions: <strong>{guideDownloadEmails.length}</strong>
               </p>
               <div className="max-h-96 overflow-y-auto space-y-2">
-                {emails.map((entry) => (
+                {guideDownloadEmails.map((entry) => (
                   <div
                     key={entry.id}
                     className="p-4 bg-neutral-50 rounded-lg border border-neutral-200"
