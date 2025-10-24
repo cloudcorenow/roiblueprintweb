@@ -5,6 +5,8 @@ import Footer from "./components/Footer";
 import ScrollToTop from "./components/ScrollToTop";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Chatbot from "./components/Chatbot";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 // Lazy load pages for better performance
 const HomePage = lazy(() => import("./pages/HomePage"));
@@ -20,6 +22,7 @@ const RDTaxCreditGuidePage = lazy(() => import("./pages/RDTaxCreditGuidePage"));
 const AdminPage = lazy(() => import("./pages/AdminPage"));
 const PrivacyPolicyPage = lazy(() => import("./pages/PrivacyPolicyPage"));
 const FAQPage = lazy(() => import("./pages/FAQPage"));
+const LoginPage = lazy(() => import("./pages/LoginPage"));
 
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center">
@@ -60,33 +63,43 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
-        <div className="min-h-screen bg-white">
-          <ScrollToTop />
-          <Navigation />
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/services" element={<ServicesPage />} />
-              <Route path="/industries" element={<IndustriesOverviewPage />} />
-              <Route path="/industries/aba-practices" element={<ABAPracticesPage />} />
-              <Route path="/industries/medical-practices" element={<MedicalPracticesPage />} />
-              <Route path="/about" element={<AboutPage />} />
-              <Route path="/resources" element={<ResourcesPage />} />
-              <Route path="/resources/:id" element={<ArticlePage />} />
-              <Route path="/contact" element={<ContactPage />} />
-              <Route
-                path="/rd-tax-credit-guide"
-                element={<RDTaxCreditGuidePage />}
-              />
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/privacy" element={<PrivacyPolicyPage />} />
-              <Route path="/faq" element={<FAQPage />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-          <Footer />
-        </div>
-        <Chatbot />
+        <AuthProvider>
+          <div className="min-h-screen bg-white">
+            <ScrollToTop />
+            <Navigation />
+            <Suspense fallback={<LoadingSpinner />}>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/services" element={<ServicesPage />} />
+                <Route path="/industries" element={<IndustriesOverviewPage />} />
+                <Route path="/industries/aba-practices" element={<ABAPracticesPage />} />
+                <Route path="/industries/medical-practices" element={<MedicalPracticesPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/resources" element={<ResourcesPage />} />
+                <Route path="/resources/:id" element={<ArticlePage />} />
+                <Route path="/contact" element={<ContactPage />} />
+                <Route
+                  path="/rd-tax-credit-guide"
+                  element={<RDTaxCreditGuidePage />}
+                />
+                <Route path="/login" element={<LoginPage />} />
+                <Route
+                  path="/admin"
+                  element={
+                    <ProtectedRoute>
+                      <AdminPage />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/faq" element={<FAQPage />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+            <Footer />
+          </div>
+          <Chatbot />
+        </AuthProvider>
       </Router>
     </ErrorBoundary>
   );

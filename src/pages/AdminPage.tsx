@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Download, Mail, Trash2 } from "lucide-react";
+import { Download, Mail, Trash2, LogOut } from "lucide-react";
 import BlogAdmin from "../components/BlogAdmin";
+import { useAuth } from "../contexts/AuthContext";
 import {
   downloadEmailsAsTextFile,
   getStoredEmails,
@@ -13,6 +14,7 @@ import {
 
 export default function AdminPage() {
   const navigate = useNavigate();
+  const { signOut, user } = useAuth();
   const [emails, setEmails] = useState<any[]>([]);
   const [subscriptions, setSubscriptions] = useState<any[]>([]);
 
@@ -53,9 +55,28 @@ export default function AdminPage() {
     }
   };
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/login');
+  };
+
   return (
     <div style={{ paddingTop: "5rem", minHeight: "100vh", backgroundColor: "#f8fafc" }}>
       <div className="container" style={{ marginBottom: "3rem" }}>
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-3xl font-bold text-neutral-900">Admin Dashboard</h1>
+            <p className="text-sm text-neutral-600 mt-1">Logged in as: {user?.email}</p>
+          </div>
+          <button
+            onClick={handleSignOut}
+            className="btn btn-outline flex items-center gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            Sign Out
+          </button>
+        </div>
+
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
