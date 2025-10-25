@@ -230,7 +230,7 @@ export default function Chatbot({ persistKey, className, title = "ROI Blueprint 
   useEffect(() => {
     if (state.isOpen && state.messages.length === 0) {
       addBotMessage(
-        "👋 Hi! I'm your ROI Blueprint assistant. I can help you understand how we help healthcare practices improve operations and potentially qualify for R&D tax credits. What would you like to know?",
+        "👋 Hi! I'm your ROI BLUEPRINT assistant. I can help you understand how we help healthcare practices improve operations and potentially qualify for R&D tax credits. What would you like to know?",
         [...QUICK_RESPONSES]
       );
     }
