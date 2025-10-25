@@ -41,7 +41,10 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
     }
 
     console.log('Turnstile: Initializing with site key:', siteKey);
-    setDebugInfo(`Site key: ${siteKey}`);
+    console.log('Turnstile: Current URL:', window.location.href);
+    console.log('Turnstile: Hostname:', window.location.hostname);
+    console.log('Turnstile: Protocol:', window.location.protocol);
+    setDebugInfo(`Site key: ${siteKey} | Host: ${window.location.hostname}`);
 
     let attempts = 0;
     const maxAttempts = 50;
@@ -79,11 +82,17 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
             setDebugInfo('Verified successfully');
             onVerify(token);
           },
-          'error-callback': (errorCode?: string) => {
+          'error-callback': (errorCode?: any) => {
             console.error('Turnstile: Error callback triggered', errorCode);
+            console.error('Turnstile: Error details:', {
+              code: errorCode,
+              type: typeof errorCode,
+              hostname: window.location.hostname,
+              href: window.location.href
+            });
             const errorMsg = errorCode ? `Error: ${errorCode}` : 'Verification failed';
             setError(errorMsg);
-            setDebugInfo(`Error: ${errorCode || 'unknown'}`);
+            setDebugInfo(`Error: ${errorCode || 'unknown'} on ${window.location.hostname}`);
             setIsLoading(false);
             onError?.();
           },
