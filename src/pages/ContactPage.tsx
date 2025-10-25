@@ -640,13 +640,15 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send email');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to send email' }));
+        throw new Error(errorData.error || 'Failed to send email');
       }
 
       setSuccess(true);
       setFormData({ name: "", email: "", company: "", industry: "", message: "" });
     } catch (err) {
-      setErrors({ message: "There was an error submitting your form. Please try again." as any });
+      console.error('Form submission error:', err);
+      setErrors({ message: (err instanceof Error ? err.message : "There was an error submitting your form. Please try again.") as any });
     } finally {
       setSubmitting(false);
     }
@@ -980,13 +982,15 @@ const StandaloneContactForm: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to send email');
+        const errorData = await response.json().catch(() => ({ error: 'Failed to send email' }));
+        throw new Error(errorData.error || 'Failed to send email');
       }
 
       setSuccess(true);
       setFormData({ name: "", email: "", company: "", industry: "", message: "" });
     } catch (err) {
-      setErrors({ message: "There was an error submitting your form. Please try again." as any });
+      console.error('Form submission error:', err);
+      setErrors({ message: (err instanceof Error ? err.message : "There was an error submitting your form. Please try again.") as any });
     } finally {
       setSubmitting(false);
     }
