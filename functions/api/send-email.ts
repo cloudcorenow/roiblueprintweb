@@ -78,8 +78,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'ROI Blueprint <notifications@roiblueprint.com>',
-        to: ['sales@roiblueprint.com'],
+        from: 'ROI Blueprint <onboarding@resend.dev>',
+        to: ['lamado@roiblueprint.com'],
         subject: subject,
         html: htmlContent,
       }),
