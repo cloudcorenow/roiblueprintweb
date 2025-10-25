@@ -54,40 +54,74 @@ interface ChatState {
 // ==== Constants ====
 
 const KNOWLEDGE_BASE = {
+  about: {
+    whatIs:
+      "ROI Blueprint is a specialized consulting firm that helps healthcare practices improve operations through documented R&D activities while potentially qualifying for valuable tax benefits. Our systematic approach transforms practices through innovation and process optimization.",
+    whoWeWorkWith:
+      "We primarily work with healthcare practices including medical practices, ABA therapy centers, dental practices, and other healthcare service providers. We specialize in practices with 15-100+ employees looking to optimize operations and innovate their service delivery.",
+    different:
+      "Unlike traditional consultants, our services are structured as Qualified Research Expenditures (QRE) under IRS guidelines. This means your investment in operational improvements may generate its own tax benefits. Additionally, we don't just provide recommendations—we implement, document, and optimize alongside your team throughout the year.",
+  },
   rdCredits: {
     what:
-      "R&D tax credits are federal incentives that provide dollar-for-dollar tax reductions for businesses investing in research and development. They typically provide 6-8% credit on qualified expenses.",
-    who:
-      "Any business conducting qualifying research activities can claim R&D credits - from software companies to manufacturers to healthcare practices.",
-    how: "We identify your qualifying activities, document them properly, and prepare IRS Form 6765 to claim your credits.",
-    amount:
-      "Most businesses save $30K-50K annually, with some larger operations saving $100K+. The exact amount depends on your qualified research expenses.",
+      "R&D tax credits are federal and state tax incentives designed to reward companies for investing in innovation and process improvement. These credits can significantly reduce your tax liability and, in some cases, provide cash refunds.",
+    qualify:
+      "Many healthcare practices qualify without realizing it. Activities like developing new treatment protocols, optimizing operational workflows, implementing new technologies, and improving patient care processes may all qualify as R&D. We help identify and document these activities according to IRS standards.",
+    howMuch:
+      "The amount varies based on qualifying activities, practice size, and state programs. Small practices (15-25 employees) might see $30,000-$50,000 in annual benefits, while larger practices (75-100 employees) could see $150,000-$250,000 or more. These figures include both operational improvements and potential tax benefits.",
+    guaranteed:
+      "Tax benefits vary based on qualifying R&D activities, state programs, and individual circumstances. We document R&D work according to IRS standards, but actual benefits depend on IRS approval. Innovation and operational improvements are the primary goals—potential tax benefits are a bonus.",
   },
   services: {
-    assessment:
-      "We provide assessments to determine if your business qualifies for R&D tax credits and estimate your potential savings.",
-    documentation:
-      "Our CPA and EA team creates IRS-compliant documentation packages that protect you during audits.",
-    ongoing:
-      "We provide ongoing compliance management through our ROI Blueprint Platform with automated tracking and alerts.",
+    methodology:
+      "Our proprietary approach follows three phases: Research (Months 1-2) where we analyze operations and identify opportunities; Optimize (Months 2-10) where we implement and refine improvements; and Innovate (Months 10-12) where we deploy proven solutions and plan future initiatives. Throughout all phases, we document activities for potential R&D tax credit qualification.",
+    engagement:
+      "Our standard engagement is 12 months, which allows us to implement meaningful changes, measure results, and document activities properly. We believe sustainable transformation requires ongoing partnership, not just a one-time assessment.",
+    implementation:
+      "We work alongside your team to implement improvements, provide training, customize systems, and ensure smooth integration. We don't just hand you a report—we're there with you through testing, refinement, and deployment.",
+    disruption:
+      "Our approach is designed to enhance, not disrupt, your operations. We work within your existing workflows and make changes incrementally. Most implementations happen during strategic planning sessions and off-peak hours to minimize disruption.",
   },
-  company: {
-    about:
-      "ROI Blueprint specializes exclusively in healthcare R&D tax credits. We've delivered over $2M in combined savings with 15+ years of healthcare experience.",
-    team:
-      "Our team includes licensed CPAs, Enrolled Agents, and healthcare professionals who understand your industry.",
-    results:
-      "We've helped 200+ practices save an average of $30K-50K annually through our proven methodology.",
+  investment: {
+    cost:
+      "Investment varies based on practice size and complexity. Small practices (15-25 employees) typically invest $75,000-$100,000 annually, while larger practices (75-100 employees) invest $200,000-$300,000. This investment often generates returns through operational improvements and potential tax benefits.",
+    payForItself:
+      "Many clients see their investment offset through a combination of operational improvements and potential tax benefits. For example, up to 65% of our fees may qualify as QRE, potentially generating additional tax benefits. Combined with efficiency gains and revenue improvements, the service often becomes self-funding.",
+    roi:
+      "Beyond potential tax benefits, clients typically see improved operational efficiency, reduced administrative burden, enhanced patient/client satisfaction, better staff productivity, and increased revenue capacity. Many practices report 2-3x ROI when considering all benefits combined.",
+    paymentPlans:
+      "Yes, we structure engagements with flexible payment terms that align with your cash flow. Contact us to discuss options that work for your practice.",
+  },
+  gettingStarted: {
+    rightForMe:
+      "If you're looking to improve operations, facing administrative challenges, considering new technology implementations, or seeking to optimize workflows, we can likely help. Schedule a consultation to discuss your specific needs and goals.",
+    consultation:
+      "We'll discuss your practice operations, challenges, and goals. We'll explain how our methodology applies to your situation and outline potential opportunities for improvement and R&D documentation. There's no obligation, and the consultation is complimentary.",
+    howQuickly:
+      "Once we've completed our initial assessment and you've decided to move forward, we can typically begin within 2-4 weeks. We'll work with your schedule to ensure a smooth onboarding process.",
+    information:
+      "During our initial phase, we'll need access to operational documentation, financial systems, workflow processes, and key team members. We'll provide a detailed checklist during onboarding to make the process straightforward.",
+  },
+  workingTogether: {
+    timeRequired:
+      "We design our engagements to be efficient with your time. Expect monthly strategic planning sessions (2-4 hours), weekly check-ins (30-60 minutes), and periodic staff training sessions. We handle the heavy lifting of documentation and implementation.",
+    training:
+      "Yes, comprehensive training is included in all engagements. We provide hands-on training for new systems, workflows, and processes to ensure your team can sustain improvements long-term.",
+    notSatisfied:
+      "We're committed to your success. If at any point you're not seeing value, we'll work together to adjust our approach or part ways professionally. Most clients extend their engagements beyond the initial 12 months because they see consistent results.",
+    allStates:
+      "Yes, we work with practices nationwide. Our approach adapts to various state regulations and programs, and we're experienced in maximizing both federal and state-specific benefits.",
   },
 } as const;
 
 const QUICK_RESPONSES = [
+  "What is ROI Blueprint?",
   "What are R&D tax credits?",
   "Do I qualify?",
   "How much can I save?",
-  "What's the process?",
+  "What's your methodology?",
+  "How much does it cost?",
   "Schedule consultation",
-  "Get assessment",
 ] as const;
 
 // ==== Helpers ====
@@ -162,7 +196,7 @@ interface ChatbotProps {
   title?: string;
 }
 
-export default function Chatbot({ persistKey, className, title = "R&D Tax Credit Assistant" }: ChatbotProps) {
+export default function Chatbot({ persistKey, className, title = "ROI Blueprint Assistant" }: ChatbotProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const navigate = useNavigate();
 
@@ -196,7 +230,7 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
   useEffect(() => {
     if (state.isOpen && state.messages.length === 0) {
       addBotMessage(
-        "👋 Hi! I'm your R&D tax credit assistant. I can help you understand if your business qualifies for substantial tax savings. What would you like to know?",
+        "👋 Hi! I'm your ROI Blueprint assistant. I can help you understand how we help healthcare practices improve operations and potentially qualify for R&D tax credits. What would you like to know?",
         [...QUICK_RESPONSES]
       );
     }
@@ -255,62 +289,177 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
     const lower = normalize(message);
     addMessage(message, false);
 
-    // Primary intents
-    if (/(what).*(r&d|credit)/.test(lower)) {
+    // About ROI Blueprint
+    if (/(what\s*(is|are)|about).*roi\s*blueprint/.test(lower) || lower === "what is roi blueprint?") {
       return addBotMessage(
-        `${KNOWLEDGE_BASE.rdCredits.what}\n\nWould you like to know if your business qualifies?`,
-        ["Yes, check if I qualify", "How much can I save?", "What's your process?"]
+        `${KNOWLEDGE_BASE.about.whatIs}\n\nWould you like to know more about who we work with or what makes us different?`,
+        ["Who do you work with?", "What makes you different?", "Schedule consultation"]
       );
     }
 
-    if (/(qualify|eligible)/.test(lower)) {
-      dispatch({ type: "SET_STAGE", value: "qualification" });
+    if (/(who.*work|clients|practices)/.test(lower)) {
       return addBotMessage(
-        "Great question! Most businesses that develop products, improve processes, or solve technical challenges qualify. Let me ask a few quick questions:\n\nWhat industry is your business in?",
-        ["Healthcare/Medical", "Software/Technology", "Manufacturing", "Other"]
+        `${KNOWLEDGE_BASE.about.whoWeWorkWith}\n\nWould you like to learn about our methodology or schedule a consultation?`,
+        ["What's your methodology?", "Schedule consultation", "How much can I save?"]
       );
     }
 
-    if (/(save|amount|how much)/.test(lower)) {
+    if (/(different|why\s*choose|makes\s*you)/.test(lower)) {
       return addBotMessage(
-        `${KNOWLEDGE_BASE.rdCredits.amount}\n\nTo give you a more accurate estimate, what's your approximate annual revenue?`,
-        ["Under $1M", "$1M - $5M", "$5M - $20M", "Over $20M"]
+        `${KNOWLEDGE_BASE.about.different}\n\nInterested in learning how this could work for your practice?`,
+        ["Yes, tell me more", "What's the process?", "How much does it cost?"]
       );
     }
 
-    if (/(process|how.*work|how does.*work)/.test(lower)) {
+    // R&D Tax Credits
+    if (/(what).*(r&d|credit|tax\s*credit)/.test(lower) || lower.includes("what are r&d")) {
       return addBotMessage(
-        "Our process is simple:\n\n1️⃣ Assessment to identify qualifying activities\n2️⃣ Professional documentation by our CPA/EA team\n3️⃣ Ongoing compliance management\n4️⃣ File with your tax return\n\nWould you like to start with an assessment?",
-        ["Yes, start assessment", "Tell me about your team", "What are the costs?"]
+        `${KNOWLEDGE_BASE.rdCredits.what}\n\nWould you like to know if your practice qualifies?`,
+        ["Do I qualify?", "How much can I save?", "Are they guaranteed?"]
       );
     }
 
-    if (/(schedule|consultation|meeting)/.test(lower)) {
+    if (/(qualify|eligible|does\s*my\s*practice)/.test(lower) || lower.includes("do i qualify")) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.rdCredits.qualify}\n\nMany healthcare practices have qualifying activities without realizing it. Would you like to explore if your practice qualifies?`,
+        ["Yes, check if I qualify", "How much can I save?", "Schedule consultation"]
+      );
+    }
+
+    if (/(save|amount|how much|savings)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.rdCredits.howMuch}\n\nWould you like to schedule a consultation to get a more specific estimate for your practice?`,
+        ["Schedule consultation", "What's your methodology?", "Tell me about costs"]
+      );
+    }
+
+    if (/(guaranteed|sure|certain|promise)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.rdCredits.guaranteed}\n\nWould you like to learn more about our process and methodology?`,
+        ["What's your methodology?", "Schedule consultation", "Who do you work with?"]
+      );
+    }
+
+    // Services & Process
+    if (/(methodology|process|approach|how.*work)/.test(lower) || lower.includes("what's your methodology")) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.services.methodology}\n\nWould you like to know more about implementation or schedule a consultation?`,
+        ["Tell me about implementation", "How long is engagement?", "Schedule consultation"]
+      );
+    }
+
+    if (/(engagement|how\s*long|duration|timeline)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.services.engagement}\n\nWould you like to learn about the implementation process?`,
+        ["What does implementation involve?", "Will this disrupt operations?", "Schedule consultation"]
+      );
+    }
+
+    if (/(implementation|involve|what\s*happens)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.services.implementation}\n\nWould you like to know how this affects your daily operations?`,
+        ["Will this disrupt operations?", "How much time required?", "Schedule consultation"]
+      );
+    }
+
+    if (/(disrupt|disruption|operations|interfere)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.services.disruption}\n\nWould you like to discuss how we can work with your specific schedule?`,
+        ["Schedule consultation", "How much time required?", "What's the ROI?"]
+      );
+    }
+
+    // Investment & ROI
+    if (/(cost|price|fee|invest|how much does)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.investment.cost}\n\nWould you like to know more about ROI and payment options?`,
+        ["Can it pay for itself?", "What kind of ROI?", "Payment plans available?"]
+      );
+    }
+
+    if (/(pay\s*for\s*itself|self-funding|offset|worth\s*it)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.investment.payForItself}\n\nWould you like to explore specific ROI for your practice?`,
+        ["What kind of ROI?", "Schedule consultation", "Tell me more"]
+      );
+    }
+
+    if (/(roi|return|benefit|value)/.test(lower) && /(expect|get|see)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.investment.roi}\n\nWould you like to schedule a consultation to discuss specific benefits for your practice?`,
+        ["Schedule consultation", "How much does it cost?", "Tell me more"]
+      );
+    }
+
+    if (/(payment|plan|terms|financing)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.investment.paymentPlans}\n\nWould you like to schedule a consultation to discuss payment options?`,
+        ["Schedule consultation", "How much does it cost?", "What's the ROI?"]
+      );
+    }
+
+    // Getting Started
+    if (/(right\s*for\s*me|good\s*fit|should\s*i)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.gettingStarted.rightForMe}\n\nWould you like to schedule a complimentary consultation?`,
+        ["Schedule consultation", "Tell me about consultation", "I have more questions"]
+      );
+    }
+
+    if (/(schedule|consultation|meeting|talk\s*to)/.test(lower)) {
       dispatch({ type: "SET_STAGE", value: "scheduling" });
       return addBotMessage(
         "Perfect! I'd love to connect you with our team. To schedule your consultation, I'll need a few details:\n\nWhat's your name?"
       );
     }
 
-    if (/(assessment|evaluate)/.test(lower)) {
-      dispatch({ type: "SET_STAGE", value: "contact" });
+    if (/(initial\s*consultation|first\s*meeting|what\s*happens)/.test(lower)) {
       return addBotMessage(
-        "Excellent! Our assessment typically takes 15-20 minutes and can identify $30K-50K+ in potential savings.\n\nWhat's the best way to reach you - email or phone?",
-        ["Email", "Phone", "Either works"]
+        `${KNOWLEDGE_BASE.gettingStarted.consultation}\n\nWould you like to schedule your complimentary consultation now?`,
+        ["Schedule consultation", "How quickly can we start?", "What information needed?"]
       );
     }
 
-    if (/(team|who\s*(are|is)?)/.test(lower)) {
+    if (/(how\s*quickly|how\s*soon|when\s*start|get\s*started)/.test(lower)) {
       return addBotMessage(
-        `${KNOWLEDGE_BASE.company.team}\n\nWould you like to learn more about our results or start your assessment?`,
-        ["See results", "Start assessment", "Schedule consultation"]
+        `${KNOWLEDGE_BASE.gettingStarted.howQuickly}\n\nReady to schedule your initial consultation?`,
+        ["Schedule consultation", "What information needed?", "I have more questions"]
       );
     }
 
-    if (/(cost|price|fee)/.test(lower)) {
+    if (/(information|documents|need\s*from|prepare)/.test(lower)) {
       return addBotMessage(
-        "Our pricing is performance-based - you only pay for results you actually claim. We use a flat monthly rate plus year-end true-up structure.\n\nThe assessment has no obligations. Would you like to get started?",
-        ["Yes, start assessment", "Tell me more about pricing", "Schedule consultation"]
+        `${KNOWLEDGE_BASE.gettingStarted.information}\n\nWould you like to get started with a consultation?`,
+        ["Schedule consultation", "How quickly can we start?", "I have more questions"]
+      );
+    }
+
+    // Working Together
+    if (/(time\s*require|time\s*commitment|how\s*much\s*time)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.workingTogether.timeRequired}\n\nWould you like to know more about training and support?`,
+        ["Will you train staff?", "Schedule consultation", "What if not satisfied?"]
+      );
+    }
+
+    if (/(train|training|teach|learn)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.workingTogether.training}\n\nWould you like to learn more about our engagement process?`,
+        ["What's your methodology?", "Schedule consultation", "How much time required?"]
+      );
+    }
+
+    if (/(not\s*satisfied|unhappy|guarantee|what\s*if)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.workingTogether.notSatisfied}\n\nWould you like to schedule a consultation to discuss how we ensure success?`,
+        ["Schedule consultation", "Tell me more", "I have more questions"]
+      );
+    }
+
+    if (/(all\s*states|nationwide|my\s*state|location)/.test(lower)) {
+      return addBotMessage(
+        `${KNOWLEDGE_BASE.workingTogether.allStates}\n\nReady to explore how we can help your practice?`,
+        ["Schedule consultation", "Do I qualify?", "How much can I save?"]
       );
     }
 
