@@ -56,7 +56,7 @@ interface ChatState {
 const KNOWLEDGE_BASE = {
   about: {
     whatIs:
-      "ROI Blueprint is a specialized consulting firm that helps healthcare practices improve operations through documented R&D activities while potentially qualifying for valuable tax benefits. Our systematic approach transforms practices through innovation and process optimization.",
+      "ROI BLUEPRINT is a specialized consulting firm that helps healthcare practices improve operations through documented R&D activities while potentially qualifying for valuable tax benefits. Our systematic approach transforms practices through innovation and process optimization.",
     whoWeWorkWith:
       "We primarily work with healthcare practices including medical practices, ABA therapy centers, dental practices, and other healthcare service providers. We specialize in practices with 15-100+ employees looking to optimize operations and innovate their service delivery.",
     different:
