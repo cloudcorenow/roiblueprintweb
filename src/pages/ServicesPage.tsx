@@ -444,7 +444,7 @@ export default function ServicesPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             <div className="animate-fade-in-up">
               <img
-                src="/ChatGPT Image Oct 24, 2025, 10_09_22 AM.png"
+                src="/ef89c467-3b72-4e54-b2a1-1a4791cf414c.png"
                 alt="Innovation That Pays Off"
                 className="rounded-2xl shadow-xl"
               />
