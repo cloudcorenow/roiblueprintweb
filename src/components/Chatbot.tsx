@@ -64,7 +64,7 @@ const KNOWLEDGE_BASE = {
   },
   services: {
     assessment:
-      "We provide free assessments to determine if your business qualifies for R&D tax credits and estimate your potential savings.",
+      "We provide assessments to determine if your business qualifies for R&D tax credits and estimate your potential savings.",
     documentation:
       "Our CPA and EA team creates IRS-compliant documentation packages that protect you during audits.",
     ongoing:
@@ -271,7 +271,7 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
 
     if (/(process|how.*work|how does.*work)/.test(lower)) {
       return addBotMessage(
-        "Our process is simple:\n\n1️⃣ Free assessment to identify qualifying activities\n2️⃣ Professional documentation by our CPA/EA team\n3️⃣ Ongoing compliance management\n4️⃣ File with your tax return\n\nWould you like to start with a free assessment?",
+        "Our process is simple:\n\n1️⃣ Assessment to identify qualifying activities\n2️⃣ Professional documentation by our CPA/EA team\n3️⃣ Ongoing compliance management\n4️⃣ File with your tax return\n\nWould you like to start with an assessment?",
         ["Yes, start assessment", "Tell me about your team", "What are the costs?"]
       );
     }
