@@ -628,7 +628,8 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     e.preventDefault();
     if (botField) return;
 
-    if (!turnstileToken) {
+    const hasTurnstileKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    if (hasTurnstileKey && !turnstileToken) {
       setErrors({ message: "Please complete the security verification" as any });
       return;
     }
@@ -806,8 +807,8 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         <button
           type="submit"
-          className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-          disabled={submitting || !turnstileToken}
+          className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50"
+          disabled={submitting || (import.meta.env.VITE_TURNSTILE_SITE_KEY && !turnstileToken)}
         >
           {submitting ? (
             <>
@@ -984,7 +985,8 @@ const StandaloneContactForm: React.FC = () => {
     e.preventDefault();
     if (botField) return;
 
-    if (!turnstileToken) {
+    const hasTurnstileKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+    if (hasTurnstileKey && !turnstileToken) {
       setErrors({ message: "Please complete the security verification" as any });
       return;
     }
@@ -1141,7 +1143,7 @@ const StandaloneContactForm: React.FC = () => {
 
         <button
           type="submit"
-          disabled={submitting || !turnstileToken}
+          disabled={submitting || (import.meta.env.VITE_TURNSTILE_SITE_KEY && !turnstileToken)}
           className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? (

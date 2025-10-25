@@ -33,11 +33,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       throw new Error('RESEND_API_KEY is not configured');
     }
 
-    if (data.formType === 'contact' && data.turnstileToken) {
-      if (!TURNSTILE_SECRET_KEY) {
-        throw new Error('TURNSTILE_SECRET_KEY is not configured');
-      }
-
+    if (data.formType === 'contact' && data.turnstileToken && TURNSTILE_SECRET_KEY) {
       const ip = context.request.headers.get('CF-Connecting-IP') || '';
       const turnstileResponse = await fetch(
         'https://challenges.cloudflare.com/turnstile/v0/siteverify',
