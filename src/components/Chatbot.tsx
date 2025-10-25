@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useReducer, useRef } from "react";
 import { MessageCircle, X, Send, Bot, User, Minimize2, Maximize2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 /**
  * R&D Tax Credit Assistant — Refactored
@@ -163,6 +164,7 @@ interface ChatbotProps {
 
 export default function Chatbot({ persistKey, className, title = "R&D Tax Credit Assistant" }: ChatbotProps) {
   const [state, dispatch] = useReducer(reducer, initialState);
+  const navigate = useNavigate();
 
   const typingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -239,7 +241,14 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
     }, delay());
   };
 
-  const handleQuickResponse = (response: string) => processUserMessage(response);
+  const handleQuickResponse = (response: string) => {
+    if (response === "Go to contact page") {
+      navigate("/contact");
+      closeChat();
+      return;
+    }
+    processUserMessage(response);
+  };
 
   // ==== Intent handling ====
   const processUserMessage = (message: string) => {
