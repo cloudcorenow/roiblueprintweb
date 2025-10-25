@@ -442,7 +442,7 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
   return (
     <div className={`fixed bottom-6 right-6 z-50 ${className ?? ""}`}>
       <div
-        className={`bg-white rounded-2xl shadow-2xl border border-neutral-200 transition-all duration-300 ${
+        className={`bg-white rounded-2xl shadow-2xl border border-neutral-200 transition-all duration-300 flex flex-col ${
           state.isMinimized ? "w-80 h-16" : "w-96 h-[600px]"
         }`}
         role="dialog"
@@ -450,7 +450,7 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
         aria-describedby="chatbot-desc"
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-t-2xl">
+        <div className="flex items-center justify-between p-4 border-b border-neutral-200 bg-gradient-to-r from-primary-500 to-primary-600 text-white rounded-t-2xl flex-shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
               <Bot className="w-5 h-5" aria-hidden />
@@ -490,7 +490,7 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
           <>
             {/* Messages */}
             <div
-              className="flex-1 overflow-y-auto p-4 space-y-4 h-[480px]"
+              className="flex-1 overflow-y-auto p-4 space-y-4"
               role="log"
               aria-live="polite"
               aria-relevant="additions"
@@ -557,7 +557,7 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-neutral-200 bg-white">
+            <div className="p-4 border-t border-neutral-200 bg-white flex-shrink-0">
               <form onSubmit={onSubmit} className="flex gap-2">
                 <label htmlFor="chatbot-input" className="sr-only">
                   Type your message
