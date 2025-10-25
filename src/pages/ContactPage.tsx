@@ -630,7 +630,19 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     try {
       setSubmitting(true);
-      console.log("Form submitted:", formData);
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          formType: 'contact'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send email');
+      }
+
       setSuccess(true);
       setFormData({ name: "", email: "", company: "", industry: "", message: "" });
     } catch (err) {
@@ -809,22 +821,26 @@ const EmailCapture: React.FC<{ onSuccess: () => void; onBack: () => void }> = ({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/guide-access', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email,
-          guide_name: 'prequalification-assessment',
+      await Promise.all([
+        fetch('/api/guide-access', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            guide_name: 'prequalification-assessment',
+          }),
         }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save email');
-      }
-
-      console.log('Prequalification Email Submitted:', { email, guide_name: 'prequalification-assessment' });
+        fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email,
+            name: email.split('@')[0],
+            message: 'Prequalification assessment request',
+            formType: 'guide'
+          }),
+        })
+      ]);
 
       setTimeout(() => {
         onSuccess();
@@ -954,7 +970,19 @@ const StandaloneContactForm: React.FC = () => {
 
     try {
       setSubmitting(true);
-      console.log("Form submitted:", formData);
+      const response = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          formType: 'contact'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to send email');
+      }
+
       setSuccess(true);
       setFormData({ name: "", email: "", company: "", industry: "", message: "" });
     } catch (err) {

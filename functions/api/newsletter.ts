@@ -1,5 +1,6 @@
 interface Env {
   DB: D1Database;
+  RESEND_API_KEY: string;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -23,6 +24,26 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       .prepare('INSERT INTO newsletter_subscriptions (id, email, source) VALUES (?, ?, ?)')
       .bind(crypto.randomUUID(), email, source)
       .run();
+
+    if (context.env.RESEND_API_KEY) {
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${context.env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'ROI Blueprint <notifications@roiblueprint.com>',
+          to: ['contact@roiblueprint.com'],
+          subject: `New Newsletter Subscription: ${email}`,
+          html: `
+            <h2>New Newsletter Subscription</h2>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Source:</strong> ${source}</p>
+          `,
+        }),
+      });
+    }
 
     return Response.json({ success: true });
   } catch (error) {
