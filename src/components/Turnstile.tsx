@@ -30,25 +30,33 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
+  const [debugInfo, setDebugInfo] = useState<string>('');
 
   useEffect(() => {
     if (!siteKey) {
       console.warn('Turnstile: No site key provided');
+      setDebugInfo('No site key configured');
       setIsLoading(false);
       return;
     }
 
     console.log('Turnstile: Initializing with site key:', siteKey);
+    setDebugInfo(`Site key: ${siteKey}`);
+
+    let attempts = 0;
+    const maxAttempts = 50;
 
     const loadTurnstile = () => {
       if (!containerRef.current) {
         console.error('Turnstile: Container ref not available');
+        setDebugInfo('Container not ready');
         return;
       }
 
       if (!window.turnstile) {
         console.error('Turnstile: API not loaded');
         setError('Turnstile API not loaded');
+        setDebugInfo('Turnstile API not loaded');
         setIsLoading(false);
         return;
       }
@@ -60,17 +68,22 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
 
       try {
         console.log('Turnstile: Rendering widget...');
+        setDebugInfo('Rendering widget...');
+
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
           callback: (token: string) => {
             console.log('Turnstile: Success, token received');
             setIsLoading(false);
             setError(null);
+            setDebugInfo('Verified successfully');
             onVerify(token);
           },
           'error-callback': (errorCode?: string) => {
             console.error('Turnstile: Error callback triggered', errorCode);
-            setError('Verification failed');
+            const errorMsg = errorCode ? `Error: ${errorCode}` : 'Verification failed';
+            setError(errorMsg);
+            setDebugInfo(`Error: ${errorCode || 'unknown'}`);
             setIsLoading(false);
             onError?.();
           },
@@ -78,26 +91,41 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
             console.warn('Turnstile: Token expired');
             setIsLoading(true);
             setError(null);
+            setDebugInfo('Token expired');
             onExpire?.();
           },
           theme: 'light',
           size: 'normal',
         });
+
         console.log('Turnstile: Widget rendered with ID:', widgetIdRef.current);
+        setDebugInfo(`Widget ID: ${widgetIdRef.current}`);
         setIsLoading(false);
       } catch (err) {
         console.error('Turnstile: Render error:', err);
-        setError('Failed to load security verification');
+        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+        setError(`Failed to load: ${errorMessage}`);
+        setDebugInfo(`Render error: ${errorMessage}`);
         setIsLoading(false);
       }
     };
 
     const checkTurnstile = () => {
+      attempts++;
+
       if (window.turnstile) {
+        console.log('Turnstile: API ready, loading widget');
+        setDebugInfo('API ready, loading...');
         loadTurnstile();
-      } else {
-        console.log('Turnstile: API not ready, waiting...');
+      } else if (attempts < maxAttempts) {
+        console.log(`Turnstile: API not ready, attempt ${attempts}/${maxAttempts}`);
+        setDebugInfo(`Waiting for API (${attempts}/${maxAttempts})...`);
         setTimeout(checkTurnstile, 100);
+      } else {
+        console.error('Turnstile: API failed to load after max attempts');
+        setError('Failed to load Turnstile API');
+        setDebugInfo('API load timeout');
+        setIsLoading(false);
       }
     };
 
@@ -135,6 +163,11 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
       {error && (
         <div className="text-center text-sm text-red-600">
           {error}
+        </div>
+      )}
+      {debugInfo && process.env.NODE_ENV === 'development' && (
+        <div className="text-center text-xs text-neutral-400 mt-2">
+          Debug: {debugInfo}
         </div>
       )}
     </div>
