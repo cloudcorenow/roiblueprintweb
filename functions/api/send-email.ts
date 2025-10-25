@@ -1,5 +1,6 @@
 interface Env {
   RESEND_API_KEY: string;
+  TURNSTILE_SECRET_KEY: string;
 }
 
 interface ContactFormData {
@@ -10,6 +11,7 @@ interface ContactFormData {
   industry?: string;
   message: string;
   formType: 'contact' | 'guide' | 'newsletter';
+  turnstileToken?: string;
 }
 
 const corsHeaders = {
@@ -25,10 +27,50 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   try {
     const data: ContactFormData = await context.request.json();
-    const { RESEND_API_KEY } = context.env;
+    const { RESEND_API_KEY, TURNSTILE_SECRET_KEY } = context.env;
 
     if (!RESEND_API_KEY) {
       throw new Error('RESEND_API_KEY is not configured');
+    }
+
+    if (data.formType === 'contact' && data.turnstileToken) {
+      if (!TURNSTILE_SECRET_KEY) {
+        throw new Error('TURNSTILE_SECRET_KEY is not configured');
+      }
+
+      const ip = context.request.headers.get('CF-Connecting-IP') || '';
+      const turnstileResponse = await fetch(
+        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            secret: TURNSTILE_SECRET_KEY,
+            response: data.turnstileToken,
+            remoteip: ip,
+          }),
+        }
+      );
+
+      const turnstileResult = await turnstileResponse.json() as { success: boolean };
+
+      if (!turnstileResult.success) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'Captcha verification failed. Please try again.',
+          }),
+          {
+            status: 400,
+            headers: {
+              ...corsHeaders,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+      }
     }
 
     let subject = '';

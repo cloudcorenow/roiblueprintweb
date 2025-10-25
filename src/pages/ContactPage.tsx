@@ -19,6 +19,7 @@ import {
   Shield,
   Target,
 } from "lucide-react";
+import Turnstile from "../components/Turnstile";
 
 interface Question {
   question: string;
@@ -610,6 +611,7 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [submitting, setSubmitting] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
   const [botField, setBotField] = React.useState("");
+  const [turnstileToken, setTurnstileToken] = React.useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -626,6 +628,11 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     e.preventDefault();
     if (botField) return;
 
+    if (!turnstileToken) {
+      setErrors({ message: "Please complete the security verification" as any });
+      return;
+    }
+
     const v = validateForm(formData);
     setErrors(v);
     if (Object.keys(v).length) return;
@@ -637,7 +644,8 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          formType: 'contact'
+          formType: 'contact',
+          turnstileToken
         }),
       });
 
@@ -648,6 +656,7 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       setSuccess(true);
       setFormData({ name: "", email: "", company: "", industry: "", message: "" });
+      setTurnstileToken("");
     } catch (err) {
       console.error('Form submission error:', err);
       setErrors({ message: (err instanceof Error ? err.message : "There was an error submitting your form. Please try again.") as any });
@@ -789,10 +798,16 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           />
         </div>
 
+        <Turnstile
+          onVerify={setTurnstileToken}
+          onError={() => setErrors({ message: "Verification failed. Please try again." as any })}
+          onExpire={() => setTurnstileToken("")}
+        />
+
         <button
           type="submit"
           className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl"
-          disabled={submitting}
+          disabled={submitting || !turnstileToken}
         >
           {submitting ? (
             <>
@@ -952,6 +967,7 @@ const StandaloneContactForm: React.FC = () => {
   const [submitting, setSubmitting] = React.useState(false);
   const [success, setSuccess] = React.useState(false);
   const [botField, setBotField] = React.useState("");
+  const [turnstileToken, setTurnstileToken] = React.useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -968,6 +984,11 @@ const StandaloneContactForm: React.FC = () => {
     e.preventDefault();
     if (botField) return;
 
+    if (!turnstileToken) {
+      setErrors({ message: "Please complete the security verification" as any });
+      return;
+    }
+
     const v = validateForm(formData);
     setErrors(v);
     if (Object.keys(v).length) return;
@@ -979,7 +1000,8 @@ const StandaloneContactForm: React.FC = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
-          formType: 'contact'
+          formType: 'contact',
+          turnstileToken
         }),
       });
 
@@ -990,6 +1012,7 @@ const StandaloneContactForm: React.FC = () => {
 
       setSuccess(true);
       setFormData({ name: "", email: "", company: "", industry: "", message: "" });
+      setTurnstileToken("");
     } catch (err) {
       console.error('Form submission error:', err);
       setErrors({ message: (err instanceof Error ? err.message : "There was an error submitting your form. Please try again.") as any });
@@ -1110,9 +1133,15 @@ const StandaloneContactForm: React.FC = () => {
           {errors.message && <p className="text-xs text-error-600 mt-1">{errors.message}</p>}
         </div>
 
+        <Turnstile
+          onVerify={setTurnstileToken}
+          onError={() => setErrors({ message: "Verification failed. Please try again." as any })}
+          onExpire={() => setTurnstileToken("")}
+        />
+
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || !turnstileToken}
           className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? (

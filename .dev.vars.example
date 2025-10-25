@@ -7,3 +7,6 @@
 
 # Resend API Key for email notifications
 RESEND_API_KEY=your_resend_api_key_here
+
+# Cloudflare Turnstile Secret Key for CAPTCHA verification
+TURNSTILE_SECRET_KEY=your_turnstile_secret_key_here

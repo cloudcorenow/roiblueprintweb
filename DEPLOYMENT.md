@@ -85,7 +85,12 @@ In Cloudflare Dashboard → Pages → Your Project → Settings:
 1. **Functions**:
    - Ensure D1 binding is set: `DB` → `roi-blueprint-db`
 
-2. **Build settings**:
+2. **Environment Variables** (Settings → Environment Variables):
+   - Add `RESEND_API_KEY` with your Resend API key
+   - Add `TURNSTILE_SECRET_KEY` with your Cloudflare Turnstile secret key
+   - Add both for Production and Preview environments
+
+3. **Build settings**:
    - Build command: `npm run build`
    - Build output directory: `dist`
    - Node version: `22`
