@@ -377,7 +377,7 @@ export default function ContactPage() {
                   <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                     <Award className="w-8 h-8 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-neutral-900 mb-2">Why Choose ROI Blueprint™</h3>
+                  <h3 className="text-2xl font-bold text-neutral-900 mb-2">Why Choose ROI BLUEPRINT™</h3>
                   <p className="text-neutral-600">Proven results for healthcare practices</p>
                 </div>
 
