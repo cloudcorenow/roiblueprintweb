@@ -351,10 +351,11 @@ export default function ContactPage() {
       )}
 
       {/* Contact Form & Social Proof */}
-      <section id="contact-form" className="py-20 bg-white">
-        <div className="container">
-          <div className="max-w-6xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-12">
+      {currentStep !== "contact" && (
+        <section id="contact-form" className="py-20 bg-white">
+          <div className="container">
+            <div className="max-w-6xl mx-auto">
+              <div className="grid lg:grid-cols-2 gap-12">
 
               {/* Contact Form */}
               <div className="bg-white rounded-3xl p-8">
@@ -424,7 +425,8 @@ export default function ContactPage() {
             </div>
           </div>
         </div>
-      </section>
+        </section>
+      )}
     </div>
   );
 }
