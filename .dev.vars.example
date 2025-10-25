@@ -4,3 +4,6 @@
 # Cloudflare D1 Database
 # The database binding 'DB' is automatically configured via wrangler.toml
 # No environment variables needed for D1
+
+# Resend API Key for email notifications
+RESEND_API_KEY=your_resend_api_key_here
