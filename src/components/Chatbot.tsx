@@ -198,8 +198,12 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
         [...QUICK_RESPONSES]
       );
     }
+    // Focus input when chat opens
+    if (state.isOpen && !state.isMinimized) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isOpen]);
+  }, [state.isOpen, state.isMinimized]);
 
   // ==== Auto-scroll ====
   useEffect(() => {
@@ -553,7 +557,7 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-neutral-200">
+            <div className="p-4 border-t border-neutral-200 bg-white">
               <form onSubmit={onSubmit} className="flex gap-2">
                 <label htmlFor="chatbot-input" className="sr-only">
                   Type your message
@@ -564,8 +568,8 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
                   type="text"
                   value={state.currentInput}
                   onChange={(e) => dispatch({ type: "SET_INPUT", value: e.target.value })}
-                  placeholder="Type your message..."
-                  className="flex-1 px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                  placeholder={state.isTyping ? "Assistant is typing..." : "Type your message..."}
+                  className="flex-1 px-4 py-3 border-2 border-neutral-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm disabled:bg-neutral-50 disabled:text-neutral-400"
                   disabled={state.isTyping}
                   autoComplete="off"
                   aria-disabled={state.isTyping}
@@ -573,10 +577,10 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
                 <button
                   type="submit"
                   disabled={!state.currentInput.trim() || state.isTyping}
-                  className="px-3 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center"
                   aria-label="Send message"
                 >
-                  <Send className="w-4 h-4" aria-hidden />
+                  <Send className="w-5 h-5" aria-hidden />
                 </button>
               </form>
             </div>
