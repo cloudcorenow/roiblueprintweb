@@ -286,7 +286,7 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
     if (/(assessment|evaluate)/.test(lower)) {
       dispatch({ type: "SET_STAGE", value: "contact" });
       return addBotMessage(
-        "Excellent! Our free assessment typically takes 15-20 minutes and can identify $30K-50K+ in potential savings.\n\nWhat's the best way to reach you - email or phone?",
+        "Excellent! Our assessment typically takes 15-20 minutes and can identify $30K-50K+ in potential savings.\n\nWhat's the best way to reach you - email or phone?",
         ["Email", "Phone", "Either works"]
       );
     }
@@ -300,8 +300,8 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
 
     if (/(cost|price|fee)/.test(lower)) {
       return addBotMessage(
-        "Our pricing is performance-based - you only pay for results you actually claim. We use a flat monthly rate plus year-end true-up structure.\n\nThe assessment is completely free with no obligations. Would you like to get started?",
-        ["Yes, start free assessment", "Tell me more about pricing", "Schedule consultation"]
+        "Our pricing is performance-based - you only pay for results you actually claim. We use a flat monthly rate plus year-end true-up structure.\n\nThe assessment has no obligations. Would you like to get started?",
+        ["Yes, start assessment", "Tell me more about pricing", "Schedule consultation"]
       );
     }
 
@@ -331,8 +331,8 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
     if (lower.includes("yes, we do these activities")) {
       dispatch({ type: "SET_STAGE", value: "qualified" });
       return addBotMessage(
-        "Excellent! Based on your responses, your business likely qualifies for significant R&D tax credits. \n\nTypical savings for businesses like yours range from $30K-50K annually. \n\nWould you like to get a free assessment to see your exact potential?",
-        ["Yes, get free assessment", "How does the assessment work?", "What information do you need?"]
+        "Excellent! Based on your responses, your business likely qualifies for significant R&D tax credits. \n\nTypical savings for businesses like yours range from $30K-50K annually. \n\nWould you like to get an assessment to see your exact potential?",
+        ["Yes, get assessment", "How does the assessment work?", "What information do you need?"]
       );
     }
 
@@ -388,15 +388,15 @@ export default function Chatbot({ persistKey, className, title = "R&D Tax Credit
 
   const handleQualifiedFlow = (message: string) => {
     const lower = normalize(message);
-    if (lower.includes("yes, get free assessment") || lower.includes("assessment")) {
+    if (lower.includes("yes, get") || lower.includes("assessment")) {
       dispatch({ type: "SET_STAGE", value: "scheduling" });
       return addBotMessage(
-        "Perfect! Our free assessment takes about 15-20 minutes and will identify your specific R&D opportunities.\n\nTo get started, I'll need your contact information. What's your name?"
+        "Perfect! Our assessment takes about 15-20 minutes and will identify your specific R&D opportunities.\n\nTo get started, I'll need your contact information. What's your name?"
       );
     }
     if (lower.includes("how does")) {
       return addBotMessage(
-        "Our assessment process is simple:\n\n1️⃣ 15-minute phone call to discuss your activities\n2️⃣ We identify qualifying R&D expenses\n3️⃣ Calculate your potential credit amount\n4️⃣ Provide detailed savings estimate\n\nIt's completely free with no obligations. Ready to get started?",
+        "Our assessment process is simple:\n\n1️⃣ 15-minute phone call to discuss your activities\n2️⃣ We identify qualifying R&D expenses\n3️⃣ Calculate your potential credit amount\n4️⃣ Provide detailed savings estimate\n\nReady to get started?",
         ["Yes, let's start", "What information do you need?", "Schedule for later"]
       );
     }
