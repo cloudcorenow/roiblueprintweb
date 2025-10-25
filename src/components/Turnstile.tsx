@@ -29,13 +29,10 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
   const widgetIdRef = useRef<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
 
   useEffect(() => {
-    const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
-
     if (!siteKey) {
-      console.error('Turnstile site key not found');
-      setError('Security verification not configured');
       setIsLoading(false);
       return;
     }
@@ -102,6 +99,10 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
       }
     };
   }, [onVerify, onError, onExpire]);
+
+  if (!siteKey) {
+    return null;
+  }
 
   return (
     <div className="my-4">
