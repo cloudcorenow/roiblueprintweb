@@ -1,6 +1,7 @@
 interface Env {
   RESEND_API_KEY: string;
   TURNSTILE_SECRET_KEY: string;
+  RATE_LIMITER: RateLimit;
 }
 
 interface ContactFormData {
@@ -26,6 +27,27 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
   }
 
   try {
+    const ip = context.request.headers.get('CF-Connecting-IP') || 'unknown';
+
+    const rateLimitKey = `contact_form:${ip}`;
+    const { success } = await context.env.RATE_LIMITER.limit({ key: rateLimitKey });
+
+    if (!success) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Too many requests. Please try again later.',
+        }),
+        {
+          status: 429,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
     const data: ContactFormData = await context.request.json();
     const { RESEND_API_KEY, TURNSTILE_SECRET_KEY } = context.env;
 

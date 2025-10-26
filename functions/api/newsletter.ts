@@ -1,10 +1,23 @@
 interface Env {
   DB: D1Database;
   RESEND_API_KEY: string;
+  RATE_LIMITER: RateLimit;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
+    const ip = context.request.headers.get('CF-Connecting-IP') || 'unknown';
+
+    const rateLimitKey = `newsletter:${ip}`;
+    const { success } = await context.env.RATE_LIMITER.limit({ key: rateLimitKey });
+
+    if (!success) {
+      return Response.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { email, source = 'website' } = await context.request.json();
 
     if (!email) {

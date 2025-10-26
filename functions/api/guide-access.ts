@@ -1,9 +1,22 @@
 interface Env {
   DB: D1Database;
+  RATE_LIMITER: RateLimit;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
+    const ip = context.request.headers.get('CF-Connecting-IP') || 'unknown';
+
+    const rateLimitKey = `guide_access:${ip}`;
+    const { success } = await context.env.RATE_LIMITER.limit({ key: rateLimitKey });
+
+    if (!success) {
+      return Response.json(
+        { error: 'Too many requests. Please try again later.' },
+        { status: 429 }
+      );
+    }
+
     const { email, guide_name = 'rd-tax-credit' } = await context.request.json();
 
     if (!email) {
