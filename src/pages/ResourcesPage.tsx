@@ -47,34 +47,28 @@ export default function ResourcesPage() {
     setNewsletterMessage('');
 
     try {
-      const subscriptionData = {
-        email: newsletterEmail,
-        subscribed_at: new Date().toISOString(),
-        source: 'resources-newsletter'
-      };
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: newsletterEmail,
+          source: 'resources-newsletter'
+        }),
+      });
 
-      const existingSubscriptions = JSON.parse(localStorage.getItem('newsletter_subscriptions') || '[]');
+      const data = await response.json();
 
-      const alreadySubscribed = existingSubscriptions.some(
-        (sub: any) => sub.email.toLowerCase() === newsletterEmail.toLowerCase()
-      );
-
-      if (alreadySubscribed) {
-        setNewsletterStatus('success');
-        setNewsletterMessage('You are already subscribed to our newsletter!');
-        setNewsletterEmail('');
+      if (!response.ok) {
+        setNewsletterStatus('error');
+        setNewsletterMessage(data.error || 'Something went wrong. Please try again.');
         setTimeout(() => {
           setNewsletterStatus('idle');
           setNewsletterMessage('');
         }, 3000);
         return;
       }
-
-      existingSubscriptions.push(subscriptionData);
-      localStorage.setItem('newsletter_subscriptions', JSON.stringify(existingSubscriptions));
-
-      console.log('Newsletter Subscription:', subscriptionData);
-      console.log('All Subscriptions:', existingSubscriptions);
 
       setNewsletterStatus('success');
       setNewsletterMessage('Thank you for subscribing! We\'ll keep you updated.');
