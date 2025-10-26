@@ -79,6 +79,9 @@ const validateForm = (data: FormData): Partial<Record<keyof FormData, string>> =
   if (!data.name.trim()) errors.name = "Name is required";
   if (!data.email.trim()) errors.email = "Email is required";
   else if (!/\S+@\S+\.\S+/.test(data.email)) errors.email = "Email is invalid";
+  if (!data.company.trim()) errors.company = "Practice name is required";
+  if (!data.industry.trim()) errors.industry = "Practice type is required";
+  if (!data.message.trim()) errors.message = "Message is required";
   return errors;
 };
 
