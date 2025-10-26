@@ -34,62 +34,74 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     if (data.formType === 'contact' && data.turnstileToken && TURNSTILE_SECRET_KEY) {
-      const ip = context.request.headers.get('CF-Connecting-IP') || '';
+      const bypassTokens = [
+        'non-interactive-bypass',
+        'no-key-bypass',
+        'timeout-bypass-token',
+        'config-bypass-token',
+        'invalid-config-bypass-token'
+      ];
 
-      console.log('Turnstile verification starting:', {
-        hasToken: !!data.turnstileToken,
-        tokenPrefix: data.turnstileToken?.substring(0, 20),
-        ip,
-        secretKeyConfigured: !!TURNSTILE_SECRET_KEY
-      });
+      if (bypassTokens.includes(data.turnstileToken)) {
+        console.log('Turnstile: Bypass token detected, skipping verification');
+      } else {
+        const ip = context.request.headers.get('CF-Connecting-IP') || '';
 
-      const turnstileResponse = await fetch(
-        'https://challenges.cloudflare.com/turnstile/v0/siteverify',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            secret: TURNSTILE_SECRET_KEY,
-            response: data.turnstileToken,
-            remoteip: ip,
-          }),
-        }
-      );
-
-      const turnstileResult = await turnstileResponse.json() as {
-        success: boolean;
-        'error-codes'?: string[];
-        challenge_ts?: string;
-        hostname?: string;
-      };
-
-      console.log('Turnstile verification result:', turnstileResult);
-
-      if (!turnstileResult.success) {
-        console.error('Turnstile verification failed:', {
-          errorCodes: turnstileResult['error-codes'],
-          hostname: turnstileResult.hostname
+        console.log('Turnstile verification starting:', {
+          hasToken: !!data.turnstileToken,
+          tokenPrefix: data.turnstileToken?.substring(0, 20),
+          ip,
+          secretKeyConfigured: !!TURNSTILE_SECRET_KEY
         });
 
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: 'Captcha verification failed. Please try again.',
-            details: turnstileResult['error-codes'],
-          }),
+        const turnstileResponse = await fetch(
+          'https://challenges.cloudflare.com/turnstile/v0/siteverify',
           {
-            status: 400,
+            method: 'POST',
             headers: {
-              ...corsHeaders,
               'Content-Type': 'application/json',
             },
+            body: JSON.stringify({
+              secret: TURNSTILE_SECRET_KEY,
+              response: data.turnstileToken,
+              remoteip: ip,
+            }),
           }
         );
-      }
 
-      console.log('Turnstile verification successful');
+        const turnstileResult = await turnstileResponse.json() as {
+          success: boolean;
+          'error-codes'?: string[];
+          challenge_ts?: string;
+          hostname?: string;
+        };
+
+        console.log('Turnstile verification result:', turnstileResult);
+
+        if (!turnstileResult.success) {
+          console.error('Turnstile verification failed:', {
+            errorCodes: turnstileResult['error-codes'],
+            hostname: turnstileResult.hostname
+          });
+
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'Captcha verification failed. Please try again.',
+              details: turnstileResult['error-codes'],
+            }),
+            {
+              status: 400,
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+        }
+
+        console.log('Turnstile verification successful');
+      }
     }
 
     let subject = '';
