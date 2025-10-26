@@ -104,9 +104,9 @@ const KNOWLEDGE_BASE = {
   },
   workingTogether: {
     timeRequired:
-      "We design our engagements to be efficient with your time. Expect monthly strategic planning sessions (2-4 hours), weekly check-ins (30-60 minutes), and periodic staff training sessions. We handle the heavy lifting of documentation and implementation.",
+      "We design our engagements to be efficient with your time. Expect monthly strategic planning sessions (2-4 hours), weekly email updates, and quarterly check-ins. We handle the heavy lifting of documentation and implementation.",
     training:
-      "Yes, comprehensive training is included in all engagements. We provide hands-on training for new systems, workflows, and processes to ensure your team can sustain improvements long-term.",
+      "Yes, comprehensive training is included in all engagements. We provide video-based training for new systems, workflows, and processes to ensure your team can sustain improvements long-term.",
     notSatisfied:
       "We're committed to your success. If at any point you're not seeing value, we'll work together to adjust our approach or part ways professionally. Most clients extend their engagements beyond the initial 12 months because they see consistent results.",
     allStates:
