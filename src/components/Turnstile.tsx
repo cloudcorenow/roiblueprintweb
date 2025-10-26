@@ -14,6 +14,7 @@ declare global {
         sitekey: string;
         callback: (token: string) => void;
         'error-callback'?: () => void;
+        'timeout-callback'?: () => void;
         'expired-callback'?: () => void;
         theme?: 'light' | 'dark' | 'auto';
         size?: 'normal' | 'compact';
@@ -31,6 +32,8 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
   const [error, setError] = useState<string | null>(null);
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
   const [debugInfo, setDebugInfo] = useState<string>('');
+  const timeoutRef = useRef<number | null>(null);
+  const hasCalledCallbackRef = useRef(false);
 
   useEffect(() => {
     if (!siteKey) {
@@ -76,10 +79,27 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
         console.log('Turnstile: Rendering widget...');
         setDebugInfo('Rendering widget...');
 
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+
+        timeoutRef.current = window.setTimeout(() => {
+          if (!hasCalledCallbackRef.current) {
+            console.error('Turnstile: Manual timeout - widget stuck');
+            setError('Verification timeout - please refresh the page');
+            setDebugInfo('Manual timeout triggered');
+            setIsLoading(false);
+          }
+        }, 15000);
+
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
           callback: (token: string) => {
             console.log('Turnstile: Success, token received');
+            hasCalledCallbackRef.current = true;
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+            }
             setIsLoading(false);
             setError(null);
             setDebugInfo('Verified successfully');
@@ -94,6 +114,11 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
               href: window.location.href
             });
 
+            hasCalledCallbackRef.current = true;
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+            }
+
             if (errorCode === '400020') {
               console.warn('Turnstile: Domain not allowed error - bypassing for development');
               setError('Verification bypassed (development mode)');
@@ -106,6 +131,17 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
             const errorMsg = errorCode ? `Error: ${errorCode}` : 'Verification failed';
             setError(errorMsg);
             setDebugInfo(`Error: ${errorCode || 'unknown'} on ${window.location.hostname}`);
+            setIsLoading(false);
+            onError?.();
+          },
+          'timeout-callback': () => {
+            console.error('Turnstile: Timeout callback triggered');
+            hasCalledCallbackRef.current = true;
+            if (timeoutRef.current) {
+              clearTimeout(timeoutRef.current);
+            }
+            setError('Verification timeout');
+            setDebugInfo('Verification timed out');
             setIsLoading(false);
             onError?.();
           },
@@ -154,6 +190,9 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
     checkTurnstile();
 
     return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       if (widgetIdRef.current && window.turnstile) {
         try {
           console.log('Turnstile: Removing widget', widgetIdRef.current);
