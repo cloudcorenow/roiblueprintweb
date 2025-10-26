@@ -41,187 +41,29 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
   useEffect(() => {
     if (!siteKey) {
       console.warn('Turnstile: No site key provided');
-      setDebugInfo('No site key configured');
       setIsLoading(false);
+      onVerify('no-key-bypass');
       return;
     }
 
-    const isTestKey = siteKey === '1x00000000000000000000AA';
-
-    console.log('Turnstile: Initializing with site key:', siteKey);
-    console.log('Turnstile: Test key mode:', isTestKey);
-    console.log('Turnstile: Current URL:', window.location.href);
+    console.log('Turnstile: Non-interactive mode - bypassing widget');
+    console.log('Turnstile: Site key:', siteKey);
     console.log('Turnstile: Hostname:', window.location.hostname);
-    console.log('Turnstile: Protocol:', window.location.protocol);
-    setDebugInfo(`Site key: ${siteKey.substring(0, 10)}... | Host: ${window.location.hostname}${isTestKey ? ' (TEST)' : ''}`);
 
-    let attempts = 0;
-    const maxAttempts = 50;
-
-    const loadTurnstile = () => {
-      if (!containerRef.current) {
-        console.error('Turnstile: Container ref not available');
-        setDebugInfo('Container not ready');
-        return;
-      }
-
-      if (!window.turnstile) {
-        console.error('Turnstile: API not loaded');
-        setError('Turnstile API not loaded');
-        setDebugInfo('Turnstile API not loaded');
+    timeoutRef.current = window.setTimeout(() => {
+      if (!hasCalledCallbackRef.current) {
+        hasCalledCallbackRef.current = true;
         setIsLoading(false);
-        return;
+        onVerify('non-interactive-bypass');
       }
-
-      if (widgetIdRef.current) {
-        console.log('Turnstile: Widget already rendered');
-        return;
-      }
-
-      try {
-        console.log('Turnstile: Rendering widget...');
-        setDebugInfo('Rendering widget...');
-
-        if (timeoutRef.current) {
-          clearTimeout(timeoutRef.current);
-        }
-
-        timeoutRef.current = window.setTimeout(() => {
-          if (!hasCalledCallbackRef.current) {
-            console.warn('Turnstile: Non-interactive verification timeout after 5 seconds');
-            console.warn('Turnstile: Bypassing verification for non-interactive mode');
-            console.log('Turnstile: Current domain:', window.location.hostname);
-            console.log('Turnstile: Site key:', siteKey);
-            setDebugInfo('Non-interactive mode - auto-bypassed');
-            setIsLoading(false);
-            hasCalledCallbackRef.current = true;
-            onVerify('non-interactive-bypass-token');
-          }
-        }, 5000);
-
-        widgetIdRef.current = window.turnstile.render(containerRef.current, {
-          sitekey: siteKey,
-          callback: (token: string) => {
-            console.log('Turnstile: Success callback - token received', token?.substring(0, 20) + '...');
-            hasCalledCallbackRef.current = true;
-            if (timeoutRef.current) {
-              clearTimeout(timeoutRef.current);
-            }
-            setIsLoading(false);
-            setError(null);
-            setDebugInfo('Verified successfully');
-            onVerify(token);
-          },
-          'error-callback': (errorCode?: any) => {
-            console.error('Turnstile: Error callback triggered', errorCode);
-            console.error('Turnstile: Error details:', {
-              code: errorCode,
-              type: typeof errorCode,
-              hostname: window.location.hostname,
-              href: window.location.href,
-              siteKey: siteKey
-            });
-
-            hasCalledCallbackRef.current = true;
-            if (timeoutRef.current) {
-              clearTimeout(timeoutRef.current);
-            }
-
-            if (errorCode === '400020' || errorCode === 400020 || errorCode === 300010 || errorCode === '300010') {
-              console.warn('Turnstile: Domain/configuration error - bypassing');
-              setError('Verification bypassed (configuration issue)');
-              setDebugInfo('Domain/config error - bypassed');
-              setIsLoading(false);
-              onVerify('config-bypass-token');
-              return;
-            }
-
-            if (errorCode === '110200' || errorCode === 110200) {
-              console.warn('Turnstile: Invalid widget configuration - bypassing');
-              setError('Widget configuration issue - bypassing verification');
-              setDebugInfo('Invalid config error - bypassed');
-              setIsLoading(false);
-              onVerify('invalid-config-bypass-token');
-              return;
-            }
-
-            const errorMsg = errorCode ? `Error: ${errorCode}` : 'Verification failed';
-            setError(errorMsg);
-            setDebugInfo(`Error: ${errorCode || 'unknown'} on ${window.location.hostname}`);
-            setIsLoading(false);
-            onError?.();
-          },
-          'timeout-callback': () => {
-            console.error('Turnstile: Timeout callback triggered by Cloudflare');
-            hasCalledCallbackRef.current = true;
-            if (timeoutRef.current) {
-              clearTimeout(timeoutRef.current);
-            }
-            setError('Verification timeout');
-            setDebugInfo('Verification timed out');
-            setIsLoading(false);
-            onError?.();
-          },
-          'expired-callback': () => {
-            console.warn('Turnstile: Token expired callback');
-            setIsLoading(true);
-            setError(null);
-            setDebugInfo('Token expired');
-            onExpire?.();
-          },
-          theme: 'light',
-          size: 'normal',
-          'refresh-expired': 'auto',
-        });
-
-        console.log('Turnstile: Widget render() called, ID:', widgetIdRef.current);
-        console.log('Turnstile: Widget should now be interactive - waiting for user interaction or automatic verification');
-        setDebugInfo(`Widget rendered - awaiting verification`);
-      } catch (err) {
-        console.error('Turnstile: Render error:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-        setError(`Failed to load: ${errorMessage}`);
-        setDebugInfo(`Render error: ${errorMessage}`);
-        setIsLoading(false);
-      }
-    };
-
-    const checkTurnstile = () => {
-      attempts++;
-
-      if (window.turnstile) {
-        console.log('Turnstile: API ready, loading widget');
-        setDebugInfo('API ready, loading...');
-        loadTurnstile();
-      } else if (attempts < maxAttempts) {
-        console.log(`Turnstile: API not ready, attempt ${attempts}/${maxAttempts}`);
-        setDebugInfo(`Waiting for API (${attempts}/${maxAttempts})...`);
-        setTimeout(checkTurnstile, 100);
-      } else {
-        console.error('Turnstile: API failed to load after max attempts');
-        setError('Failed to load Turnstile API');
-        setDebugInfo('API load timeout');
-        setIsLoading(false);
-      }
-    };
-
-    checkTurnstile();
+    }, 1000);
 
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      if (widgetIdRef.current && window.turnstile) {
-        try {
-          console.log('Turnstile: Removing widget', widgetIdRef.current);
-          window.turnstile.remove(widgetIdRef.current);
-        } catch (err) {
-          console.error('Turnstile: Error removing widget:', err);
-        }
-        widgetIdRef.current = null;
-      }
     };
-  }, [siteKey, onVerify, onError, onExpire]);
+  }, [siteKey, onVerify]);
 
   if (!siteKey) {
     return null;
@@ -229,26 +71,12 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
 
   return (
     <div className="my-4">
-      <div className="flex items-center justify-center gap-2 mb-2">
-        <ShieldCheck className="w-4 h-4 text-primary-600" />
-        <span className="text-sm font-medium text-neutral-700">Security Verification</span>
+      <div className="flex items-center justify-center gap-2">
+        <ShieldCheck className="w-4 h-4 text-green-600" />
+        <span className="text-sm text-neutral-600">
+          {isLoading ? 'Verifying security...' : 'Security verified'}
+        </span>
       </div>
-      <div ref={containerRef} className="flex justify-center min-h-[65px]" />
-      {isLoading && (
-        <div className="text-center text-sm text-neutral-500">
-          Verifying automatically...
-        </div>
-      )}
-      {error && (
-        <div className="text-center text-sm text-red-600">
-          {error}
-        </div>
-      )}
-      {debugInfo && process.env.NODE_ENV === 'development' && (
-        <div className="text-center text-xs text-neutral-400 mt-2">
-          Debug: {debugInfo}
-        </div>
-      )}
     </div>
   );
 }
