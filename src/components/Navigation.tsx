@@ -127,7 +127,7 @@ export default function Navigation() {
 
               {/* Mobile menu button */}
               <button
-                className="lg:hidden p-2 rounded-md text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
+                className="nav-toggle lg:hidden p-2 rounded-md text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 transition-colors"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 aria-label="Toggle navigation menu"
                 aria-expanded={isMenuOpen}
