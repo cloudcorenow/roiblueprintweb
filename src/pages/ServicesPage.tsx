@@ -444,7 +444,7 @@ export default function ServicesPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             <div className="animate-fade-in-up">
               <img
-                src="/ef89c467-3b72-4e54-b2a1-1a4791cf414c.png"
+                src="/ef89c467-3b72-4e54-b2a1-1a4791cf414c.jpg"
                 alt="Innovation That Pays Off"
                 className="rounded-2xl shadow-xl"
               />
