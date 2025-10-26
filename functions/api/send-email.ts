@@ -30,6 +30,24 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
   try {
     const ip = context.request.headers.get('CF-Connecting-IP') || 'unknown';
+    const country = context.request.headers.get('CF-IPCountry') || 'XX';
+
+    if (country !== 'US') {
+      console.log(`Blocked submission from country: ${country}, IP: ${ip}`);
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'We currently only accept submissions from the United States.',
+        }),
+        {
+          status: 403,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
 
     const rateLimitKey = `contact_form:${ip}`;
     const { success } = await context.env.RATE_LIMITER.limit({ key: rateLimitKey });

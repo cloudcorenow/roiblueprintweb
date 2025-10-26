@@ -7,6 +7,15 @@ interface Env {
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
     const ip = context.request.headers.get('CF-Connecting-IP') || 'unknown';
+    const country = context.request.headers.get('CF-IPCountry') || 'XX';
+
+    if (country !== 'US') {
+      console.log(`Blocked newsletter signup from country: ${country}, IP: ${ip}`);
+      return Response.json(
+        { error: 'We currently only accept subscriptions from the United States.' },
+        { status: 403 }
+      );
+    }
 
     const rateLimitKey = `newsletter:${ip}`;
     const { success } = await context.env.RATE_LIMITER.limit({ key: rateLimitKey });
