@@ -1,7 +1,6 @@
 interface Env {
   DB: D1Database;
   RESEND_API_KEY: string;
-  RATE_LIMITER: RateLimit;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -14,16 +13,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json(
         { error: 'We currently only accept subscriptions from the United States.' },
         { status: 403 }
-      );
-    }
-
-    const rateLimitKey = `newsletter:${ip}`;
-    const { success } = await context.env.RATE_LIMITER.limit({ key: rateLimitKey });
-
-    if (!success) {
-      return Response.json(
-        { error: 'Too many requests. Please try again later.' },
-        { status: 429 }
       );
     }
 

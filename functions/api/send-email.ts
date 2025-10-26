@@ -1,7 +1,6 @@
 interface Env {
   RESEND_API_KEY: string;
   TURNSTILE_SECRET_KEY: string;
-  RATE_LIMITER: RateLimit;
   DB: D1Database;
 }
 
@@ -41,25 +40,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         }),
         {
           status: 403,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-    }
-
-    const rateLimitKey = `contact_form:${ip}`;
-    const { success } = await context.env.RATE_LIMITER.limit({ key: rateLimitKey });
-
-    if (!success) {
-      return new Response(
-        JSON.stringify({
-          success: false,
-          error: 'Too many requests. Please try again later.',
-        }),
-        {
-          status: 429,
           headers: {
             ...corsHeaders,
             'Content-Type': 'application/json',

@@ -1,6 +1,5 @@
 interface Env {
   DB: D1Database;
-  RATE_LIMITER: RateLimit;
 }
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -13,16 +12,6 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       return Response.json(
         { error: 'We currently only accept requests from the United States.' },
         { status: 403 }
-      );
-    }
-
-    const rateLimitKey = `guide_access:${ip}`;
-    const { success } = await context.env.RATE_LIMITER.limit({ key: rateLimitKey });
-
-    if (!success) {
-      return Response.json(
-        { error: 'Too many requests. Please try again later.' },
-        { status: 429 }
       );
     }
 
