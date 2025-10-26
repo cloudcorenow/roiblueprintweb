@@ -102,8 +102,6 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
 
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
-          action: 'contact-form',
-          cData: window.location.hostname,
           callback: (token: string) => {
             console.log('Turnstile: Success callback - token received', token?.substring(0, 20) + '...');
             hasCalledCallbackRef.current = true;
