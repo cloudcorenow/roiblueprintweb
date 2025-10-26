@@ -2,6 +2,7 @@ interface Env {
   RESEND_API_KEY: string;
   TURNSTILE_SECRET_KEY: string;
   RATE_LIMITER: RateLimit;
+  DB: D1Database;
 }
 
 interface ContactFormData {
@@ -13,6 +14,7 @@ interface ContactFormData {
   message: string;
   formType: 'contact' | 'guide' | 'newsletter';
   turnstileToken?: string;
+  honeypot?: string;
 }
 
 const corsHeaders = {
@@ -49,7 +51,76 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
     }
 
     const data: ContactFormData = await context.request.json();
-    const { RESEND_API_KEY, TURNSTILE_SECRET_KEY } = context.env;
+    const { RESEND_API_KEY, TURNSTILE_SECRET_KEY, DB } = context.env;
+
+    if (data.honeypot) {
+      console.log('Honeypot triggered - bot detected');
+      return new Response(
+        JSON.stringify({ success: true }),
+        {
+          status: 200,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+    }
+
+    if (DB) {
+      const existing = await DB
+        .prepare('SELECT * FROM form_submissions WHERE email = ? AND form_type = ?')
+        .bind(data.email.toLowerCase(), data.formType)
+        .first() as any;
+
+      if (existing) {
+        if (existing.is_blocked) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'This email has been blocked due to suspicious activity.',
+            }),
+            {
+              status: 403,
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+        }
+
+        const lastSubmission = new Date(existing.last_submission_at);
+        const now = new Date();
+        const hoursSinceLastSubmission = (now.getTime() - lastSubmission.getTime()) / (1000 * 60 * 60);
+
+        if (hoursSinceLastSubmission < 24 && existing.submission_count >= 3) {
+          return new Response(
+            JSON.stringify({
+              success: false,
+              error: 'You have reached the maximum number of submissions for today. Please try again later.',
+            }),
+            {
+              status: 429,
+              headers: {
+                ...corsHeaders,
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+        }
+
+        await DB
+          .prepare('UPDATE form_submissions SET submission_count = submission_count + 1, last_submission_at = datetime("now"), ip_address = ? WHERE email = ? AND form_type = ?')
+          .bind(ip, data.email.toLowerCase(), data.formType)
+          .run();
+      } else {
+        await DB
+          .prepare('INSERT INTO form_submissions (id, email, form_type, ip_address) VALUES (?, ?, ?, ?)')
+          .bind(crypto.randomUUID(), data.email.toLowerCase(), data.formType, ip)
+          .run();
+      }
+    }
 
     if (!RESEND_API_KEY) {
       throw new Error('RESEND_API_KEY is not configured');

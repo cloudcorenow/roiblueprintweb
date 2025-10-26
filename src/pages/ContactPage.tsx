@@ -646,7 +646,8 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         body: JSON.stringify({
           ...formData,
           formType: 'contact',
-          turnstileToken
+          turnstileToken,
+          honeypot: botField
         }),
       });
 
@@ -1003,7 +1004,8 @@ const StandaloneContactForm: React.FC = () => {
         body: JSON.stringify({
           ...formData,
           formType: 'contact',
-          turnstileToken
+          turnstileToken,
+          honeypot: botField
         }),
       });
 
