@@ -33,17 +33,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (country !== 'US') {
       console.log(`Blocked submission from country: ${country}, IP: ${ip}`);
-      return new Response(
-        JSON.stringify({
+      return Response.json(
+        {
           success: false,
           error: 'We currently only accept submissions from the United States.',
-        }),
+        },
         {
           status: 403,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
+          headers: corsHeaders,
         }
       );
     }
@@ -53,14 +50,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (data.honeypot) {
       console.log('Honeypot triggered - bot detected');
-      return new Response(
-        JSON.stringify({ success: true }),
+      return Response.json(
+        { success: true },
         {
           status: 200,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-          },
+          headers: corsHeaders,
         }
       );
     }
@@ -73,17 +67,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
       if (existing) {
         if (existing.is_blocked) {
-          return new Response(
-            JSON.stringify({
+          return Response.json(
+            {
               success: false,
               error: 'This email has been blocked due to suspicious activity.',
-            }),
+            },
             {
               status: 403,
-              headers: {
-                ...corsHeaders,
-                'Content-Type': 'application/json',
-              },
+              headers: corsHeaders,
             }
           );
         }
@@ -93,17 +84,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         const hoursSinceLastSubmission = (now.getTime() - lastSubmission.getTime()) / (1000 * 60 * 60);
 
         if (hoursSinceLastSubmission < 24 && existing.submission_count >= 3) {
-          return new Response(
-            JSON.stringify({
+          return Response.json(
+            {
               success: false,
               error: 'You have reached the maximum number of submissions for today. Please try again later.',
-            }),
+            },
             {
               status: 429,
-              headers: {
-                ...corsHeaders,
-                'Content-Type': 'application/json',
-              },
+              headers: corsHeaders,
             }
           );
         }
@@ -175,18 +163,15 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
             hostname: turnstileResult.hostname
           });
 
-          return new Response(
-            JSON.stringify({
+          return Response.json(
+            {
               success: false,
               error: 'Captcha verification failed. Please try again.',
               details: turnstileResult['error-codes'],
-            }),
+            },
             {
               status: 400,
-              headers: {
-                ...corsHeaders,
-                'Content-Type': 'application/json',
-              },
+              headers: corsHeaders,
             }
           );
         }
@@ -257,29 +242,23 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const result = await response.json();
 
-    return new Response(
-      JSON.stringify({ success: true, messageId: result.id }),
+    return Response.json(
+      { success: true, messageId: result.id },
       {
         status: 200,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+        headers: corsHeaders,
       }
     );
   } catch (error) {
     console.error('Error sending email:', error);
-    return new Response(
-      JSON.stringify({
+    return Response.json(
+      {
         success: false,
         error: error instanceof Error ? error.message : 'Failed to send email',
-      }),
+      },
       {
         status: 500,
-        headers: {
-          ...corsHeaders,
-          'Content-Type': 'application/json',
-        },
+        headers: corsHeaders,
       }
     );
   }
