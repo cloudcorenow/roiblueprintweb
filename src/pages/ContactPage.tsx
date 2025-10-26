@@ -119,7 +119,7 @@ export default function ContactPage() {
               </h1>
 
               <p className="text-xl lg:text-2xl text-neutral-300 mb-6 leading-relaxed">
-                Join 200+ healthcare practices already saving $30K-50K annually through our
+                Join 120+ healthcare practices already saving $30K-50K annually through our
                 proven ROI Blueprint™ methodology. Your transformation starts with one conversation.
               </p>
 
@@ -131,11 +131,11 @@ export default function ContactPage() {
               {/* Trust indicators */}
               <div className="grid grid-cols-3 gap-6">
                 <div>
-                  <div className="text-3xl font-black text-primary-400 mb-2">$2M+</div>
-                  <div className="text-sm text-neutral-400">Total Savings</div>
+                  <div className="text-3xl font-black text-primary-400 mb-2">$5M+</div>
+                  <div className="text-sm text-neutral-400">R&D Credits Identified</div>
                 </div>
                 <div>
-                  <div className="text-3xl font-black text-primary-400 mb-2">200+</div>
+                  <div className="text-3xl font-black text-primary-400 mb-2">120+</div>
                   <div className="text-sm text-neutral-400">Practices Served</div>
                 </div>
                 <div>
@@ -401,7 +401,7 @@ export default function ContactPage() {
                     </div>
                     <div>
                       <div className="font-bold text-neutral-900 mb-1">Proven ROI Methodology</div>
-                      <p className="text-neutral-600 text-sm">$2M+ in savings delivered with 20-35% efficiency improvements</p>
+                      <p className="text-neutral-600 text-sm">$5M+ in R&D credits identified with 20-35% efficiency improvements</p>
                     </div>
                   </div>
 
