@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Download, Mail, Trash2, LogOut, RefreshCw } from "lucide-react";
+import { Download, Mail, Trash2, LogOut, RefreshCw, Shield, AlertTriangle } from "lucide-react";
 import BlogAdmin from "../components/BlogAdmin";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -20,11 +20,23 @@ interface NewsletterSubscription {
   created_at: string;
 }
 
+interface FormSubmission {
+  id: string;
+  email: string;
+  form_type: string;
+  ip_address: string;
+  submission_count: number;
+  last_submission_at: string;
+  created_at: string;
+  is_blocked: boolean;
+}
+
 export default function AdminPage() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
   const [emails, setEmails] = useState<GuideAccessEmail[]>([]);
   const [subscriptions, setSubscriptions] = useState<NewsletterSubscription[]>([]);
+  const [formSubmissions, setFormSubmissions] = useState<FormSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -35,7 +47,7 @@ export default function AdminPage() {
   const loadData = async () => {
     setLoading(true);
     setError(null);
-    await Promise.all([loadEmails(), loadSubscriptions()]);
+    await Promise.all([loadEmails(), loadSubscriptions(), loadFormSubmissions()]);
     setLoading(false);
   };
 
@@ -65,6 +77,19 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error loading newsletter subscriptions:', error);
       setError('Failed to load newsletter subscriptions');
+    }
+  };
+
+  const loadFormSubmissions = async () => {
+    try {
+      const response = await fetch('/api/form-submissions');
+      if (response.ok) {
+        const data = await response.json();
+        setFormSubmissions(data);
+      }
+    } catch (error) {
+      console.error('Error loading form submissions:', error);
+      setError('Failed to load form submissions');
     }
   };
 
@@ -151,6 +176,44 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error deleting subscription:', error);
       setError('Failed to delete subscription');
+    }
+  };
+
+  const handleToggleBlock = async (id: string, currentStatus: boolean) => {
+    try {
+      const response = await fetch('/api/form-submissions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, is_blocked: !currentStatus }),
+      });
+
+      if (response.ok) {
+        await loadFormSubmissions();
+      } else {
+        setError('Failed to update block status');
+      }
+    } catch (error) {
+      console.error('Error updating block status:', error);
+      setError('Failed to update block status');
+    }
+  };
+
+  const handleDeleteFormSubmission = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this form submission record?')) return;
+
+    try {
+      const response = await fetch(`/api/form-submissions?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await loadFormSubmissions();
+      } else {
+        setError('Failed to delete form submission');
+      }
+    } catch (error) {
+      console.error('Error deleting form submission:', error);
+      setError('Failed to delete form submission');
     }
   };
 
@@ -345,6 +408,94 @@ export default function AdminPage() {
           <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
             <p className="text-sm text-green-800">
               <strong>Status:</strong> Guide access emails are now stored in the D1 database and synced automatically.
+            </p>
+          </div>
+        </div>
+
+        <div className="card">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <Shield className="w-6 h-6 text-error-600" />
+              <h2 className="text-2xl font-bold">Form Submission Security</h2>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="text-center py-8 text-neutral-500">
+              <RefreshCw className="w-8 h-8 mx-auto mb-3 text-neutral-300 animate-spin" />
+              <p>Loading...</p>
+            </div>
+          ) : formSubmissions.length === 0 ? (
+            <div className="text-center py-8 text-neutral-500">
+              <Shield className="w-12 h-12 mx-auto mb-3 text-neutral-300" />
+              <p>No form submissions tracked yet</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-sm text-neutral-600 mb-4">
+                Total tracked: <strong>{formSubmissions.length}</strong> |
+                Blocked: <strong className="text-error-600">{formSubmissions.filter(s => s.is_blocked).length}</strong>
+              </p>
+              <div className="max-h-96 overflow-y-auto space-y-2">
+                {formSubmissions.map((submission) => (
+                  <div
+                    key={submission.id}
+                    className={`p-4 rounded-lg border ${
+                      submission.is_blocked
+                        ? 'bg-error-50 border-error-200'
+                        : 'bg-neutral-50 border-neutral-200'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-medium text-neutral-900 truncate">{submission.email}</p>
+                          {submission.is_blocked && (
+                            <span className="inline-flex items-center gap-1 px-2 py-1 bg-error-100 text-error-700 text-xs font-semibold rounded-full">
+                              <AlertTriangle className="w-3 h-3" />
+                              BLOCKED
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-neutral-600 space-y-1">
+                          <p>Form: <strong>{submission.form_type}</strong></p>
+                          <p>Submissions: <strong>{submission.submission_count}</strong></p>
+                          <p>IP: {submission.ip_address}</p>
+                          <p>First: {new Date(submission.created_at).toLocaleString()}</p>
+                          <p>Last: {new Date(submission.last_submission_at).toLocaleString()}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                          <input
+                            type="checkbox"
+                            checked={submission.is_blocked}
+                            onChange={() => handleToggleBlock(submission.id, submission.is_blocked)}
+                            className="w-5 h-5 rounded border-2 border-neutral-300 text-error-600 focus:ring-2 focus:ring-error-500 cursor-pointer"
+                          />
+                          <span className="text-sm font-medium text-neutral-700 group-hover:text-error-600">
+                            Block
+                          </span>
+                        </label>
+                        <button
+                          onClick={() => handleDeleteFormSubmission(submission.id)}
+                          className="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-red-100 rounded"
+                          title="Delete record"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="mt-6 p-4 bg-error-50 rounded-lg border border-error-200">
+            <p className="text-sm text-error-800">
+              <strong>Security Note:</strong> Blocked emails will receive a 403 error when attempting to submit any form.
+              Use this feature to prevent abuse and spam.
             </p>
           </div>
         </div>
