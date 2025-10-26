@@ -99,7 +99,7 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
           callback: (token: string) => {
-            console.log('Turnstile: Success, token received');
+            console.log('Turnstile: Success callback - token received', token?.substring(0, 20) + '...');
             hasCalledCallbackRef.current = true;
             if (timeoutRef.current) {
               clearTimeout(timeoutRef.current);
@@ -148,7 +148,7 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
             onError?.();
           },
           'timeout-callback': () => {
-            console.error('Turnstile: Timeout callback triggered');
+            console.error('Turnstile: Timeout callback triggered by Cloudflare');
             hasCalledCallbackRef.current = true;
             if (timeoutRef.current) {
               clearTimeout(timeoutRef.current);
@@ -159,7 +159,7 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
             onError?.();
           },
           'expired-callback': () => {
-            console.warn('Turnstile: Token expired');
+            console.warn('Turnstile: Token expired callback');
             setIsLoading(true);
             setError(null);
             setDebugInfo('Token expired');
@@ -169,9 +169,9 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
           size: 'normal',
         });
 
-        console.log('Turnstile: Widget rendered with ID:', widgetIdRef.current);
-        setDebugInfo(`Widget ID: ${widgetIdRef.current}`);
-        setIsLoading(false);
+        console.log('Turnstile: Widget render() called, ID:', widgetIdRef.current);
+        console.log('Turnstile: Widget should now be interactive - waiting for user interaction or automatic verification');
+        setDebugInfo(`Widget rendered - awaiting verification`);
       } catch (err) {
         console.error('Turnstile: Render error:', err);
         const errorMessage = err instanceof Error ? err.message : 'Unknown error';

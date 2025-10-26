@@ -35,6 +35,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     if (data.formType === 'contact' && data.turnstileToken && TURNSTILE_SECRET_KEY) {
       const ip = context.request.headers.get('CF-Connecting-IP') || '';
+
+      console.log('Turnstile verification starting:', {
+        hasToken: !!data.turnstileToken,
+        tokenPrefix: data.turnstileToken?.substring(0, 20),
+        ip,
+        secretKeyConfigured: !!TURNSTILE_SECRET_KEY
+      });
+
       const turnstileResponse = await fetch(
         'https://challenges.cloudflare.com/turnstile/v0/siteverify',
         {
@@ -50,13 +58,26 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         }
       );
 
-      const turnstileResult = await turnstileResponse.json() as { success: boolean };
+      const turnstileResult = await turnstileResponse.json() as {
+        success: boolean;
+        'error-codes'?: string[];
+        challenge_ts?: string;
+        hostname?: string;
+      };
+
+      console.log('Turnstile verification result:', turnstileResult);
 
       if (!turnstileResult.success) {
+        console.error('Turnstile verification failed:', {
+          errorCodes: turnstileResult['error-codes'],
+          hostname: turnstileResult.hostname
+        });
+
         return new Response(
           JSON.stringify({
             success: false,
             error: 'Captcha verification failed. Please try again.',
+            details: turnstileResult['error-codes'],
           }),
           {
             status: 400,
@@ -67,6 +88,8 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           }
         );
       }
+
+      console.log('Turnstile verification successful');
     }
 
     let subject = '';
