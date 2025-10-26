@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import { useEffect } from "react";
 
 interface StructuredDataProps {
   type?: "organization" | "service" | "faq" | "article";
@@ -82,11 +82,26 @@ export default function StructuredData({ type = "organization" }: StructuredData
     }
   };
 
-  return (
-    <Helmet>
-      <script type="application/ld+json">
-        {JSON.stringify(getSchema())}
-      </script>
-    </Helmet>
-  );
+  useEffect(() => {
+    const scriptId = "structured-data-script";
+    let script = document.getElementById(scriptId) as HTMLScriptElement;
+
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.type = "application/ld+json";
+      document.head.appendChild(script);
+    }
+
+    script.textContent = JSON.stringify(getSchema());
+
+    return () => {
+      const existingScript = document.getElementById(scriptId);
+      if (existingScript) {
+        existingScript.remove();
+      }
+    };
+  }, [type]);
+
+  return null;
 }

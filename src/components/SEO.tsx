@@ -1,4 +1,4 @@
-import { Helmet } from "react-helmet-async";
+import { useEffect } from "react";
 
 interface SEOProps {
   title?: string;
@@ -23,28 +23,45 @@ export default function SEO({
   const fullTitle = title.includes("ROI Blueprint") ? title : `${title} | ROI Blueprint`;
   const url = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
 
-  return (
-    <Helmet>
-      <title>{fullTitle}</title>
-      <meta name="description" content={description} />
-      <meta name="keywords" content={keywords} />
+  useEffect(() => {
+    document.title = fullTitle;
 
-      <link rel="canonical" href={url} />
+    const updateMetaTag = (property: string, content: string, isProperty = false) => {
+      const attribute = isProperty ? "property" : "name";
+      let element = document.querySelector(`meta[${attribute}="${property}"]`);
 
-      <meta property="og:title" content={fullTitle} />
-      <meta property="og:description" content={description} />
-      <meta property="og:type" content={ogType} />
-      <meta property="og:url" content={url} />
-      <meta property="og:image" content={`${baseUrl}${ogImage}`} />
-      <meta property="og:site_name" content="ROI Blueprint" />
+      if (!element) {
+        element = document.createElement("meta");
+        element.setAttribute(attribute, property);
+        document.head.appendChild(element);
+      }
 
-      <meta name="twitter:card" content={twitterCard} />
-      <meta name="twitter:title" content={fullTitle} />
-      <meta name="twitter:description" content={description} />
-      <meta name="twitter:image" content={`${baseUrl}${ogImage}`} />
+      element.setAttribute("content", content);
+    };
 
-      <meta name="robots" content="index, follow" />
-      <meta name="googlebot" content="index, follow" />
-    </Helmet>
-  );
+    updateMetaTag("description", description);
+    updateMetaTag("keywords", keywords);
+
+    updateMetaTag("og:title", fullTitle, true);
+    updateMetaTag("og:description", description, true);
+    updateMetaTag("og:type", ogType, true);
+    updateMetaTag("og:url", url, true);
+    updateMetaTag("og:image", `${baseUrl}${ogImage}`, true);
+    updateMetaTag("og:site_name", "ROI Blueprint", true);
+
+    updateMetaTag("twitter:card", twitterCard, true);
+    updateMetaTag("twitter:title", fullTitle, true);
+    updateMetaTag("twitter:description", description, true);
+    updateMetaTag("twitter:image", `${baseUrl}${ogImage}`, true);
+
+    let canonicalElement = document.querySelector('link[rel="canonical"]');
+    if (!canonicalElement) {
+      canonicalElement = document.createElement("link");
+      canonicalElement.setAttribute("rel", "canonical");
+      document.head.appendChild(canonicalElement);
+    }
+    canonicalElement.setAttribute("href", url);
+  }, [fullTitle, description, keywords, ogImage, ogType, twitterCard, url, baseUrl]);
+
+  return null;
 }
