@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, CheckCircle, Beaker, GraduationCap, Cpu, Cog, BarChart3, Rocket, Stethoscope, Shield, Users, ChevronDown } from "lucide-react";
+import SEO from "../components/SEO";
+import StructuredData from "../components/StructuredData";
 
 function FAQAccordion({ faqs }: { faqs: { question: string; answer: string; }[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -121,6 +123,13 @@ export default function HomePage() {
 
   return (
     <div>
+      <SEO
+        title="Healthcare R&D Tax Credit Consultants | Research, Optimize, Innovate"
+        description="Transform your healthcare practice through documented R&D. ROI Blueprint helps medical and ABA practices optimize operations while qualifying for $50K-$250K in federal and state R&D tax credits."
+        keywords="R&D tax credits healthcare, medical practice R&D, ABA therapy tax credits, healthcare innovation, research and development tax incentives, IRS Section 41, healthcare practice optimization"
+        canonicalUrl="/"
+      />
+      <StructuredData type="organization" />
       {/* Hero Section */}
       <section className="hero" style={{
         paddingTop: "6rem",

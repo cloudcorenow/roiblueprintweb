@@ -1,10 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle, ArrowRight, Stethoscope, Cpu, Shield } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function MedicalPracticesPage() {
   return (
     <div>
+      <SEO
+        title="Medical Practice R&D Tax Credits | Primary Care & Specialty"
+        description="Medical, family medicine, internal medicine, and specialty practices qualify for R&D tax credits through clinical innovation, EMR customization, quality improvement, and care coordination initiatives."
+        keywords="medical practice R&D, primary care tax credits, specialty practice R&D, clinical protocol development, EMR customization tax credits"
+        canonicalUrl="/industries/medical-practices"
+      />
       {/* Hero Section */}
       <section className="hero" style={{
         paddingTop: "6rem",

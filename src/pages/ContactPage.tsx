@@ -20,6 +20,7 @@ import {
   Target,
 } from "lucide-react";
 import Turnstile from "../components/Turnstile";
+import SEO from "../components/SEO";
 
 interface Question {
   question: string;
@@ -96,6 +97,12 @@ export default function ContactPage() {
 
   return (
     <div>
+      <SEO
+        title="Contact Us - Prequalify for R&D Tax Credits in 3 Minutes"
+        description="Get prequalified for healthcare R&D tax credits in under 3 minutes. Free consultation with ROI Blueprint experts. Serving medical and ABA practices nationwide. Call (855) 764-2583."
+        keywords="R&D tax credit prequalification, healthcare practice consultation, free R&D assessment, medical practice tax credits, contact ROI Blueprint"
+        canonicalUrl="/contact"
+      />
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 lg:py-32" style={{
         paddingTop: "8rem",

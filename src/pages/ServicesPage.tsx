@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle, ArrowRight, Shield, TrendingUp, FileText, Users, Calculator, Award, Target, Zap } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function ServicesPage() {
   const phases = [
@@ -70,6 +71,12 @@ export default function ServicesPage() {
 
   return (
     <div>
+      <SEO
+        title="R&D Tax Credit Services for Healthcare Practices"
+        description="ROI Blueprint™ methodology: Research, Optimize, Innovate. Full-service R&D implementation for medical and ABA practices. Performance-based pricing with $50K-$250K average eligible activities identified."
+        keywords="R&D tax credit services, healthcare R&D consulting, ROI Blueprint methodology, medical practice innovation, ABA practice optimization, IRS Section 41 compliance"
+        canonicalUrl="/services"
+      />
       {/* Hero Section */}
       <section className="hero" style={{
         paddingTop: "6rem",

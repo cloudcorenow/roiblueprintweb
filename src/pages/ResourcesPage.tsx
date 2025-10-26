@@ -4,6 +4,7 @@ import { Calendar, Clock, User, ArrowRight, Search, Tag, FileText, TrendingUp } 
 import { BlogPost } from '../types/blog';
 import { blogService } from '../utils/blogService';
 import GuideAccessModal from '../components/GuideAccessModal';
+import SEO from '../components/SEO';
 
 
 const categories = ["All", "Tax Planning", "Small Business", "Bookkeeping", "Financial Planning", "Business Formation", "Tax Preparation"];
@@ -103,6 +104,12 @@ export default function ResourcesPage() {
 
   return (
     <div>
+      <SEO
+        title="R&D Tax Credit Resources & Expert Healthcare Insights"
+        description="Free R&D tax credit guides, healthcare practice optimization resources, and expert insights. Access comprehensive guides on qualifying for federal and state R&D tax credits."
+        keywords="R&D tax credit guide, healthcare practice resources, medical practice optimization, tax credit resources, free R&D consultation"
+        canonicalUrl="/resources"
+      />
       {/* Hero Section */}
       <section className="hero" style={{
         minHeight: "60vh",

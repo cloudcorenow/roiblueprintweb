@@ -1,10 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Brain, Stethoscope, Heart, ArrowRight } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function IndustriesOverviewPage() {
   return (
     <div>
+      <SEO
+        title="Healthcare Industries We Serve | ABA & Medical Practices"
+        description="ROI Blueprint serves ABA therapy practices, medical practices, specialty practices, and healthcare providers nationwide. Learn how your practice type qualifies for R&D tax credits."
+        keywords="healthcare R&D industries, ABA therapy tax credits, medical practice R&D, specialty practice optimization, healthcare innovation"
+        canonicalUrl="/industries"
+      />
       {/* Hero Section */}
       <section className="hero" style={{
         paddingTop: "6rem",

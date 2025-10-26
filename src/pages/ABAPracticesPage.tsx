@@ -1,10 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { CheckCircle, ArrowRight, Brain, BarChart3, Users as UsersIcon } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function ABAPracticesPage() {
   return (
     <div>
+      <SEO
+        title="ABA Therapy Practice R&D Tax Credits | Applied Behavior Analysis"
+        description="ABA therapy, behavioral health, and autism service providers qualify for R&D tax credits through protocol development, data systems, training methodologies, and outcome measurement initiatives."
+        keywords="ABA therapy R&D, applied behavior analysis tax credits, behavioral health R&D, autism services tax credits, BCBA protocol development"
+        canonicalUrl="/industries/aba-practices"
+      />
       {/* Hero Section */}
       <section className="hero" style={{
         paddingTop: "6rem",

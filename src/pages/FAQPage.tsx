@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ChevronDown, HelpCircle } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function FAQPage() {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
@@ -144,6 +145,12 @@ export default function FAQPage() {
 
   return (
     <div className="min-h-screen bg-neutral-50">
+      <SEO
+        title="FAQ - Healthcare R&D Tax Credit Questions Answered"
+        description="Get answers to common questions about R&D tax credits, ROI Blueprint services, pricing, qualifications, and how healthcare practices can optimize operations while qualifying for tax benefits."
+        keywords="R&D tax credit FAQ, healthcare tax credit questions, ROI Blueprint pricing, R&D qualification, medical practice FAQ"
+        canonicalUrl="/faq"
+      />
       {/* Hero Section */}
       <section className="hero" style={{
         paddingTop: "6rem",

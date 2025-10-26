@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { ArrowRight, Users, Target, Eye, Award, ExternalLink, CheckCircle, TrendingUp, Shield, Heart, ChevronDown, ChevronUp } from "lucide-react";
+import SEO from "../components/SEO";
 
 export default function AboutPage() {
   const [expandedMember, setExpandedMember] = useState<number | null>(null);
@@ -49,6 +50,12 @@ export default function AboutPage() {
 
   return (
     <div>
+      <SEO
+        title="About Our Healthcare R&D Tax Credit Team"
+        description="Meet the ROI Blueprint team: Enrolled Agents, Registered Nurses, BCBAs, and technology experts helping healthcare practices optimize operations and qualify for R&D tax credits. Florida-based, serving practices nationwide."
+        keywords="healthcare R&D consultants, Enrolled Agent, BCBA, registered nurse, healthcare tax experts, ROI Blueprint team, medical practice consultants"
+        canonicalUrl="/about"
+      />
       {/* Hero Section */}
       <section className="hero" style={{ paddingTop: "6rem", backgroundImage: "url('/4dcca43d-2969-40a8-9a4d-a215adb0b3c5.png')", backgroundSize: "cover", backgroundPosition: "center" }}>
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900/90 via-gray-800/85 to-gray-900/90"></div>
