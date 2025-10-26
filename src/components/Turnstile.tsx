@@ -88,17 +88,21 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
 
         timeoutRef.current = window.setTimeout(() => {
           if (!hasCalledCallbackRef.current) {
-            console.error('Turnstile: Manual timeout - widget stuck');
-            console.error('Turnstile: This usually means site key and secret key are from different widgets');
+            console.error('Turnstile: Manual timeout - widget stuck after 10 seconds');
+            console.error('Turnstile: Possible causes:');
+            console.error('  1. Domain not added to widget settings in Cloudflare');
+            console.error('  2. Site key and secret key from different widgets');
+            console.error('  3. Widget mode mismatch (interactive vs non-interactive)');
             console.error('Turnstile: Current domain:', window.location.hostname);
             console.error('Turnstile: Site key:', siteKey);
-            setError('Verification timeout - check key configuration');
-            setDebugInfo('Timeout - likely mismatched keys');
+            console.error('Turnstile: ACTION REQUIRED: Check Cloudflare Turnstile widget settings');
+            setError('Widget timeout - check domain configuration in Cloudflare');
+            setDebugInfo(`Timeout on ${window.location.hostname} - verify domain in Turnstile settings`);
             setIsLoading(false);
             hasCalledCallbackRef.current = true;
             onVerify('timeout-bypass-token');
           }
-        }, 8000);
+        }, 10000);
 
         widgetIdRef.current = window.turnstile.render(containerRef.current, {
           sitekey: siteKey,
