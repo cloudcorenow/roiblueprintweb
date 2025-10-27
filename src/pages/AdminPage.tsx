@@ -31,6 +31,19 @@ interface FormSubmission {
   is_blocked: boolean;
 }
 
+const formatDateTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  return date.toLocaleString('en-US', {
+    month: '2-digit',
+    day: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZoneName: 'short',
+  });
+};
+
 export default function AdminPage() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
@@ -95,7 +108,7 @@ export default function AdminPage() {
 
   const handleDownloadPrequalification = () => {
     const text = prequalificationEmails.map(e =>
-      `${e.email} | Access Count: ${e.access_count} | First Submitted: ${new Date(e.created_at).toLocaleString()} | Last Accessed: ${new Date(e.last_accessed_at).toLocaleString()}`
+      `${e.email} | Access Count: ${e.access_count} | First Submitted: ${formatDateTime(e.created_at)} | Last Accessed: ${formatDateTime(e.last_accessed_at)}`
     ).join('\n');
 
     const blob = new Blob([text], { type: 'text/plain' });
@@ -111,7 +124,7 @@ export default function AdminPage() {
 
   const handleDownload = () => {
     const text = guideDownloadEmails.map(e =>
-      `${e.email} | Guide: ${e.guide_name} | Access Count: ${e.access_count} | Created: ${new Date(e.created_at).toLocaleString()}`
+      `${e.email} | Guide: ${e.guide_name} | Access Count: ${e.access_count} | Created: ${formatDateTime(e.created_at)}`
     ).join('\n');
 
     const blob = new Blob([text], { type: 'text/plain' });
@@ -127,7 +140,7 @@ export default function AdminPage() {
 
   const handleDownloadSubscriptions = () => {
     const text = subscriptions.map(s =>
-      `${s.email} | Source: ${s.source} | Subscribed: ${new Date(s.created_at).toLocaleString()}`
+      `${s.email} | Source: ${s.source} | Subscribed: ${formatDateTime(s.created_at)}`
     ).join('\n');
 
     const blob = new Blob([text], { type: 'text/plain' });
@@ -304,10 +317,10 @@ export default function AdminPage() {
                       <div className="text-right flex items-start gap-3">
                         <div>
                           <p className="text-xs text-neutral-500">
-                            First: {new Date(entry.created_at).toLocaleString()}
+                            First: {formatDateTime(entry.created_at)}
                           </p>
                           <p className="text-xs text-neutral-500">
-                            Last: {new Date(entry.last_accessed_at).toLocaleString()}
+                            Last: {formatDateTime(entry.last_accessed_at)}
                           </p>
                         </div>
                         <button
@@ -388,7 +401,7 @@ export default function AdminPage() {
                       </div>
                       <div className="flex items-start gap-3">
                         <p className="text-xs text-neutral-500">
-                          {new Date(entry.created_at).toLocaleString()}
+                          {formatDateTime(entry.created_at)}
                         </p>
                         <button
                           onClick={() => handleDeleteGuideAccess(entry.id)}
@@ -461,8 +474,8 @@ export default function AdminPage() {
                           <p>Form: <strong>{submission.form_type}</strong></p>
                           <p>Submissions: <strong>{submission.submission_count}</strong></p>
                           <p>IP: {submission.ip_address}</p>
-                          <p>First: {new Date(submission.created_at).toLocaleString()}</p>
-                          <p>Last: {new Date(submission.last_submission_at).toLocaleString()}</p>
+                          <p>First: {formatDateTime(submission.created_at)}</p>
+                          <p>Last: {formatDateTime(submission.last_submission_at)}</p>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
@@ -547,7 +560,7 @@ export default function AdminPage() {
                       </div>
                       <div className="flex items-start gap-3">
                         <p className="text-xs text-neutral-500">
-                          {new Date(entry.created_at).toLocaleString()}
+                          {formatDateTime(entry.created_at)}
                         </p>
                         <button
                           onClick={() => handleDeleteSubscription(entry.id)}
