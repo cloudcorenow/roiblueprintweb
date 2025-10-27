@@ -1,13 +1,14 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 
 interface StructuredDataProps {
   type?: "organization" | "service" | "faq" | "article";
 }
 
 export default function StructuredData({ type = "organization" }: StructuredDataProps) {
-  const organizationSchema = {
-    "@context": "https://schema.org",
-    "@type": "ProfessionalService",
+  const schema = useMemo(() => {
+    const organizationSchema = {
+      "@context": "https://schema.org",
+      "@type": "ProfessionalService",
     "name": "ROI Blueprint",
     "alternateName": "ROI Blueprint - Research Optimize Innovate",
     "description": "Healthcare R&D tax credit consultants helping medical and ABA practices optimize operations and qualify for federal and state R&D tax credits",
@@ -50,29 +51,28 @@ export default function StructuredData({ type = "organization" }: StructuredData
       "https://www.facebook.com/roiblueprint",
       "https://www.linkedin.com/company/roiblueprint"
     ]
-  };
+    };
 
-  const serviceSchema = {
-    "@context": "https://schema.org",
-    "@type": "Service",
-    "serviceType": "R&D Tax Credit Consulting",
-    "provider": {
-      "@type": "ProfessionalService",
-      "name": "ROI Blueprint"
-    },
-    "areaServed": {
-      "@type": "Country",
-      "name": "United States"
-    },
-    "description": "Comprehensive R&D tax credit services for healthcare practices including documentation, IRS compliance, and operational optimization",
-    "offers": {
-      "@type": "Offer",
-      "availability": "https://schema.org/InStock",
-      "priceRange": "Contact for pricing"
-    }
-  };
+    const serviceSchema = {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "serviceType": "R&D Tax Credit Consulting",
+      "provider": {
+        "@type": "ProfessionalService",
+        "name": "ROI Blueprint"
+      },
+      "areaServed": {
+        "@type": "Country",
+        "name": "United States"
+      },
+      "description": "Comprehensive R&D tax credit services for healthcare practices including documentation, IRS compliance, and operational optimization",
+      "offers": {
+        "@type": "Offer",
+        "availability": "https://schema.org/InStock",
+        "priceRange": "Contact for pricing"
+      }
+    };
 
-  const getSchema = () => {
     switch (type) {
       case "service":
         return serviceSchema;
@@ -80,7 +80,7 @@ export default function StructuredData({ type = "organization" }: StructuredData
       default:
         return organizationSchema;
     }
-  };
+  }, [type]);
 
   useEffect(() => {
     const scriptId = "structured-data-script";
@@ -93,7 +93,7 @@ export default function StructuredData({ type = "organization" }: StructuredData
       document.head.appendChild(script);
     }
 
-    script.textContent = JSON.stringify(getSchema());
+    script.textContent = JSON.stringify(schema);
 
     return () => {
       const existingScript = document.getElementById(scriptId);
@@ -101,7 +101,7 @@ export default function StructuredData({ type = "organization" }: StructuredData
         existingScript.remove();
       }
     };
-  }, [type]);
+  }, [schema]);
 
   return null;
 }

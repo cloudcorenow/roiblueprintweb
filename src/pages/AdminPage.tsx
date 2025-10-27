@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Download, Mail, Trash2, LogOut, RefreshCw, Shield, AlertTriangle } from "lucide-react";
 import BlogAdmin from "../components/BlogAdmin";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 interface GuideAccessEmail {
   id: string;
@@ -54,18 +54,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setLoading(true);
-    setError(null);
-    await Promise.all([loadEmails(), loadSubscriptions(), loadFormSubmissions()]);
-    setLoading(false);
-  };
-
-  const loadEmails = async () => {
+  const loadEmails = useCallback(async () => {
     try {
       const response = await fetch('/api/guide-access');
       if (response.ok) {
@@ -76,12 +65,12 @@ export default function AdminPage() {
       console.error('Error loading guide access emails:', error);
       setError('Failed to load guide access emails');
     }
-  };
+  }, []);
 
   const prequalificationEmails = emails.filter(e => e.guide_name === 'prequalification-assessment');
   const guideDownloadEmails = emails.filter(e => e.guide_name !== 'prequalification-assessment');
 
-  const loadSubscriptions = async () => {
+  const loadSubscriptions = useCallback(async () => {
     try {
       const response = await fetch('/api/newsletter');
       if (response.ok) {
@@ -92,9 +81,9 @@ export default function AdminPage() {
       console.error('Error loading newsletter subscriptions:', error);
       setError('Failed to load newsletter subscriptions');
     }
-  };
+  }, []);
 
-  const loadFormSubmissions = async () => {
+  const loadFormSubmissions = useCallback(async () => {
     try {
       const response = await fetch('/api/form-submissions');
       if (response.ok) {
@@ -105,7 +94,18 @@ export default function AdminPage() {
       console.error('Error loading form submissions:', error);
       setError('Failed to load form submissions');
     }
-  };
+  }, []);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    await Promise.all([loadEmails(), loadSubscriptions(), loadFormSubmissions()]);
+    setLoading(false);
+  }, [loadEmails, loadSubscriptions, loadFormSubmissions]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleDownloadPrequalification = () => {
     const text = prequalificationEmails.map(e =>

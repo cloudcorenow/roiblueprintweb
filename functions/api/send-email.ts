@@ -4,6 +4,16 @@ interface Env {
   DB: D1Database;
 }
 
+interface FormSubmissionRecord {
+  id: string;
+  email: string;
+  form_type: string;
+  ip_address: string;
+  submission_count: number;
+  last_submission_at: string;
+  is_blocked: number | boolean;
+}
+
 interface ContactFormData {
   name: string;
   email: string;
@@ -63,10 +73,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const existing = await DB
         .prepare('SELECT * FROM form_submissions WHERE email = ? AND form_type = ?')
         .bind(data.email.toLowerCase(), data.formType)
-        .first() as any;
+        .first<FormSubmissionRecord>();
 
       if (existing) {
-        if (existing.is_blocked) {
+        const isBlocked = existing.is_blocked === 1 || existing.is_blocked === true;
+        if (isBlocked) {
           return Response.json(
             {
               success: false,
@@ -97,9 +108,9 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         }
 
         await DB
-  .prepare('UPDATE form_submissions SET submission_count = submission_count + 1, last_submission_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now"), ip_address = ? WHERE email = ? AND form_type = ?')
-  .bind(ip, data.email.toLowerCase(), data.formType)
-  .run();
+          .prepare('UPDATE form_submissions SET submission_count = submission_count + 1, last_submission_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now"), ip_address = ? WHERE email = ? AND form_type = ?')
+          .bind(ip, data.email.toLowerCase(), data.formType)
+          .run();
 
       } else {
         await DB

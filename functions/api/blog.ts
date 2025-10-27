@@ -1,3 +1,5 @@
+import type { BlogPostInput } from '../../src/types/blog';
+
 interface Env {
   DB: D1Database;
 }
@@ -39,7 +41,7 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
   try {
-    const post = await context.request.json();
+    const post = (await context.request.json()) as BlogPostInput;
     const id = crypto.randomUUID();
 
     await context.env.DB
@@ -86,16 +88,33 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Post ID required' }, { status: 400 });
     }
 
-    const post = await context.request.json();
+    const post = (await context.request.json()) as Partial<BlogPostInput>;
     const updates: string[] = [];
-    const values: any[] = [];
+    const values: (string | number | null)[] = [];
+
+    const allowedKeys: (keyof BlogPostInput)[] = [
+      'title',
+      'slug',
+      'excerpt',
+      'content',
+      'category',
+      'author',
+      'author_title',
+      'image',
+      'read_time',
+      'published',
+      'featured',
+    ];
 
     Object.entries(post).forEach(([key, value]) => {
+      if (!allowedKeys.includes(key as keyof BlogPostInput)) {
+        return;
+      }
       updates.push(`${key} = ?`);
       if (key === 'published' || key === 'featured') {
         values.push(value ? 1 : 0);
       } else {
-        values.push(value);
+        values.push((value as string | null | undefined) ?? null);
       }
     });
 

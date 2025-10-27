@@ -1,13 +1,10 @@
 import React, { useState } from "react";
 import {
-  Phone,
   Mail,
-  MapPin,
   CheckCircle,
   ArrowRight,
   ArrowLeft,
   X,
-  Zap,
   MessageSquare,
   Calendar,
   Clock,
@@ -640,7 +637,7 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     const hasTurnstileKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
     if (hasTurnstileKey && !turnstileToken) {
-      setErrors({ message: "Please complete the security verification" as any });
+      setErrors({ message: "Please complete the security verification" });
       return;
     }
 
@@ -671,7 +668,8 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       setTurnstileToken("");
     } catch (err) {
       console.error('Form submission error:', err);
-      setErrors({ message: (err instanceof Error ? err.message : "There was an error submitting your form. Please try again.") as any });
+      const message = err instanceof Error ? err.message : "There was an error submitting your form. Please try again.";
+      setErrors({ message });
     } finally {
       setSubmitting(false);
     }
@@ -812,7 +810,7 @@ const ContactForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         <Turnstile
           onVerify={setTurnstileToken}
-          onError={() => setErrors({ message: "Verification failed. Please try again." as any })}
+          onError={() => setErrors({ message: "Verification failed. Please try again." })}
           onExpire={() => setTurnstileToken("")}
         />
 
@@ -876,8 +874,8 @@ const EmailCapture: React.FC<{ onSuccess: () => void; onBack: () => void }> = ({
       setTimeout(() => {
         onSuccess();
       }, 500);
-    } catch (err: any) {
-      const errorMessage = err?.message || 'An error occurred. Please try again.';
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred. Please try again.';
       setError(errorMessage);
       console.error('Error saving email:', err);
     } finally {
@@ -998,7 +996,7 @@ const StandaloneContactForm: React.FC = () => {
 
     const hasTurnstileKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
     if (hasTurnstileKey && !turnstileToken) {
-      setErrors({ message: "Please complete the security verification" as any });
+      setErrors({ message: "Please complete the security verification" });
       return;
     }
 
@@ -1029,7 +1027,8 @@ const StandaloneContactForm: React.FC = () => {
       setTurnstileToken("");
     } catch (err) {
       console.error('Form submission error:', err);
-      setErrors({ message: (err instanceof Error ? err.message : "There was an error submitting your form. Please try again.") as any });
+      const message = err instanceof Error ? err.message : "There was an error submitting your form. Please try again.";
+      setErrors({ message });
     } finally {
       setSubmitting(false);
     }
@@ -1149,7 +1148,7 @@ const StandaloneContactForm: React.FC = () => {
 
         <Turnstile
           onVerify={setTurnstileToken}
-          onError={() => setErrors({ message: "Verification failed. Please try again." as any })}
+          onError={() => setErrors({ message: "Verification failed. Please try again." })}
           onExpire={() => setTurnstileToken("")}
         />
 
