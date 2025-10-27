@@ -72,9 +72,10 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         });
       }
 
-      await env.DB.prepare(
-        'UPDATE users SET last_login_at = datetime("now") WHERE id = ?'
-      ).bind(user.id).run();
+  await env.DB.prepare(
+  'UPDATE users SET last_login_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now") WHERE id = ?'
+).bind(user.id).run();
+
 
       const token = await generateToken();
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
