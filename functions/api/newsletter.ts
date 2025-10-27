@@ -65,11 +65,90 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
 export const onRequestGet: PagesFunction<Env> = async (context) => {
   try {
+    const stripTimezoneArtifacts = (input: string): string => {
+      let sanitized = input.trim();
+
+      if (!sanitized) {
+        return sanitized;
+      }
+
+      sanitized = sanitized.replace(/\s*\([^)]*\)\s*$/, '');
+
+      const offsetMatch = sanitized.match(/([+-]\d{2}:?\d{2})$/);
+      if (offsetMatch) {
+        sanitized = sanitized.slice(0, -offsetMatch[1].length).trim();
+      }
+
+      const trailingToken = sanitized.match(/\b([A-Z]{3,5})$/)?.[1];
+      if (trailingToken && !['AM', 'PM'].includes(trailingToken)) {
+        sanitized = sanitized.slice(0, -trailingToken.length).trim();
+      }
+
+      return sanitized.replace(/\s{2,}/g, ' ');
+    };
+
+    const normalizeTimestamp = (value: unknown): string => {
+      if (value instanceof Date) {
+        return value.toISOString();
+      }
+
+      if (typeof value === 'number') {
+        return new Date(value).toISOString();
+      }
+
+      if (typeof value !== 'string') {
+        return '';
+      }
+
+      const trimmed = value.trim();
+
+      if (!trimmed) {
+        return trimmed;
+      }
+
+      if (trimmed.endsWith('Z')) {
+        return trimmed;
+      }
+
+      const sanitized = stripTimezoneArtifacts(trimmed);
+
+      const direct = Date.parse(sanitized);
+      if (!Number.isNaN(direct)) {
+        return new Date(direct).toISOString();
+      }
+
+      const candidate = sanitized.includes('T') ? sanitized : sanitized.replace(' ', 'T');
+      const withUtcSuffix = candidate.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(candidate)
+        ? candidate
+        : `${candidate}Z`;
+
+      const parsed = Date.parse(withUtcSuffix);
+      if (!Number.isNaN(parsed)) {
+        return new Date(parsed).toISOString();
+      }
+
+      const fallback = Date.parse(trimmed);
+      if (!Number.isNaN(fallback)) {
+        return new Date(fallback).toISOString();
+      }
+
+      return sanitized;
+    };
+
     const { results } = await context.env.DB
       .prepare('SELECT * FROM newsletter_subscriptions ORDER BY created_at DESC')
       .all();
 
-    return Response.json(results || []);
+    const normalized = (results || []).map((row) => {
+      const record = row as Record<string, unknown>;
+
+      return {
+        ...record,
+        created_at: normalizeTimestamp(record.created_at),
+      };
+    });
+
+    return Response.json(normalized);
   } catch (error) {
     console.error('Error fetching newsletter subscriptions:', error);
     return Response.json({ error: 'Failed to fetch newsletter subscriptions' }, { status: 500 });

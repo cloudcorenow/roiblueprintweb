@@ -31,6 +31,28 @@ interface FormSubmission {
   is_blocked: boolean;
 }
 
+const stripTimezoneArtifacts = (input: string): string => {
+  let sanitized = input.trim();
+
+  if (!sanitized) {
+    return sanitized;
+  }
+
+  sanitized = sanitized.replace(/\s*\([^)]*\)\s*$/, '');
+
+  const offsetMatch = sanitized.match(/([+-]\d{2}:?\d{2})$/);
+  if (offsetMatch) {
+    sanitized = sanitized.slice(0, -offsetMatch[1].length).trim();
+  }
+
+  const trailingToken = sanitized.match(/\b([A-Z]{3,5})$/)?.[1];
+  if (trailingToken && !['AM', 'PM'].includes(trailingToken)) {
+    sanitized = sanitized.slice(0, -trailingToken.length).trim();
+  }
+
+  return sanitized.replace(/\s{2,}/g, ' ');
+};
+
 const parseUtcDate = (value: string): Date | null => {
   if (!value) {
     return null;
@@ -42,19 +64,14 @@ const parseUtcDate = (value: string): Date | null => {
     return null;
   }
 
-  const hasExplicitOffset = /([+-]\d{2}:?\d{2}|Z|GMT|UTC)/i.test(trimmed);
-  const trailingToken = trimmed.match(/\b([A-Z]{3,5})$/)?.[1];
-  const hasZoneAbbreviation = trailingToken ? !['AM', 'PM'].includes(trailingToken) : false;
+  const sanitized = stripTimezoneArtifacts(trimmed);
 
-  if (hasExplicitOffset || hasZoneAbbreviation) {
-    const parsedWithZone = Date.parse(trimmed);
-
-    if (!Number.isNaN(parsedWithZone)) {
-      return new Date(parsedWithZone);
-    }
+  const direct = Date.parse(sanitized);
+  if (!Number.isNaN(direct)) {
+    return new Date(direct);
   }
 
-  const candidate = trimmed.includes('T') ? trimmed : trimmed.replace(' ', 'T');
+  const candidate = sanitized.includes('T') ? sanitized : sanitized.replace(' ', 'T');
   const withUtc = candidate.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(candidate)
     ? candidate
     : `${candidate}Z`;
