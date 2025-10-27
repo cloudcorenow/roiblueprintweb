@@ -31,8 +31,8 @@ CREATE TABLE IF NOT EXISTS form_submissions (
   form_type TEXT NOT NULL,
   ip_address TEXT,
   submission_count INTEGER DEFAULT 1,
-  last_submission_at DATETIME DEFAULT (datetime('now')),
-  created_at DATETIME DEFAULT (datetime('now')),
+  last_submission_at DATETIME DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  created_at DATETIME DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   is_blocked BOOLEAN DEFAULT 0
 );
 

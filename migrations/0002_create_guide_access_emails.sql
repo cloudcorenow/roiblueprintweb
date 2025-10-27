@@ -5,9 +5,9 @@ CREATE TABLE IF NOT EXISTS guide_access_emails (
   id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
   email TEXT NOT NULL,
   guide_name TEXT NOT NULL DEFAULT 'rd-tax-credit',
-  created_at TEXT DEFAULT (datetime('now')),
+  created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   access_count INTEGER DEFAULT 1,
-  last_accessed_at TEXT DEFAULT (datetime('now')),
+  last_accessed_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   UNIQUE(email, guide_name)
 );
 

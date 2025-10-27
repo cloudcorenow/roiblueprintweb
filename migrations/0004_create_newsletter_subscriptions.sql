@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS newsletter_subscriptions (
   id TEXT PRIMARY KEY,
   email TEXT UNIQUE NOT NULL,
   source TEXT DEFAULT 'website',
-  created_at DATETIME DEFAULT (datetime('now')),
-  updated_at DATETIME DEFAULT (datetime('now'))
+  created_at DATETIME DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  updated_at DATETIME DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_newsletter_email ON newsletter_subscriptions(email);

@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY DEFAULT (lower(hex(randomblob(16)))),
   email TEXT UNIQUE NOT NULL,
   password_hash TEXT NOT NULL,
-  created_at TEXT DEFAULT (datetime('now')),
+  created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   last_login_at TEXT
 );
 
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS sessions (
   user_id TEXT NOT NULL,
   token TEXT UNIQUE NOT NULL,
   expires_at TEXT NOT NULL,
-  created_at TEXT DEFAULT (datetime('now')),
+  created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

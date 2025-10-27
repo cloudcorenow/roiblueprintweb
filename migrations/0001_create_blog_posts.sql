@@ -14,8 +14,8 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   read_time TEXT NOT NULL,
   published INTEGER DEFAULT 0,
   featured INTEGER DEFAULT 0,
-  created_at TEXT DEFAULT (datetime('now')),
-  updated_at TEXT DEFAULT (datetime('now')),
+  created_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
+  updated_at TEXT DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now')),
   published_at TEXT
 );
 
