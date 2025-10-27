@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="handGradient" x1="256" y1="320" x2="256" y2="480" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#45B649"/>
+      <stop offset="1" stop-color="#0A9A45"/>
+    </linearGradient>
+    <linearGradient id="personGradient" x1="256" y1="176" x2="256" y2="352" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2DA8E1"/>
+      <stop offset="1" stop-color="#167CC1"/>
+    </linearGradient>
+  </defs>
+  <circle cx="256" cy="128" r="112" stroke="#FFE45C" stroke-width="32" fill="none" stroke-linecap="round"/>
+  <path d="M256 352C205.027 352 156.433 365.113 114.616 389.614C82.1829 409.03 59.9045 437.83 48.685 470.145C45.8804 478.189 53.9861 485.447 61.5158 481.771C99.7013 463.276 145.014 448 256 448C366.986 448 412.299 463.276 450.484 481.771C458.014 485.447 466.12 478.189 463.315 470.145C452.096 437.83 429.817 409.03 397.384 389.614C355.567 365.113 306.973 352 256 352Z" fill="url(#handGradient)"/>
+  <path d="M128 336C128 288.589 166.589 250 214 250H298C345.411 250 384 288.589 384 336V340C384 356.569 369.673 372.046 348.088 384.146C325.548 396.843 291.341 405 256 405C220.659 405 186.452 396.843 163.912 384.146C142.327 372.046 128 356.569 128 340V336Z" fill="url(#personGradient)"/>
+  <circle cx="180" cy="208" r="44" fill="#2DA8E1"/>
+  <circle cx="256" cy="192" r="52" fill="#2DA8E1"/>
+  <circle cx="332" cy="208" r="44" fill="#2DA8E1"/>
+</svg>
