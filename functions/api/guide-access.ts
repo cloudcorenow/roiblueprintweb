@@ -27,10 +27,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       .first();
 
     if (existing) {
-      await context.env.DB
-        .prepare('UPDATE guide_access_emails SET access_count = access_count + 1, last_accessed_at = datetime("now") WHERE email = ? AND guide_name = ?')
-        .bind(email, guide_name)
-        .run();
+    await context.env.DB
+  .prepare('UPDATE guide_access_emails SET access_count = access_count + 1, last_accessed_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now") WHERE email = ? AND guide_name = ?')
+  .bind(email, guide_name)
+  .run();
+
     } else {
       await context.env.DB
         .prepare('INSERT INTO guide_access_emails (id, email, guide_name) VALUES (?, ?, ?)')
