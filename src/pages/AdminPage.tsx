@@ -40,6 +40,7 @@ const formatDateTime = (dateString: string): string => {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
+    timeZone: 'America/Los_Angeles',
     timeZoneName: 'short',
   });
 };
