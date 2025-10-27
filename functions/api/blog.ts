@@ -99,7 +99,7 @@ export const onRequestPut: PagesFunction<Env> = async (context) => {
       }
     });
 
-    updates.push('updated_at = datetime("now")');
+    updates.push('updated_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now")');
     values.push(id);
 
     await context.env.DB
