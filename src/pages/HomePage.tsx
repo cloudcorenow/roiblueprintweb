@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { ArrowRight, CheckCircle, Beaker, GraduationCap, Cpu, Cog, BarChart3, Rocket, Stethoscope, Shield, Users, ChevronDown } from "lucide-react";
+import { ArrowRight, CheckCircle, Beaker, GraduationCap, Cpu, Cog, BarChart3, Rocket, Shield, ChevronDown } from "lucide-react";
 import SEO from "../components/SEO";
 import StructuredData from "../components/StructuredData";
 

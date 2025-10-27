@@ -1,5 +1,66 @@
+interface GuideAccessEmailEntry {
+  email: string;
+  guide_name: string;
+  submitted_at: string;
+}
+
+interface NewsletterSubscriptionEntry {
+  email: string;
+  source?: string;
+  subscribed_at: string;
+}
+
+const parseStoredList = <T>(key: string, isValid: (value: unknown) => value is T): T[] => {
+  const raw = localStorage.getItem(key);
+  if (!raw) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed.filter(isValid);
+  } catch (error) {
+    console.error(`Failed to parse stored data for ${key}`, error);
+    return [];
+  }
+};
+
+const isGuideAccessEmailEntry = (value: unknown): value is GuideAccessEmailEntry => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const candidate = value as Partial<GuideAccessEmailEntry>;
+  return (
+    typeof candidate.email === 'string' &&
+    typeof candidate.guide_name === 'string' &&
+    typeof candidate.submitted_at === 'string'
+  );
+};
+
+const isNewsletterSubscriptionEntry = (value: unknown): value is NewsletterSubscriptionEntry => {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  const candidate = value as Partial<NewsletterSubscriptionEntry>;
+  return typeof candidate.email === 'string' && typeof candidate.subscribed_at === 'string';
+};
+
+const formatDate = (value: string): string => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString();
+};
+
+export const getStoredEmails = (): GuideAccessEmailEntry[] =>
+  parseStoredList('guide_access_emails', isGuideAccessEmailEntry);
+
 export const exportEmailsToText = () => {
-  const emails = JSON.parse(localStorage.getItem('guide_access_emails') || '[]');
+  const emails = getStoredEmails();
 
   if (emails.length === 0) {
     return 'No emails collected yet.';
@@ -8,11 +69,11 @@ export const exportEmailsToText = () => {
   let textContent = 'Guide Access Email Submissions\n';
   textContent += '================================\n\n';
 
-  emails.forEach((entry: any, index: number) => {
+  emails.forEach((entry, index) => {
     textContent += `Entry ${index + 1}:\n`;
     textContent += `Email: ${entry.email}\n`;
     textContent += `Guide: ${entry.guide_name}\n`;
-    textContent += `Submitted: ${new Date(entry.submitted_at).toLocaleString()}\n`;
+    textContent += `Submitted: ${formatDate(entry.submitted_at)}\n`;
     textContent += '---\n\n';
   });
 
@@ -34,16 +95,12 @@ export const downloadEmailsAsTextFile = () => {
   URL.revokeObjectURL(url);
 };
 
-export const getStoredEmails = () => {
-  return JSON.parse(localStorage.getItem('guide_access_emails') || '[]');
-};
-
 export const clearStoredEmails = () => {
   localStorage.removeItem('guide_access_emails');
 };
 
 export const exportNewsletterSubscriptionsToText = () => {
-  const subscriptions = JSON.parse(localStorage.getItem('newsletter_subscriptions') || '[]');
+  const subscriptions = getNewsletterSubscriptions();
 
   if (subscriptions.length === 0) {
     return 'No newsletter subscriptions yet.';
@@ -52,11 +109,11 @@ export const exportNewsletterSubscriptionsToText = () => {
   let textContent = 'Newsletter Subscriptions\n';
   textContent += '========================\n\n';
 
-  subscriptions.forEach((entry: any, index: number) => {
+  subscriptions.forEach((entry, index) => {
     textContent += `Entry ${index + 1}:\n`;
     textContent += `Email: ${entry.email}\n`;
     textContent += `Source: ${entry.source || 'unknown'}\n`;
-    textContent += `Subscribed: ${new Date(entry.subscribed_at).toLocaleString()}\n`;
+    textContent += `Subscribed: ${formatDate(entry.subscribed_at)}\n`;
     textContent += '---\n\n';
   });
 
@@ -78,9 +135,8 @@ export const downloadNewsletterSubscriptionsAsTextFile = () => {
   URL.revokeObjectURL(url);
 };
 
-export const getNewsletterSubscriptions = () => {
-  return JSON.parse(localStorage.getItem('newsletter_subscriptions') || '[]');
-};
+export const getNewsletterSubscriptions = (): NewsletterSubscriptionEntry[] =>
+  parseStoredList('newsletter_subscriptions', isNewsletterSubscriptionEntry);
 
 export const clearNewsletterSubscriptions = () => {
   localStorage.removeItem('newsletter_subscriptions');

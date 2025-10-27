@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Download, Mail, Trash2, LogOut, RefreshCw, Shield, AlertTriangle } from "lucide-react";
 import BlogAdmin from "../components/BlogAdmin";
-import { useAuth } from "../contexts/AuthContext";
+import { useAuth } from "../hooks/useAuth";
 
 interface GuideAccessEmail {
   id: string;
@@ -31,18 +31,82 @@ interface FormSubmission {
   is_blocked: boolean;
 }
 
+const stripTimezoneArtifacts = (input: string): string => {
+  let sanitized = input.trim();
+
+  if (!sanitized) {
+    return sanitized;
+  }
+
+  sanitized = sanitized.replace(/\s*\([^)]*\)\s*$/, '');
+
+  const offsetMatch = sanitized.match(/([+-]\d{2}:?\d{2})$/);
+  if (offsetMatch) {
+    sanitized = sanitized.slice(0, -offsetMatch[1].length).trim();
+  }
+
+  const trailingToken = sanitized.match(/\b([A-Z]{3,5})$/)?.[1];
+  if (trailingToken && !['AM', 'PM'].includes(trailingToken)) {
+    sanitized = sanitized.slice(0, -trailingToken.length).trim();
+  }
+
+  return sanitized.replace(/\s{2,}/g, ' ');
+};
+
+const parseUtcDate = (value: string): Date | null => {
+  if (!value) {
+    return null;
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const sanitized = stripTimezoneArtifacts(trimmed);
+
+  const direct = Date.parse(sanitized);
+  if (!Number.isNaN(direct)) {
+    return new Date(direct);
+  }
+
+  const candidate = sanitized.includes('T') ? sanitized : sanitized.replace(' ', 'T');
+  const withUtc = candidate.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(candidate)
+    ? candidate
+    : `${candidate}Z`;
+
+  const asUtc = Date.parse(withUtc);
+
+  if (!Number.isNaN(asUtc)) {
+    return new Date(asUtc);
+  }
+
+  const fallbackParsed = Date.parse(trimmed);
+
+  if (!Number.isNaN(fallbackParsed)) {
+    return new Date(fallbackParsed);
+  }
+
+  return null;
+};
+
 const formatDateTime = (dateString: string): string => {
-  const date = new Date(dateString);
-  return date.toLocaleString('en-US', {
+  const date = parseUtcDate(dateString);
+
+  if (!date || Number.isNaN(date.getTime())) {
+    return dateString || '—';
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
     month: '2-digit',
     day: '2-digit',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    timeZone: 'America/Los_Angeles',
     timeZoneName: 'short',
-  });
+  }).format(date);
 };
 
 export default function AdminPage() {
@@ -54,18 +118,7 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
-    setLoading(true);
-    setError(null);
-    await Promise.all([loadEmails(), loadSubscriptions(), loadFormSubmissions()]);
-    setLoading(false);
-  };
-
-  const loadEmails = async () => {
+  const loadEmails = useCallback(async () => {
     try {
       const response = await fetch('/api/guide-access');
       if (response.ok) {
@@ -76,12 +129,12 @@ export default function AdminPage() {
       console.error('Error loading guide access emails:', error);
       setError('Failed to load guide access emails');
     }
-  };
+  }, []);
 
   const prequalificationEmails = emails.filter(e => e.guide_name === 'prequalification-assessment');
   const guideDownloadEmails = emails.filter(e => e.guide_name !== 'prequalification-assessment');
 
-  const loadSubscriptions = async () => {
+  const loadSubscriptions = useCallback(async () => {
     try {
       const response = await fetch('/api/newsletter');
       if (response.ok) {
@@ -92,9 +145,9 @@ export default function AdminPage() {
       console.error('Error loading newsletter subscriptions:', error);
       setError('Failed to load newsletter subscriptions');
     }
-  };
+  }, []);
 
-  const loadFormSubmissions = async () => {
+  const loadFormSubmissions = useCallback(async () => {
     try {
       const response = await fetch('/api/form-submissions');
       if (response.ok) {
@@ -105,7 +158,18 @@ export default function AdminPage() {
       console.error('Error loading form submissions:', error);
       setError('Failed to load form submissions');
     }
-  };
+  }, []);
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    await Promise.all([loadEmails(), loadSubscriptions(), loadFormSubmissions()]);
+    setLoading(false);
+  }, [loadEmails, loadSubscriptions, loadFormSubmissions]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const handleDownloadPrequalification = () => {
     const text = prequalificationEmails.map(e =>

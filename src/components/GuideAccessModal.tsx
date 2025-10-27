@@ -50,8 +50,8 @@ export default function GuideAccessModal({
       setTimeout(() => {
         onSuccess();
       }, 1500);
-    } catch (err: any) {
-      const errorMessage = err?.message || 'An error occurred. Please try again.';
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred. Please try again.';
       setError(errorMessage);
       console.error('Error saving email:', err);
     } finally {

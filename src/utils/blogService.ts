@@ -1,11 +1,17 @@
 import { getD1, isD1Available } from './d1Client';
 import { BlogPost, BlogPostInput } from '../types/blog';
 
-function convertRowToBlogPost(row: any): BlogPost {
+type BlogPostRow = Omit<BlogPost, 'published' | 'featured'> & {
+  published: number | boolean | null;
+  featured: number | boolean | null;
+};
+
+function convertRowToBlogPost(row: BlogPostRow): BlogPost {
+  const { published, featured, ...rest } = row;
   return {
-    ...row,
-    published: Boolean(row.published),
-    featured: Boolean(row.featured)
+    ...rest,
+    published: Boolean(published),
+    featured: Boolean(featured)
   };
 }
 
@@ -27,7 +33,8 @@ export const blogService = {
         return [];
       }
 
-      return (result.results || []).map(convertRowToBlogPost);
+      const rows = (result.results ?? []) as BlogPostRow[];
+      return rows.map(convertRowToBlogPost);
     } catch (error) {
       console.error('Error in getAllPosts:', error);
       return [];
@@ -51,7 +58,8 @@ export const blogService = {
         return [];
       }
 
-      return (result.results || []).map(convertRowToBlogPost);
+      const rows = (result.results ?? []) as BlogPostRow[];
+      return rows.map(convertRowToBlogPost);
     } catch (error) {
       console.error('Error in getPublishedPosts:', error);
       return [];
@@ -75,7 +83,7 @@ export const blogService = {
         return null;
       }
 
-      return convertRowToBlogPost(result);
+      return convertRowToBlogPost(result as BlogPostRow);
     } catch (error) {
       console.error('Error in getPostBySlug:', error);
       return null;
@@ -99,7 +107,7 @@ export const blogService = {
         return null;
       }
 
-      return convertRowToBlogPost(result);
+      return convertRowToBlogPost(result as BlogPostRow);
     } catch (error) {
       console.error('Error in getPostById:', error);
       return null;
@@ -122,7 +130,7 @@ export const blogService = {
         return null;
       }
 
-      return convertRowToBlogPost(result);
+      return convertRowToBlogPost(result as BlogPostRow);
     } catch (error) {
       console.error('Error in getFeaturedPost:', error);
       return null;
@@ -147,7 +155,8 @@ export const blogService = {
         return [];
       }
 
-      return (result.results || []).map(convertRowToBlogPost);
+      const rows = (result.results ?? []) as BlogPostRow[];
+      return rows.map(convertRowToBlogPost);
     } catch (error) {
       console.error('Error in getPostsByCategory:', error);
       return [];
@@ -206,14 +215,14 @@ export const blogService = {
 
       const db = getD1();
       const updates: string[] = [];
-      const values: any[] = [];
+      const values: (string | number | null)[] = [];
 
       Object.entries(post).forEach(([key, value]) => {
         updates.push(`${key} = ?`);
         if (key === 'published' || key === 'featured') {
           values.push(value ? 1 : 0);
         } else {
-          values.push(value);
+          values.push((value as string | null | undefined) ?? null);
         }
       });
 

@@ -4,6 +4,16 @@ interface Env {
   DB: D1Database;
 }
 
+interface FormSubmissionRecord {
+  id: string;
+  email: string;
+  form_type: string;
+  ip_address: string;
+  submission_count: number;
+  last_submission_at: string;
+  is_blocked: number | boolean;
+}
+
 interface ContactFormData {
   name: string;
   email: string;
@@ -20,6 +30,87 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
+};
+
+const stripTimezoneArtifacts = (input: string): string => {
+  let sanitized = input.trim();
+
+  if (!sanitized) {
+    return sanitized;
+  }
+
+  sanitized = sanitized.replace(/\s*\([^)]*\)\s*$/, '');
+
+  const offsetMatch = sanitized.match(/([+-]\d{2}:?\d{2})$/);
+  if (offsetMatch) {
+    sanitized = sanitized.slice(0, -offsetMatch[1].length).trim();
+  }
+
+  const trailingToken = sanitized.match(/\b([A-Z]{3,5})$/)?.[1];
+  if (trailingToken && !['AM', 'PM'].includes(trailingToken)) {
+    sanitized = sanitized.slice(0, -trailingToken.length).trim();
+  }
+
+  return sanitized.replace(/\s{2,}/g, ' ');
+};
+
+const normalizeTimestamp = (value: unknown): string => {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+
+  if (typeof value === 'number') {
+    return new Date(value).toISOString();
+  }
+
+  if (typeof value !== 'string') {
+    return '';
+  }
+
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return trimmed;
+  }
+
+  if (trimmed.endsWith('Z')) {
+    return trimmed;
+  }
+
+  const sanitized = stripTimezoneArtifacts(trimmed);
+
+  const direct = Date.parse(sanitized);
+  if (!Number.isNaN(direct)) {
+    return new Date(direct).toISOString();
+  }
+
+  const candidate = sanitized.includes('T') ? sanitized : sanitized.replace(' ', 'T');
+  const withUtcSuffix = candidate.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(candidate)
+    ? candidate
+    : `${candidate}Z`;
+
+  const parsed = Date.parse(withUtcSuffix);
+  if (!Number.isNaN(parsed)) {
+    return new Date(parsed).toISOString();
+  }
+
+  const fallback = Date.parse(trimmed);
+  if (!Number.isNaN(fallback)) {
+    return new Date(fallback).toISOString();
+  }
+
+  return sanitized;
+};
+
+const toUtcDate = (value: unknown): Date => {
+  const normalized = normalizeTimestamp(value);
+  const parsed = normalized ? Date.parse(normalized) : Number.NaN;
+
+  if (Number.isNaN(parsed)) {
+    return new Date(0);
+  }
+
+  return new Date(parsed);
 };
 
 export const onRequestPost: PagesFunction<Env> = async (context) => {
@@ -63,10 +154,11 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       const existing = await DB
         .prepare('SELECT * FROM form_submissions WHERE email = ? AND form_type = ?')
         .bind(data.email.toLowerCase(), data.formType)
-        .first() as any;
+        .first<FormSubmissionRecord>();
 
       if (existing) {
-        if (existing.is_blocked) {
+        const isBlocked = existing.is_blocked === 1 || existing.is_blocked === true;
+        if (isBlocked) {
           return Response.json(
             {
               success: false,
@@ -79,7 +171,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           );
         }
 
-        const lastSubmission = new Date(existing.last_submission_at);
+        const lastSubmission = toUtcDate(existing.last_submission_at);
         const now = new Date();
         const hoursSinceLastSubmission = (now.getTime() - lastSubmission.getTime()) / (1000 * 60 * 60);
 
@@ -96,15 +188,19 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           );
         }
 
+        const isoNow = new Date().toISOString();
+
         await DB
-  .prepare('UPDATE form_submissions SET submission_count = submission_count + 1, last_submission_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now"), ip_address = ? WHERE email = ? AND form_type = ?')
-  .bind(ip, data.email.toLowerCase(), data.formType)
-  .run();
+          .prepare('UPDATE form_submissions SET submission_count = submission_count + 1, last_submission_at = ?, ip_address = ? WHERE email = ? AND form_type = ?')
+          .bind(isoNow, ip, data.email.toLowerCase(), data.formType)
+          .run();
 
       } else {
+        const isoNow = new Date().toISOString();
+
         await DB
-          .prepare('INSERT INTO form_submissions (id, email, form_type, ip_address) VALUES (?, ?, ?, ?)')
-          .bind(crypto.randomUUID(), data.email.toLowerCase(), data.formType, ip)
+          .prepare('INSERT INTO form_submissions (id, email, form_type, ip_address, created_at, last_submission_at) VALUES (?, ?, ?, ?, ?, ?)')
+          .bind(crypto.randomUUID(), data.email.toLowerCase(), data.formType, ip, isoNow, isoNow)
           .run();
       }
     }

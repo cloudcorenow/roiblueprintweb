@@ -7,13 +7,21 @@ interface TurnstileProps {
   onExpire?: () => void;
 }
 
+type TurnstileErrorCode =
+  | 'internal-error'
+  | 'network-error'
+  | 'browser-error'
+  | 'timeout-or-duplicate'
+  | 'invalid-input-response'
+  | string;
+
 declare global {
   interface Window {
     turnstile?: {
       render: (element: HTMLElement | string, options: {
         sitekey: string;
         callback: (token: string) => void;
-        'error-callback'?: (errorCode?: any) => void;
+        'error-callback'?: (errorCode?: TurnstileErrorCode) => void;
         'timeout-callback'?: () => void;
         'expired-callback'?: () => void;
         theme?: 'light' | 'dark' | 'auto';
@@ -32,38 +40,98 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [hasError, setHasError] = useState(false);
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY;
-  const [debugInfo, setDebugInfo] = useState<string>('');
-  const timeoutRef = useRef<number | null>(null);
-  const hasCalledCallbackRef = useRef(false);
 
   useEffect(() => {
     if (!siteKey) {
-      console.warn('Turnstile: No site key provided');
+      console.warn('Turnstile: No site key provided. Widget will not be rendered.');
       setIsLoading(false);
-      onVerify('no-key-bypass');
       return;
     }
 
-    console.log('Turnstile: Non-interactive mode - bypassing widget');
-    console.log('Turnstile: Site key:', siteKey);
-    console.log('Turnstile: Hostname:', window.location.hostname);
+    let isMounted = true;
 
-    timeoutRef.current = window.setTimeout(() => {
-      if (!hasCalledCallbackRef.current) {
-        hasCalledCallbackRef.current = true;
-        setIsLoading(false);
-        onVerify('non-interactive-bypass');
+    const renderWidget = () => {
+      if (!isMounted || !containerRef.current || !window.turnstile) {
+        return;
       }
-    }, 1000);
+
+      widgetIdRef.current = window.turnstile.render(containerRef.current, {
+        sitekey: siteKey,
+        callback: (token) => {
+          if (!isMounted) return;
+          setIsLoading(false);
+          setHasError(false);
+          onVerify(token);
+        },
+        'error-callback': () => {
+          if (!isMounted) return;
+          setHasError(true);
+          setIsLoading(false);
+          onError?.();
+        },
+        'timeout-callback': () => {
+          if (!isMounted) return;
+          setHasError(true);
+          setIsLoading(false);
+          onError?.();
+        },
+        'expired-callback': () => {
+          if (!isMounted) return;
+          setIsLoading(false);
+          onExpire?.();
+        },
+        theme: 'light',
+        'refresh-expired': 'auto',
+      });
+    };
+
+    const scriptId = 'cf-turnstile-script';
+    const existingScript = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+    const handleScriptLoad = () => {
+      if (!isMounted) return;
+      renderWidget();
+    };
+
+    const handleScriptError = () => {
+      if (!isMounted) return;
+      setHasError(true);
+      setIsLoading(false);
+      onError?.();
+    };
+
+    if (window.turnstile) {
+      renderWidget();
+    } else if (existingScript) {
+      existingScript.addEventListener('load', handleScriptLoad);
+      existingScript.addEventListener('error', handleScriptError);
+    } else {
+      const script = document.createElement('script');
+      script.id = scriptId;
+      script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+      script.async = true;
+      script.defer = true;
+      script.addEventListener('load', handleScriptLoad);
+      script.addEventListener('error', handleScriptError);
+      document.head.appendChild(script);
+    }
 
     return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
+      isMounted = false;
+      const script = document.getElementById(scriptId);
+      if (script) {
+        script.removeEventListener('load', handleScriptLoad);
+        script.removeEventListener('error', handleScriptError);
+      }
+
+      if (widgetIdRef.current && window.turnstile) {
+        window.turnstile.remove(widgetIdRef.current);
+        widgetIdRef.current = null;
       }
     };
-  }, [siteKey, onVerify]);
+  }, [siteKey, onVerify, onError, onExpire]);
 
   if (!siteKey) {
     return null;
@@ -71,10 +139,15 @@ export default function Turnstile({ onVerify, onError, onExpire }: TurnstileProp
 
   return (
     <div className="my-4">
-      <div className="flex items-center justify-center gap-2">
-        <ShieldCheck className="w-4 h-4 text-green-600" />
+      <div ref={containerRef} />
+      <div className="mt-2 flex items-center justify-center gap-2">
+        <ShieldCheck className={`w-4 h-4 ${hasError ? 'text-red-600' : 'text-green-600'}`} />
         <span className="text-sm text-neutral-600">
-          {isLoading ? 'Verifying security...' : 'Security verified'}
+          {hasError
+            ? 'Security verification failed'
+            : isLoading
+            ? 'Verifying security...'
+            : 'Security verified'}
         </span>
       </div>
     </div>

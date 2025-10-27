@@ -26,16 +26,21 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       .bind(email, guide_name)
       .first();
 
-    if (existing) {
-    await context.env.DB
-  .prepare('UPDATE guide_access_emails SET access_count = access_count + 1, last_accessed_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now") WHERE email = ? AND guide_name = ?')
-  .bind(email, guide_name)
-  .run();
+    const isoNow = new Date().toISOString();
 
+    if (existing) {
+      await context.env.DB
+        .prepare(
+          'UPDATE guide_access_emails SET access_count = access_count + 1, last_accessed_at = ? WHERE email = ? AND guide_name = ?'
+        )
+        .bind(isoNow, email, guide_name)
+        .run();
     } else {
       await context.env.DB
-        .prepare('INSERT INTO guide_access_emails (id, email, guide_name) VALUES (?, ?, ?)')
-        .bind(crypto.randomUUID(), email, guide_name)
+        .prepare(
+          'INSERT INTO guide_access_emails (id, email, guide_name, created_at, last_accessed_at) VALUES (?, ?, ?, ?, ?)'
+        )
+        .bind(crypto.randomUUID(), email, guide_name, isoNow, isoNow)
         .run();
     }
 
@@ -52,7 +57,87 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       .prepare('SELECT * FROM guide_access_emails ORDER BY created_at DESC')
       .all();
 
-    return Response.json(results || []);
+    const stripTimezoneArtifacts = (input: string): string => {
+      let sanitized = input.trim();
+
+      if (!sanitized) {
+        return sanitized;
+      }
+
+      sanitized = sanitized.replace(/\s*\([^)]*\)\s*$/, '');
+
+      const offsetMatch = sanitized.match(/([+-]\d{2}:?\d{2})$/);
+      if (offsetMatch) {
+        sanitized = sanitized.slice(0, -offsetMatch[1].length).trim();
+      }
+
+      const trailingToken = sanitized.match(/\b([A-Z]{3,5})$/)?.[1];
+      if (trailingToken && !['AM', 'PM'].includes(trailingToken)) {
+        sanitized = sanitized.slice(0, -trailingToken.length).trim();
+      }
+
+      return sanitized.replace(/\s{2,}/g, ' ');
+    };
+
+    const normalizeDateTime = (value: unknown): string => {
+      if (value instanceof Date) {
+        return value.toISOString();
+      }
+
+      if (typeof value === 'number') {
+        return new Date(value).toISOString();
+      }
+
+      if (typeof value !== 'string') {
+        return '';
+      }
+
+      const trimmed = value.trim();
+
+      if (!trimmed) {
+        return trimmed;
+      }
+
+      if (trimmed.endsWith('Z')) {
+        return trimmed;
+      }
+
+      const sanitized = stripTimezoneArtifacts(trimmed);
+
+      const direct = Date.parse(sanitized);
+      if (!Number.isNaN(direct)) {
+        return new Date(direct).toISOString();
+      }
+
+      const candidate = sanitized.includes('T') ? sanitized : sanitized.replace(' ', 'T');
+      const withUtcSuffix = candidate.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(candidate)
+        ? candidate
+        : `${candidate}Z`;
+
+      const parsed = Date.parse(withUtcSuffix);
+      if (!Number.isNaN(parsed)) {
+        return new Date(parsed).toISOString();
+      }
+
+      const fallback = Date.parse(trimmed);
+      if (!Number.isNaN(fallback)) {
+        return new Date(fallback).toISOString();
+      }
+
+      return sanitized;
+    };
+
+    const normalizedResults = (results || []).map((record) => {
+      const row = record as Record<string, unknown>;
+
+      return {
+        ...row,
+        created_at: normalizeDateTime(row.created_at),
+        last_accessed_at: normalizeDateTime(row.last_accessed_at),
+      };
+    });
+
+    return Response.json(normalizedResults);
   } catch (error) {
     console.error('Error fetching guide access emails:', error);
     return Response.json({ error: 'Failed to fetch guide access emails' }, { status: 500 });

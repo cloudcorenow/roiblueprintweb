@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useReducer, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useReducer, useRef } from "react";
 import { MessageCircle, X, Send, Bot, User, Minimize2, Maximize2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -212,9 +212,10 @@ export default function Chatbot({ persistKey, className, title = "ROI Blueprint 
       if (!raw) return;
       const saved = JSON.parse(raw) as Partial<ChatState>;
       if (saved.messages) dispatch({ type: "SET_MESSAGES", value: saved.messages });
-    } catch {}
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [persistKey]);
+    } catch (error) {
+      console.error("Failed to restore chatbot history", error);
+    }
+  }, [persistKey, dispatch]);
 
   useEffect(() => {
     if (!persistKey) return;
@@ -223,23 +224,12 @@ export default function Chatbot({ persistKey, className, title = "ROI Blueprint 
         persistKey,
         JSON.stringify({ messages: state.messages })
       );
-    } catch {}
+    } catch (error) {
+      console.error("Failed to persist chatbot history", error);
+    }
   }, [state.messages, persistKey]);
 
   // ==== Initial greeting ====
-  useEffect(() => {
-    if (state.isOpen && state.messages.length === 0) {
-      addBotMessage(
-        "👋 Hi! I'm your ROI BLUEPRINT assistant. I can help you understand how we help healthcare practices improve operations and potentially qualify for R&D tax credits. What would you like to know?",
-        [...QUICK_RESPONSES]
-      );
-    }
-    // Focus input when chat opens
-    if (state.isOpen && !state.isMinimized) {
-      setTimeout(() => inputRef.current?.focus(), 100);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.isOpen, state.isMinimized]);
 
   // ==== Auto-scroll ====
   useEffect(() => {
@@ -255,7 +245,7 @@ export default function Chatbot({ persistKey, className, title = "ROI Blueprint 
   const quickResponses = useMemo(() => [...QUICK_RESPONSES], []);
 
   // ==== Message helpers ====
-  const addMessage = (text: string, isBot: boolean, options?: string[]) => {
+  const addMessage = useCallback((text: string, isBot: boolean, options?: string[]) => {
     const msg: Message = {
       id: makeId(),
       text,
@@ -264,16 +254,28 @@ export default function Chatbot({ persistKey, className, title = "ROI Blueprint 
       options,
     };
     dispatch({ type: "ADD_MESSAGE", value: msg });
-  };
+  }, [dispatch]);
 
-  const addBotMessage = (text: string, options?: string[]) => {
+  const addBotMessage = useCallback((text: string, options?: string[]) => {
     dispatch({ type: "SET_TYPING", value: true });
     if (typingTimerRef.current) clearTimeout(typingTimerRef.current);
     typingTimerRef.current = setTimeout(() => {
       addMessage(text, true, options);
       dispatch({ type: "SET_TYPING", value: false });
     }, delay());
-  };
+  }, [addMessage, dispatch]);
+
+  useEffect(() => {
+    if (state.isOpen && state.messages.length === 0) {
+      addBotMessage(
+        "👋 Hi! I'm your ROI BLUEPRINT assistant. I can help you understand how we help healthcare practices improve operations and potentially qualify for R&D tax credits. What would you like to know?",
+        [...QUICK_RESPONSES]
+      );
+    }
+    if (state.isOpen && !state.isMinimized) {
+      setTimeout(() => inputRef.current?.focus(), 100);
+    }
+  }, [addBotMessage, state.isMinimized, state.isOpen, state.messages.length]);
 
   const handleQuickResponse = (response: string) => {
     if (response === "Go to contact page") {
@@ -470,7 +472,7 @@ export default function Chatbot({ persistKey, className, title = "ROI Blueprint 
       case "scheduling":
         return handleSchedulingFlow(message);
       case "contact":
-        return handleContactFlow(message);
+        return handleContactFlow();
       case "qualified":
         return handleQualifiedFlow(message);
       default:
@@ -537,7 +539,7 @@ export default function Chatbot({ persistKey, className, title = "ROI Blueprint 
     }
   };
 
-  const handleContactFlow = (_message: string) => {
+  const handleContactFlow = () => {
     return addBotMessage(
       "Perfect! I'll make sure our team reaches out to you soon. \n\nTo complete your assessment request, please visit our contact page where you can provide additional details about your business.",
       ["Go to contact page", "I have more questions", "Thank you"]

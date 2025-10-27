@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Calendar, Clock, User, ArrowRight, Search, Tag, FileText, TrendingUp } from "lucide-react";
+import { Calendar, Clock, User, ArrowRight, Search, Tag, FileText } from "lucide-react";
 import { BlogPost } from '../types/blog';
 import { blogService } from '../utils/blogService';
 import GuideAccessModal from '../components/GuideAccessModal';

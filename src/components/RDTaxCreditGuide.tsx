@@ -18,7 +18,6 @@ import {
   PieChart,
   Settings,
   Briefcase,
-  Heart,
   Cpu,
   Factory,
   Stethoscope,
@@ -26,7 +25,6 @@ import {
   Wrench,
   Truck,
   ShoppingCart,
-  Coffee,
   ArrowRight,
   Star,
   Info
