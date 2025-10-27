@@ -26,7 +26,51 @@ export const onRequestGet: PagesFunction<Env> = async (context) => {
       `)
       .all();
 
-    return Response.json(result.results || []);
+    const normalizeDateTime = (value: unknown): string => {
+      if (value instanceof Date) {
+        return value.toISOString();
+      }
+
+      if (typeof value === "number") {
+        return new Date(value).toISOString();
+      }
+
+      if (typeof value !== "string") {
+        return "";
+      }
+
+      const trimmed = value.trim();
+
+      if (!trimmed) {
+        return trimmed;
+      }
+
+      if (trimmed.endsWith("Z") || trimmed.includes("+")) {
+        return trimmed;
+      }
+
+      const candidate = trimmed.includes("T") ? trimmed : trimmed.replace(" ", "T");
+      const withUtcSuffix = candidate.endsWith("Z") || candidate.includes("+") ? candidate : `${candidate}Z`;
+      const timestamp = Date.parse(withUtcSuffix);
+
+      if (Number.isNaN(timestamp)) {
+        return trimmed;
+      }
+
+      return new Date(timestamp).toISOString();
+    };
+
+    const normalizedResults = (result.results || []).map((row) => {
+      const record = row as Record<string, unknown>;
+
+      return {
+        ...record,
+        created_at: normalizeDateTime(record.created_at),
+        last_submission_at: normalizeDateTime(record.last_submission_at),
+      };
+    });
+
+    return Response.json(normalizedResults);
   } catch (error) {
     console.error('Error loading form submissions:', error);
     return Response.json(
