@@ -97,9 +97,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         }
 
         await DB
-          .prepare('UPDATE form_submissions SET submission_count = submission_count + 1, last_submission_at = datetime("now"), ip_address = ? WHERE email = ? AND form_type = ?')
-          .bind(ip, data.email.toLowerCase(), data.formType)
-          .run();
+  .prepare('UPDATE form_submissions SET submission_count = submission_count + 1, last_submission_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now"), ip_address = ? WHERE email = ? AND form_type = ?')
+  .bind(ip, data.email.toLowerCase(), data.formType)
+  .run();
+
       } else {
         await DB
           .prepare('INSERT INTO form_submissions (id, email, form_type, ip_address) VALUES (?, ?, ?, ?)')
