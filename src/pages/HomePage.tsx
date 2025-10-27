@@ -71,7 +71,7 @@ export default function HomePage() {
 
   const teamCredentials = [
     {
-      image: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&h=400&fit=crop",
+      image: "/abaiconpalette%20copy.png",
       name: "Healthcare Specialist, RN",
       title: "Healthcare Expertise",
       description: "Our Registered Nurse and Board Certified Behavior Analyst uncover R&D opportunities often overlooked by others—drawing on firsthand experience working within practices like yours."
