@@ -31,10 +31,57 @@ interface FormSubmission {
   is_blocked: boolean;
 }
 
-const formatDateTime = (dateString: string): string => {
-  const date = new Date(dateString);
+const parseUtcDate = (value: string): Date | null => {
+  if (!value) {
+    return null;
+  }
 
-  return new Intl.DateTimeFormat('en-US', {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    return null;
+  }
+
+  const hasExplicitOffset = /([+-]\d{2}:?\d{2}|Z|GMT|UTC)/i.test(trimmed);
+  const trailingToken = trimmed.match(/\b([A-Z]{3,5})$/)?.[1];
+  const hasZoneAbbreviation = trailingToken ? !['AM', 'PM'].includes(trailingToken) : false;
+
+  if (hasExplicitOffset || hasZoneAbbreviation) {
+    const parsedWithZone = Date.parse(trimmed);
+
+    if (!Number.isNaN(parsedWithZone)) {
+      return new Date(parsedWithZone);
+    }
+  }
+
+  const candidate = trimmed.includes('T') ? trimmed : trimmed.replace(' ', 'T');
+  const withUtc = candidate.endsWith('Z') || /[+-]\d{2}:?\d{2}$/.test(candidate)
+    ? candidate
+    : `${candidate}Z`;
+
+  const asUtc = Date.parse(withUtc);
+
+  if (!Number.isNaN(asUtc)) {
+    return new Date(asUtc);
+  }
+
+  const fallbackParsed = Date.parse(trimmed);
+
+  if (!Number.isNaN(fallbackParsed)) {
+    return new Date(fallbackParsed);
+  }
+
+  return null;
+};
+
+const formatDateTime = (dateString: string): string => {
+  const date = parseUtcDate(dateString);
+
+  if (!date || Number.isNaN(date.getTime())) {
+    return dateString || '—';
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
     month: '2-digit',
     day: '2-digit',
     year: 'numeric',
