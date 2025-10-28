@@ -77,13 +77,13 @@ export default function HomePage() {
       description: "Our Registered Nurse and Board Certified Behavior Analyst uncover R&D opportunities often overlooked by others—drawing on firsthand experience working within practices like yours."
     },
     {
-      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400&h=400&fit=crop",
+      image: "/irsrepimage.png",
       name: "Tax Specialist, EA",
       title: "IRS Representation",
       description: "Our Enrolled Agent provides authoritative representation before the IRS, maintaining audit-ready documentation and offering expert defense when needed."
     },
     {
-      image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?w=400&h=400&fit=crop",
+      image: "/hippamage.png",
       name: "Technology Director, CTO",
       title: "HIPAA-Compliant Technology",
       description: "Secure, real-time tracking through software that seamlessly integrates with your existing systems—eliminating the need for manual processes."
