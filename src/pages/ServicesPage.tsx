@@ -82,7 +82,7 @@ export default function ServicesPage() {
         paddingTop: "6rem",
         background: `
           linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.85) 100%),
-          url('/ChatGPT Image Oct 24, 2025, 10_09_22 AM copy.png') center/cover no-repeat
+          url('/home/project/public/servicesherotiny.jpg') center/cover no-repeat
         `
       }}>
         <div className="container">
