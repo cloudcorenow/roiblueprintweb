@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowRight, CheckCircle, Beaker, GraduationCap, Cpu, Cog, BarChart3, Rocket, Stethoscope, Shield, Users, ChevronDown } from "lucide-react";
 import SEO from "../components/SEO";
 import StructuredData from "../components/StructuredData";
@@ -37,6 +37,36 @@ function FAQAccordion({ faqs }: { faqs: { question: string; answer: string; }[] 
 
 export default function HomePage() {
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data && typeof event.data === 'string') {
+        try {
+          const data = JSON.parse(event.data);
+          if (data.event === 'ended' || data.ended === true) {
+            setIsVideoModalOpen(false);
+            setTimeout(() => navigate('/contact'), 300);
+          }
+        } catch (e) {
+          // Not JSON, ignore
+        }
+      } else if (event.data && typeof event.data === 'object') {
+        if (event.data.event === 'ended' || event.data.ended === true) {
+          setIsVideoModalOpen(false);
+          setTimeout(() => navigate('/contact'), 300);
+        }
+      }
+    };
+
+    if (isVideoModalOpen) {
+      window.addEventListener('message', handleMessage);
+    }
+
+    return () => {
+      window.removeEventListener('message', handleMessage);
+    };
+  }, [isVideoModalOpen, navigate]);
 
   const focusAreas = [
     {
@@ -435,7 +465,7 @@ export default function HomePage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
           onClick={() => setIsVideoModalOpen(false)}
         >
-          <div className="relative w-full h-full" onClick={(e) => e.stopPropagation()}>
+          <div className="relative w-full h-full max-w-7xl mx-auto p-4 flex flex-col" onClick={(e) => e.stopPropagation()}>
             <button
               onClick={() => setIsVideoModalOpen(false)}
               className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors"
@@ -445,13 +475,28 @@ export default function HomePage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
-            <iframe
-              src="https://customer-mp06svfe1n138f7h.cloudflarestream.com/e37eb2914737729afaba61bed57eb277/iframe?autoplay=true"
-              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full"
-              title="How It Works Video"
-            />
+            <div className="flex-1">
+              <iframe
+                src="https://customer-mp06svfe1n138f7h.cloudflarestream.com/e37eb2914737729afaba61bed57eb277/iframe?autoplay=true"
+                allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full rounded-lg"
+                title="How It Works Video"
+              />
+            </div>
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => {
+                  setIsVideoModalOpen(false);
+                  navigate('/contact');
+                }}
+                className="btn text-lg px-8 py-4 font-semibold inline-flex items-center"
+                style={{ backgroundColor: '#ade5f8', color: '#004aad' }}
+              >
+                Start Your Assessment
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </button>
+            </div>
           </div>
         </div>
       )}
