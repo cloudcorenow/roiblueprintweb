@@ -36,6 +36,8 @@ function FAQAccordion({ faqs }: { faqs: { question: string; answer: string; }[] 
 }
 
 export default function HomePage() {
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+
   const focusAreas = [
     {
       icon: Beaker,
@@ -149,10 +151,13 @@ export default function HomePage() {
               We help healthcare practices optimize operations and innovate through documented Research and Development (R&D) initiatives that may qualify your health practice for tax benefits.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-              <Link to="/services" className="btn bg-white/10 hover:bg-white/20 text-white border border-white/30">
+              <button
+                onClick={() => setIsVideoModalOpen(true)}
+                className="btn bg-white/10 hover:bg-white/20 text-white border border-white/30"
+              >
                 How It Works
                 <ArrowRight className="w-5 h-5 ml-2" />
-              </Link>
+              </button>
             </div>
 
             {/* Trust Statistics */}
@@ -423,6 +428,33 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Video Modal */}
+      {isVideoModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90"
+          onClick={() => setIsVideoModalOpen(false)}
+        >
+          <div className="relative w-full h-full" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => setIsVideoModalOpen(false)}
+              className="absolute top-4 right-4 z-10 text-white hover:text-gray-300 transition-colors"
+              aria-label="Close video"
+            >
+              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <iframe
+              src="https://customer-mp06svfe1n138f7h.cloudflarestream.com/e37eb2914737729afaba61bed57eb277/iframe?autoplay=true"
+              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+              title="How It Works Video"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
