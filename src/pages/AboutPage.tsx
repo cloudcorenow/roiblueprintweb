@@ -28,7 +28,7 @@ export default function AboutPage() {
     {
       name: "Yvette Oseguera",
       title: "Chief Client Officer",
-      description: "As Chief Client Officer, Yvette leads all client relationships, ensuring practices receive guidance that respects clinical realities while identifying R&D documentation opportunities. Emergency room nurse with 20+ years of clinical experience, including management roles at USC focused on healthcare operations and clinical workflow optimization. AA in Nursing and BA in Communications from Cal State Fullerton.",
+      description: "As Chief Client Officer, Yvette leads all client relationships, ensuring practices receive guidance that respects real clinical workflows while identifying opportunities for R&D documentation. She is a registered nurse with 17+ years of experience, including emergency room nursing, serving as an RN House Supervisor, and working as a Clinic Nurse Manager at USC, where she focused on healthcare operations and workflow optimization. Yvette holds an Associate Degree in Nursing and a Bachelor’s Degree in Communications from Cal State Fullerton.",
       linkedIn: "#",
       image: "/Yvette.jpeg"
     },
