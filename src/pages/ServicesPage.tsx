@@ -74,7 +74,7 @@ export default function ServicesPage() {
       <SEO
         title="R&D Tax Credit Services for Healthcare Practices"
         description="ROI Blueprint™ methodology: Research, Optimize, Innovate. Full-service R&D implementation for medical and ABA practices. Performance-based pricing with $50K-$250K average eligible activities identified."
-        keywords="R&D tax credit services, healthcare R&D consulting, ROI Blueprint methodology, medical practice innovation, ABA practice optimization, IRS Section 41 compliance"
+        keywords="R&D tax credit services, healthcare R&D consulting, ROI Blueprint methodology, medical practice innovation, ABA practice optimization, IRS Section 41 compliance, R&D documentation healthcare, healthcare operations optimization, healthcare business optimization services, healthcare innovation strategy consulting, medical R&D services, healthcare innovation firm"
         canonicalUrl="/services"
       />
       {/* Hero Section */}
