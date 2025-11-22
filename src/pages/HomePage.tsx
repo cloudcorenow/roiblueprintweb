@@ -158,7 +158,7 @@ export default function HomePage() {
       <SEO
         title="Healthcare R&D Tax Credit Consultants | Research, Optimize, Innovate"
         description="Transform your healthcare practice through documented R&D. ROI Blueprint helps medical and ABA practices optimize operations while qualifying for $50K-$250K in federal and state R&D tax credits."
-        keywords="R&D tax credits healthcare, medical practice R&D, ABA therapy tax credits, healthcare innovation, research and development tax incentives, IRS Section 41, healthcare practice optimization"
+        keywords="R&D tax credits healthcare, medical practice R&D tax incentives, ABA therapy tax credits, healthcare R&D consulting, research and development tax incentives, IRS Section 41, healthcare practice optimization, R&D documentation services for healthcare, healthcare innovation and tax savings, clinical workflow optimization, R&D tax credit consulting"
         canonicalUrl="/"
       />
       <StructuredData type="organization" />
