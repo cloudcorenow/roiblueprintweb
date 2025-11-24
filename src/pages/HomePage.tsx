@@ -103,19 +103,19 @@ export default function HomePage() {
 
   const teamCredentials = [
     {
-      image: "/healthcareexpimage.png",
+      image: "https://imagedelivery.net/BXoH8ST34Y6pWikCxf10Gg/d689e99a-1984-4a94-ef0a-b14b4caaf500/public",
       name: "Healthcare Specialist, RN",
       title: "Healthcare Expertise",
       description: "Our Registered Nurse and Board Certified Behavior Analyst uncover R&D opportunities often overlooked by others—drawing on firsthand experience working within practices like yours."
     },
     {
-      image: "/irsrepimage.png",
+      image: "https://imagedelivery.net/BXoH8ST34Y6pWikCxf10Gg/835586eb-7296-4bf7-24e2-bd7b7df99a00/public",
       name: "Tax Specialist, EA",
       title: "IRS Representation",
       description: "Our Enrolled Agent provides authoritative representation before the IRS, maintaining audit-ready documentation and offering expert defense when needed."
     },
     {
-      image: "/hippamage.png",
+      image: "https://imagedelivery.net/BXoH8ST34Y6pWikCxf10Gg/7c3e0b31-53f3-4802-b087-e517222fae00/public",
       name: "Technology Director, CTO",
       title: "HIPAA-Compliant Technology",
       description: "Secure, real-time tracking through software that seamlessly integrates with your existing systems—eliminating the need for manual processes."
@@ -158,7 +158,7 @@ export default function HomePage() {
       <SEO
         title="Healthcare R&D Tax Credit Consultants | Research, Optimize, Innovate"
         description="Transform your healthcare practice through documented R&D. ROI Blueprint helps medical and ABA practices optimize operations while qualifying for $50K-$250K in federal and state R&D tax credits."
-        keywords="R&D tax credits healthcare, medical practice R&D tax incentives, ABA therapy tax credits, healthcare R&D consulting, research and development tax incentives, IRS Section 41, healthcare practice optimization, R&D documentation services for healthcare, healthcare innovation and tax savings, clinical workflow optimization, R&D tax credit consulting"
+        keywords="R&D tax credits healthcare, medical practice R&D, ABA therapy tax credits, healthcare innovation, research and development tax incentives, IRS Section 41, healthcare practice optimization"
         canonicalUrl="/"
       />
       <StructuredData type="organization" />
