@@ -9,7 +9,7 @@ export default function ABAPracticesPage() {
       <SEO
         title="ABA Therapy Practice R&D Tax Credits | Applied Behavior Analysis"
         description="ABA therapy, behavioral health, and autism service providers qualify for R&D tax credits through protocol development, data systems, training methodologies, and outcome measurement initiatives."
-        keywords="ABA therapy R&D, applied behavior analysis tax credits, behavioral health R&D, autism services tax credits, BCBA protocol development"
+        keywords="ABA therapy R&D, applied behavior analysis tax credits, behavioral health R&D, autism services tax credits, BCBA protocol development, ABA practice optimization, how ABA providers qualify for R&D tax credits, behavioral health innovation consulting, ABA therapy business growth, autism service provider tax benefits"
         canonicalUrl="/industries/aba-practices"
       />
       {/* Hero Section */}
