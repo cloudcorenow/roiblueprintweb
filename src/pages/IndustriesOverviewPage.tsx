@@ -1,15 +1,32 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { Brain, Stethoscope, Heart, ArrowRight } from "lucide-react";
+import { ArrowRight, Brain, Stethoscope } from "lucide-react";
 import SEO from "../components/SEO";
 
 export default function IndustriesOverviewPage() {
+  const industries = [
+    {
+      icon: Stethoscope,
+      title: "Medical & Specialty Practices",
+      description: "Primary care, specialty clinics, and healthcare providers optimizing clinical protocols, integrating technology, and measuring outcomes.",
+      link: "/industries/medical-practices",
+      bgColor: "from-primary-500 to-primary-600"
+    },
+    {
+      icon: Brain,
+      title: "ABA & Behavioral Health",
+      description: "Applied Behavior Analysis, autism services, and behavioral health providers developing protocols, data systems, and training methodologies.",
+      link: "/industries/aba-practices",
+      bgColor: "from-success-500 to-success-600"
+    }
+  ];
+
   return (
     <div>
       <SEO
-        title="Healthcare Industries We Serve | ABA & Medical Practices"
-        description="ROI Blueprint serves ABA therapy practices, medical practices, specialty practices, and healthcare providers nationwide. Learn how your practice type qualifies for R&D tax credits."
-        keywords="healthcare R&D industries, ABA therapy tax credits, medical practice R&D, specialty practice optimization, healthcare innovation"
+        title="Healthcare Industries We Serve | Medical & ABA Practices"
+        description="ROI Blueprint serves medical practices, specialty clinics, ABA therapy providers, and behavioral health organizations. Learn how your healthcare specialty qualifies for R&D tax credits."
+        keywords="healthcare R&D by specialty, medical practice R&D, ABA practice R&D, behavioral health tax credits, specialty clinic tax incentives, primary care R&D, autism services tax benefits"
         canonicalUrl="/industries"
       />
       {/* Hero Section */}
@@ -17,97 +34,69 @@ export default function IndustriesOverviewPage() {
         paddingTop: "6rem",
         background: `
           linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.85) 100%),
-          url('https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat
+          url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat
         `
       }}>
         <div className="container">
           <div className="hero-content">
-            <h1>Everyday Innovation. Documented. Rewarded.</h1>
+            <h1>Healthcare Industries We Serve</h1>
             <p className="text-xl">
-              Whether you lead an ABA clinic or a medical practice, your daily workflows may qualify as R&D activities—worth documenting for compliance, operational excellence, and potential tax benefits.
+              Specialized R&D consulting for medical practices and behavioral health providers nationwide
             </p>
-            <div className="flex flex-col sm:flex-row gap-6 justify-center mt-8">
-              <Link to="/industries/aba-practices" className="btn btn-primary shadow-strong">
-                Explore ABA Practices
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Link>
-              <Link to="/industries/medical-practices" className="btn shadow-strong" style={{ backgroundColor: 'transparent', color: 'white', border: '2px solid #89c726' }}>
-                Explore Medical Practices
-                <ArrowRight className="w-5 h-5 ml-2" />
-              </Link>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* How Healthcare R&D Works */}
+      {/* Industries Grid */}
       <section className="section">
         <div className="container">
-          <div className="text-center mb-16 animate-fade-in-up max-w-4xl mx-auto">
-            <h2 className="mb-6">How Healthcare R&D Works</h2>
-            <h3 className="text-2xl font-semibold text-primary-600 mb-6">You're Already Doing R&D—Here's How It Qualifies</h3>
-            <p className="text-xl text-neutral-700 mb-4">
-              Healthcare providers innovate constantly—refining processes, implementing new technologies, and improving patient outcomes. Under IRS Section 41, many of these improvements meet the criteria for qualified R&D activities.
+          <div className="text-center mb-16 animate-fade-in-up">
+            <h2 className="mb-6">Healthcare Expertise You Can Trust</h2>
+            <p className="text-xl text-neutral-700 max-w-3xl mx-auto">
+              We work exclusively with healthcare organizations, bringing deep clinical knowledge combined with IRS compliance expertise to help you research, optimize, and innovate.
             </p>
-            <p className="text-lg text-neutral-600">
-              We help you identify, document, and substantiate that work for compliance and potential tax advantages.
-            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {industries.map((industry, index) => (
+              <Link
+                key={index}
+                to={industry.link}
+                className="card group hover:shadow-2xl transition-all duration-500 animate-fade-in-up"
+                style={{ animationDelay: `${index * 0.1}s` }}
+              >
+                <div className={`w-20 h-20 bg-gradient-to-br ${industry.bgColor} rounded-3xl flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform duration-300`}>
+                  <industry.icon className="w-10 h-10 text-white" />
+                </div>
+                <h3 className="mb-4 group-hover:text-primary-600 transition-colors">{industry.title}</h3>
+                <p className="text-neutral-600 mb-6 leading-relaxed">{industry.description}</p>
+                <div className="flex items-center gap-2 text-primary-600 font-semibold group-hover:gap-4 transition-all">
+                  <span>Learn More</span>
+                  <ArrowRight className="w-5 h-5" />
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Industries We Support */}
+      {/* Why Healthcare Only */}
       <section className="section" style={{ backgroundColor: "#f8fafc" }}>
         <div className="container">
-          <div className="text-center mb-16 animate-fade-in-up">
-            <h2 className="mb-4">Who We Serve</h2>
-            <h3 className="text-2xl font-semibold text-neutral-800">Industries We Support</h3>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* ABA Therapy Practices */}
-            <div className="card text-center group hover:shadow-xl transition-all duration-300 animate-fade-in-up">
-              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Brain className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="mb-4">ABA Therapy Practices</h3>
-              <p className="text-neutral-600 mb-6">
-                Protocol design, data systems, and training innovation
-              </p>
-              <Link to="/industries/aba-practices" className="btn w-full" style={{ backgroundColor: 'transparent', color: 'black', border: '2px solid #89c726' }}>
-                View ABA R&D
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
+          <div className="max-w-4xl mx-auto animate-fade-in-up">
+            <div className="text-center mb-12">
+              <h2 className="mb-6">Why We Focus Exclusively on Healthcare</h2>
             </div>
-
-            {/* Medical & Specialty Practices */}
-            <div className="card text-center group hover:shadow-xl transition-all duration-300 animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
-              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Stethoscope className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="mb-4">Medical & Specialty Practices</h3>
-              <p className="text-neutral-600 mb-6">
-                Clinical process improvement, technology integration, and quality initiatives
+            <div className="card">
+              <p className="text-lg text-neutral-700 mb-6">
+                Healthcare R&D is fundamentally different from other industries. Clinical workflows, patient outcomes, regulatory compliance, and HIPAA requirements demand specialized knowledge that generalist consulting firms simply don't have.
               </p>
-              <Link to="/industries/medical-practices" className="btn w-full" style={{ backgroundColor: 'transparent', color: 'black', border: '2px solid #89c726' }}>
-                View Medical R&D
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
-            </div>
-
-            {/* Other Healthcare Services */}
-            <div className="card text-center group hover:shadow-xl transition-all duration-300 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300">
-                <Heart className="w-10 h-10 text-white" />
-              </div>
-              <h3 className="mb-4">Other Healthcare Services</h3>
-              <p className="text-neutral-600 mb-6">
-                Dental, therapy, diagnostic, and emerging healthcare innovators
+              <p className="text-lg text-neutral-700 mb-6">
+                Our team includes <strong>Registered Nurses</strong>, <strong>Board Certified Behavior Analysts</strong>, <strong>Enrolled Agents</strong>, and <strong>healthcare technology specialists</strong>—professionals who understand both the clinical realities and the IRS requirements.
               </p>
-              <Link to="/contact" className="btn w-full" style={{ backgroundColor: '#ade5f8', color: '#004aad' }}>
-                Contact Us
-                <ArrowRight className="w-4 h-4 ml-2" />
-              </Link>
+              <p className="text-lg text-neutral-700">
+                This healthcare-only focus means we identify R&D opportunities others miss, document work that withstands IRS scrutiny, and help you build systems that genuinely improve patient care while qualifying for tax benefits.
+              </p>
             </div>
           </div>
         </div>
@@ -116,18 +105,21 @@ export default function IndustriesOverviewPage() {
       {/* CTA Section */}
       <section className="section">
         <div className="container">
-          <div className="max-w-4xl mx-auto text-center animate-fade-in-up">
-            <h2 className="mb-6">Learn How Your Practice Qualifies for R&D Credits</h2>
-            <p className="text-xl text-neutral-700 mb-6">
-              Prequalify in minutes and learn how to turn daily operations into documented R&D work that may qualify for tax benefits and translate into measurable ROI.
+          <div className="card text-center max-w-4xl mx-auto animate-fade-in-up">
+            <h2 className="mb-6">Ready to Discover Your Practice's R&D Potential?</h2>
+            <p className="text-xl text-neutral-600 mb-10 max-w-3xl mx-auto">
+              Whether you're a medical practice or behavioral health provider, we'll help you identify, document, and maximize your R&D opportunities. Start with a quick prequalification assessment.
             </p>
-            <p className="text-lg text-success-600 font-semibold mb-8 italic">
-              Serving ABA and medical practices nationwide.
-            </p>
-            <Link to="/contact" className="btn shadow-strong transform hover:scale-110" style={{ backgroundColor: '#ade5f8', color: '#004aad' }}>
-              Prequalify in Minutes
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-6 justify-center">
+              <Link to="/contact" className="btn shadow-strong transform hover:scale-110" style={{ backgroundColor: '#ade5f8', color: '#004aad' }}>
+                Get Prequalified
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+              <Link to="/services" className="btn shadow-strong transform hover:scale-110" style={{ backgroundColor: 'white', color: '#000', border: '2px solid #89c726' }}>
+                View Our Services
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+            </div>
           </div>
         </div>
       </section>
