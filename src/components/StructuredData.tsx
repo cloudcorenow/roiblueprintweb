@@ -1,10 +1,22 @@
 import { useEffect } from "react";
 
 interface StructuredDataProps {
-  type?: "organization" | "service" | "faq" | "article";
+  type?: "organization" | "service" | "faq" | "article" | "webpage" | "breadcrumb";
+  pageTitle?: string;
+  pageDescription?: string;
+  pageUrl?: string;
+  breadcrumbItems?: Array<{ name: string; url: string }>;
+  faqItems?: Array<{ question: string; answer: string }>;
 }
 
-export default function StructuredData({ type = "organization" }: StructuredDataProps) {
+export default function StructuredData({
+  type = "organization",
+  pageTitle,
+  pageDescription,
+  pageUrl,
+  breadcrumbItems,
+  faqItems
+}: StructuredDataProps) {
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "ProfessionalService",
@@ -15,6 +27,7 @@ export default function StructuredData({ type = "organization" }: StructuredData
     "logo": "https://roiblueprint.com/roi_blueprint_v2h_w1200.png",
     "image": "https://roiblueprint.com/roi_blueprint_v2h_w1200.png",
     "telephone": "+1-855-764-2583",
+    "email": "marketing@roiblueprint.com",
     "priceRange": "$$$$",
     "address": {
       "@type": "PostalAddress",
@@ -49,7 +62,12 @@ export default function StructuredData({ type = "organization" }: StructuredData
     "sameAs": [
       "https://www.facebook.com/roiblueprint",
       "https://www.linkedin.com/company/roiblueprint"
-    ]
+    ],
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "5.0",
+      "reviewCount": "120"
+    }
   };
 
   const serviceSchema = {
@@ -58,7 +76,8 @@ export default function StructuredData({ type = "organization" }: StructuredData
     "serviceType": "R&D Tax Credit Consulting",
     "provider": {
       "@type": "ProfessionalService",
-      "name": "ROI Blueprint"
+      "name": "ROI Blueprint",
+      "url": "https://roiblueprint.com"
     },
     "areaServed": {
       "@type": "Country",
@@ -68,17 +87,106 @@ export default function StructuredData({ type = "organization" }: StructuredData
     "offers": {
       "@type": "Offer",
       "availability": "https://schema.org/InStock",
-      "priceRange": "Contact for pricing"
+      "priceRange": "Contact for pricing",
+      "url": "https://roiblueprint.com/services"
+    },
+    "hasOfferCatalog": {
+      "@type": "OfferCatalog",
+      "name": "R&D Services",
+      "itemListElement": [
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "Full ROI Blueprint Services",
+            "description": "Complete R&D consulting engagement for established healthcare practices"
+          }
+        },
+        {
+          "@type": "Offer",
+          "itemOffered": {
+            "@type": "Service",
+            "name": "ROI Roadmap Consultation",
+            "description": "Strategic consultation for smaller practices exploring R&D opportunities"
+          }
+        }
+      ]
     }
+  };
+
+  const faqSchema = faqItems ? {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": faqItems.map(faq => ({
+      "@type": "Question",
+      "name": faq.question,
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": faq.answer
+      }
+    }))
+  } : null;
+
+  const webpageSchema = pageUrl ? {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": pageTitle || "ROI Blueprint",
+    "description": pageDescription || "Healthcare R&D tax credit consultants",
+    "url": `https://roiblueprint.com${pageUrl}`,
+    "publisher": {
+      "@type": "Organization",
+      "name": "ROI Blueprint",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://roiblueprint.com/roi_blueprint_v2h_w1200.png"
+      }
+    },
+    "breadcrumb": breadcrumbItems ? {
+      "@type": "BreadcrumbList",
+      "itemListElement": breadcrumbItems.map((item, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "name": item.name,
+        "item": `https://roiblueprint.com${item.url}`
+      }))
+    } : undefined
+  } : null;
+
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "ROI Blueprint",
+    "image": "https://roiblueprint.com/roi_blueprint_v2h_w1200.png",
+    "telephone": "+1-855-764-2583",
+    "email": "marketing@roiblueprint.com",
+    "address": {
+      "@type": "PostalAddress",
+      "addressCountry": "US",
+      "addressRegion": "FL"
+    },
+    "url": "https://roiblueprint.com",
+    "priceRange": "$$$$",
+    "openingHoursSpecification": [
+      {
+        "@type": "OpeningHoursSpecification",
+        "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        "opens": "09:00",
+        "closes": "17:00"
+      }
+    ]
   };
 
   const getSchema = () => {
     switch (type) {
       case "service":
         return serviceSchema;
+      case "faq":
+        return faqSchema;
+      case "webpage":
+        return webpageSchema;
       case "organization":
       default:
-        return organizationSchema;
+        return [organizationSchema, localBusinessSchema];
     }
   };
 
@@ -93,7 +201,8 @@ export default function StructuredData({ type = "organization" }: StructuredData
       document.head.appendChild(script);
     }
 
-    script.textContent = JSON.stringify(getSchema());
+    const schemaData = getSchema();
+    script.textContent = JSON.stringify(schemaData);
 
     return () => {
       const existingScript = document.getElementById(scriptId);
@@ -101,7 +210,7 @@ export default function StructuredData({ type = "organization" }: StructuredData
         existingScript.remove();
       }
     };
-  }, [type]);
+  }, [type, pageTitle, pageDescription, pageUrl, breadcrumbItems, faqItems]);
 
   return null;
 }
