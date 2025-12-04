@@ -229,7 +229,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       },
       body: JSON.stringify({
         from: 'ROI Blueprint <noreply@notifications.roiblueprint.com>',
-        to: ['lamado@roiblueprint.com'],
+        to: ['sales@roiblueprint.com'],
         subject: subject,
         html: htmlContent,
       }),
