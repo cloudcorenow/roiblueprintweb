@@ -30,7 +30,7 @@ const CalComEmbed: React.FC = () => {
           </a>
           <span className="text-neutral-400 text-sm hidden sm:inline">or</span>
           <a
-            href="mailto:info@roiblueprint.com?subject=Consultation Request"
+            href="mailto:sales@roiblueprint.com?subject=Consultation Request"
             className="text-primary-600 hover:text-primary-700 text-sm underline font-medium"
           >
             Email Us Instead
