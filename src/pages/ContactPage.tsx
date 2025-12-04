@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   Phone,
   Mail,
@@ -32,9 +32,22 @@ export default function ContactPage() {
     "initial" | "email" | "prequalification" | "qualified" | "disqualified" | "contact"
   >("initial");
   const [disqualificationMessage, setDisqualificationMessage] = useState("");
+  const calendarRef = useRef<HTMLElement>(null);
 
   const startPrequalification = () => setCurrentStep("email");
   const resetFlow = () => setCurrentStep("initial");
+
+  // Scroll to calendar when user becomes qualified
+  useEffect(() => {
+    if (currentStep === "qualified" && calendarRef.current) {
+      setTimeout(() => {
+        calendarRef.current?.scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }, 300);
+    }
+  }, [currentStep]);
 
   return (
     <div>
@@ -252,7 +265,7 @@ export default function ContactPage() {
 
       {/* Calendar Section */}
       {(currentStep === "initial" || currentStep === "prequalification" || currentStep === "qualified" || currentStep === "disqualified") && (
-        <section className="py-16 bg-neutral-50">
+        <section ref={calendarRef} className="py-16 bg-neutral-50">
           <div className="container">
             <div className="max-w-7xl mx-auto">
               {/* Calendar Section */}
@@ -382,4 +395,3 @@ export default function ContactPage() {
     </div>
   );
 }
-
