@@ -47,6 +47,17 @@ export default function GuideAccessModal({
       console.log('Guide Access Email Submitted:', { email, guide_name: guideName });
 
       setSuccess(true);
+
+      // Trigger PDF download
+      const pdfUrl = 'https://pub-d6d31077bf1c45ddbede359b95106359.r2.dev/PDF/ROI-Blueprint-GUIDE.pdf';
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = 'ROI-Blueprint-Guide.pdf';
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
       setTimeout(() => {
         onSuccess();
       }, 1500);
@@ -92,7 +103,7 @@ export default function GuideAccessModal({
             </div>
             <h3 className="text-2xl font-bold text-neutral-900 mb-2">Thank You!</h3>
             <p className="text-neutral-600">
-              Opening your guide now...
+              Your guide is downloading now...
             </p>
           </div>
         ) : (
