@@ -10,7 +10,8 @@ interface ContactFormProps {
 
 const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
   const [formData, setFormData] = React.useState<ContactFormData>({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     company: "",
     industry: "",
@@ -66,7 +67,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
       }
 
       setSuccess(true);
-      setFormData({ name: "", email: "", company: "", industry: "", message: "" });
+      setFormData({ firstName: "", lastName: "", email: "", company: "", industry: "", message: "" });
       setTurnstileToken("");
     } catch (err) {
       console.error("Form submission error:", err);
@@ -118,25 +119,48 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-neutral-700 mb-2">
-              Full Name *
+            <label htmlFor="firstName" className="block text-sm font-medium text-neutral-700 mb-2">
+              First Name *
             </label>
             <input
               type="text"
-              id="name"
-              name="name"
+              id="firstName"
+              name="firstName"
               required
-              value={formData.name}
+              value={formData.firstName}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
             />
-            {errors.name && (
+            {errors.firstName && (
               <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
                 <AlertTriangle className="w-3 h-3" />
-                {errors.name}
+                {errors.firstName}
               </p>
             )}
           </div>
+          <div>
+            <label htmlFor="lastName" className="block text-sm font-medium text-neutral-700 mb-2">
+              Last Name *
+            </label>
+            <input
+              type="text"
+              id="lastName"
+              name="lastName"
+              required
+              value={formData.lastName}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+            />
+            {errors.lastName && (
+              <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" />
+                {errors.lastName}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
               Email Address *
@@ -157,9 +181,6 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
               </p>
             )}
           </div>
-        </div>
-
-        <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="company" className="block text-sm font-medium text-neutral-700 mb-2">
               Company Name
@@ -173,24 +194,25 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
             />
           </div>
-          <div>
-            <label htmlFor="industry" className="block text-sm font-medium text-neutral-700 mb-2">
-              Industry
-            </label>
-            <select
-              id="industry"
-              name="industry"
-              value={formData.industry}
-              onChange={handleInputChange}
-              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-            >
-              <option value="">Select Industry</option>
-              <option value="medical">Medical/Healthcare</option>
-              <option value="manufacturing">Manufacturing</option>
-              <option value="aba">ABA Therapy</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
+        </div>
+
+        <div>
+          <label htmlFor="industry" className="block text-sm font-medium text-neutral-700 mb-2">
+            Industry
+          </label>
+          <select
+            id="industry"
+            name="industry"
+            value={formData.industry}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+          >
+            <option value="">Select Industry</option>
+            <option value="medical">Medical/Healthcare</option>
+            <option value="manufacturing">Manufacturing</option>
+            <option value="aba">ABA Therapy</option>
+            <option value="other">Other</option>
+          </select>
         </div>
 
         <div>
