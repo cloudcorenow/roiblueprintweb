@@ -31,7 +31,8 @@ const EmailCapture: React.FC<EmailCaptureProps> = ({ onSuccess, onBack }) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             email,
-            name: email.split("@")[0],
+            firstName: email.split("@")[0],
+            lastName: "",
             message: "Prequalification assessment request",
             formType: "guide",
           }),
