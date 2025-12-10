@@ -5,7 +5,8 @@ export interface PrequalificationQuestion {
 }
 
 export interface ContactFormData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   company: string;
   industry: string;
