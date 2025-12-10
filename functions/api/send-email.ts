@@ -5,7 +5,8 @@ interface Env {
 }
 
 interface ContactFormData {
-  name: string;
+  firstName: string;
+  lastName: string;
   email: string;
   phone?: string;
   company?: string;
@@ -186,10 +187,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     switch (data.formType) {
       case 'contact':
-        subject = `New Contact Form Submission from ${data.name}`;
+        subject = `New Contact Form Submission from ${data.firstName} ${data.lastName}`;
         htmlContent = `
           <h2>New Contact Form Submission</h2>
-          <p><strong>Name:</strong> ${data.name}</p>
+          <p><strong>Name:</strong> ${data.firstName} ${data.lastName}</p>
           <p><strong>Email:</strong> ${data.email}</p>
           ${data.phone ? `<p><strong>Phone:</strong> ${data.phone}</p>` : ''}
           ${data.company ? `<p><strong>Practice Name:</strong> ${data.company}</p>` : ''}
@@ -200,10 +201,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         break;
 
       case 'guide':
-        subject = `R&D Tax Credit Guide Request from ${data.name}`;
+        subject = `R&D Tax Credit Guide Request from ${data.firstName} ${data.lastName}`;
         htmlContent = `
           <h2>R&D Tax Credit Guide Request</h2>
-          <p><strong>Name:</strong> ${data.name}</p>
+          <p><strong>Name:</strong> ${data.firstName} ${data.lastName}</p>
           <p><strong>Email:</strong> ${data.email}</p>
           <p>Please send the R&D Tax Credit Guide to this email address.</p>
         `;
