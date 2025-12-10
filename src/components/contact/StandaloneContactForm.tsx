@@ -6,7 +6,8 @@ import { validateContactForm } from "../../utils/contactValidation";
 
 const StandaloneContactForm: React.FC = () => {
   const [formData, setFormData] = React.useState<ContactFormData>({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     company: "",
     industry: "",
@@ -62,7 +63,7 @@ const StandaloneContactForm: React.FC = () => {
       }
 
       setSuccess(true);
-      setFormData({ name: "", email: "", company: "", industry: "", message: "" });
+      setFormData({ firstName: "", lastName: "", email: "", company: "", industry: "", message: "" });
       setTurnstileToken("");
     } catch (err) {
       console.error("Form submission error:", err);
@@ -100,21 +101,39 @@ const StandaloneContactForm: React.FC = () => {
 
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="standalone-name" className="block text-sm font-medium text-neutral-700 mb-2">
-              Full Name *
+            <label htmlFor="standalone-firstName" className="block text-sm font-medium text-neutral-700 mb-2">
+              First Name *
             </label>
             <input
               type="text"
-              id="standalone-name"
-              name="name"
+              id="standalone-firstName"
+              name="firstName"
               required
-              value={formData.name}
+              value={formData.firstName}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
             />
-            {errors.name && <p className="text-xs text-error-600 mt-1">{errors.name}</p>}
+            {errors.firstName && <p className="text-xs text-error-600 mt-1">{errors.firstName}</p>}
           </div>
 
+          <div>
+            <label htmlFor="standalone-lastName" className="block text-sm font-medium text-neutral-700 mb-2">
+              Last Name *
+            </label>
+            <input
+              type="text"
+              id="standalone-lastName"
+              name="lastName"
+              required
+              value={formData.lastName}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+            />
+            {errors.lastName && <p className="text-xs text-error-600 mt-1">{errors.lastName}</p>}
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
           <div>
             <label htmlFor="standalone-email" className="block text-sm font-medium text-neutral-700 mb-2">
               Email Address *
@@ -130,22 +149,22 @@ const StandaloneContactForm: React.FC = () => {
             />
             {errors.email && <p className="text-xs text-error-600 mt-1">{errors.email}</p>}
           </div>
-        </div>
 
-        <div>
-          <label htmlFor="standalone-company" className="block text-sm font-medium text-neutral-700 mb-2">
-            Practice Name *
-          </label>
-          <input
-            type="text"
-            id="standalone-company"
-            name="company"
-            required
-            value={formData.company}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-          />
-          {errors.company && <p className="text-xs text-error-600 mt-1">{errors.company}</p>}
+          <div>
+            <label htmlFor="standalone-company" className="block text-sm font-medium text-neutral-700 mb-2">
+              Practice Name *
+            </label>
+            <input
+              type="text"
+              id="standalone-company"
+              name="company"
+              required
+              value={formData.company}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+            />
+            {errors.company && <p className="text-xs text-error-600 mt-1">{errors.company}</p>}
+          </div>
         </div>
 
         <div>
