@@ -1,8 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import { Calendar, Clock, User, ArrowLeft, Tag, Share2 } from "lucide-react";
-import { BlogPost } from '../types/blog';
-import { blogService } from '../utils/blogService';
+import { BlogPost } from "../types/blog";
+import { blogService } from "../utils/blogService";
+import SEO from "../components/SEO";
+
+const BASE_URL = "https://www.roiblueprint.com";
+
+function safeAbsUrl(urlOrPath?: string) {
+  if (!urlOrPath) return undefined;
+  try {
+    return new URL(urlOrPath, BASE_URL).toString();
+  } catch {
+    return undefined;
+  }
+}
 
 export default function ArticlePage() {
   const { id } = useParams<{ id: string }>();
@@ -30,11 +42,12 @@ export default function ArticlePage() {
 
         const allPosts = await blogService.getPublishedPosts();
         const related = allPosts
-          .filter(p => p.id !== post.id && p.category === post.category)
+          .filter((p) => p.id !== post.id && p.category === post.category)
           .slice(0, 3);
+
         setRelatedArticles(related);
       } catch (error) {
-        console.error('Error loading article:', error);
+        console.error("Error loading article:", error);
         setNotFound(true);
       } finally {
         setLoading(false);
@@ -47,6 +60,75 @@ export default function ArticlePage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [id]);
+
+  const canonicalPath = useMemo(() => (id ? `/resources/${id}` : "/resources"), [id]);
+
+  const publishedDate = useMemo(() => {
+    if (!article) return undefined;
+    const d = article.published_at || article.created_at;
+    if (!d) return undefined;
+    try {
+      return new Date(d).toISOString();
+    } catch {
+      return undefined;
+    }
+  }, [article]);
+
+  const articleUrl = useMemo(() => safeAbsUrl(canonicalPath), [canonicalPath]);
+
+  const blogPostingSchema = useMemo(() => {
+    if (!article || !articleUrl) return null;
+
+    const imageUrl = safeAbsUrl(article.image) || article.image;
+
+    return {
+      "@context": "https://schema.org",
+      "@type": "BlogPosting",
+      headline: article.title,
+      description: article.excerpt,
+      image: imageUrl ? [imageUrl] : undefined,
+      author: {
+        "@type": "Person",
+        name: article.author
+      },
+      datePublished: publishedDate,
+      dateModified: publishedDate,
+      mainEntityOfPage: {
+        "@type": "WebPage",
+        "@id": articleUrl
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "ROI Blueprint",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://www.roiblueprint.com/roi_blueprint_v2h_w1200.png"
+        }
+      }
+    };
+  }, [article, articleUrl, publishedDate]);
+
+  // Inject BlogPosting JSON-LD for each article; remove on unmount
+  useEffect(() => {
+    if (!blogPostingSchema || !id) return;
+
+    const scriptId = `structured-data-blogposting-${id}`;
+    let script = document.getElementById(scriptId) as HTMLScriptElement | null;
+
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.type = "application/ld+json";
+      document.head.appendChild(script);
+    }
+
+    script.textContent = JSON.stringify(blogPostingSchema);
+
+    return () => {
+      const el = document.getElementById(scriptId);
+      if (el) el.remove();
+    };
+  }, [blogPostingSchema, id]);
 
   if (loading) {
     return (
@@ -64,11 +146,13 @@ export default function ArticlePage() {
 
   const handleShare = () => {
     if (navigator.share) {
-      navigator.share({
-        title: article.title,
-        text: article.excerpt,
-        url: window.location.href,
-      }).catch(() => {});
+      navigator
+        .share({
+          title: article.title,
+          text: article.excerpt,
+          url: window.location.href
+        })
+        .catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert("Link copied to clipboard!");
@@ -77,6 +161,15 @@ export default function ArticlePage() {
 
   return (
     <div>
+      <SEO
+        title={article.title}
+        description={article.excerpt}
+        keywords={`ROI Blueprint, ${article.category}, healthcare R&D tax credits, IRS Section 41, ${article.title}`}
+        canonicalUrl={canonicalPath}
+        ogType="article"
+        ogImage={article.image} // supports absolute URLs in updated SEO.tsx
+      />
+
       <section style={{ paddingTop: "5rem", paddingBottom: "2rem", backgroundColor: "#f8fafc" }}>
         <div className="container">
           <div className="max-w-4xl mx-auto">
@@ -95,14 +188,16 @@ export default function ArticlePage() {
               </span>
             </div>
 
-            <h1 style={{
-              fontSize: "2.5rem",
-              lineHeight: "1.2",
-              fontWeight: "700",
-              color: "#212529",
-              marginBottom: "1.5rem",
-              fontFamily: "'Josefin Sans', sans-serif"
-            }}>
+            <h1
+              style={{
+                fontSize: "2.5rem",
+                lineHeight: "1.2",
+                fontWeight: "700",
+                color: "#212529",
+                marginBottom: "1.5rem",
+                fontFamily: "'Josefin Sans', sans-serif"
+              }}
+            >
               {article.title}
             </h1>
 
@@ -110,22 +205,25 @@ export default function ArticlePage() {
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
                 <span className="font-medium">{article.author}</span>
-                {article.author_title && (
-                  <span className="text-neutral-500">• {article.author_title}</span>
-                )}
+                {article.author_title && <span className="text-neutral-500">• {article.author_title}</span>}
               </div>
+
               <div className="flex items-center gap-2">
                 <Calendar className="w-4 h-4" />
-                <span>{new Date(article.published_at || article.created_at).toLocaleDateString('en-US', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}</span>
+                <span>
+                  {new Date(article.published_at || article.created_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric"
+                  })}
+                </span>
               </div>
+
               <div className="flex items-center gap-2">
                 <Clock className="w-4 h-4" />
                 <span>{article.read_time}</span>
               </div>
+
               <button
                 onClick={handleShare}
                 className="flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors ml-auto"
@@ -142,15 +240,13 @@ export default function ArticlePage() {
         <div className="container">
           <div className="max-w-4xl mx-auto">
             <div className="relative overflow-hidden rounded-2xl mb-8 shadow-lg">
-              <img
-                src={article.image}
-                alt={article.title}
-                className="w-full h-[400px] object-cover"
-              />
+              <img src={article.image} alt={article.title} className="w-full h-[400px] object-cover" />
             </div>
 
             <article className="article-content">
-              <style dangerouslySetInnerHTML={{ __html: `
+              <style
+                dangerouslySetInnerHTML={{
+                  __html: `
                 .article-content {
                   font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
                   font-size: 1.0625rem;
@@ -256,54 +352,21 @@ export default function ArticlePage() {
                   border-radius: 0.5rem;
                 }
 
-                .article-content blockquote p {
-                  margin-bottom: 0;
-                }
-
-                .article-content > *:first-child {
-                  margin-top: 0;
-                }
+                .article-content blockquote p { margin-bottom: 0; }
+                .article-content > *:first-child { margin-top: 0; }
 
                 @media (max-width: 768px) {
-                  .article-content {
-                    font-size: 1rem;
-                    line-height: 1.7;
-                  }
-
-                  .article-content h2 {
-                    font-size: 1.5rem;
-                    margin-top: 2rem;
-                    margin-bottom: 0.875rem;
-                  }
-
-                  .article-content h3 {
-                    font-size: 1.25rem;
-                    margin-top: 1.75rem;
-                    margin-bottom: 0.75rem;
-                  }
-
-                  .article-content h4 {
-                    font-size: 1.0625rem;
-                    margin-top: 1.5rem;
-                    margin-bottom: 0.5rem;
-                  }
-
-                  .article-content p {
-                    font-size: 1rem;
-                    margin-bottom: 1rem;
-                  }
-
-                  .article-content li {
-                    font-size: 0.9375rem;
-                    margin-bottom: 0.375rem;
-                  }
-
-                  .article-content ul, .article-content ol {
-                    padding-left: 1.5rem;
-                    margin: 1rem 0;
-                  }
+                  .article-content { font-size: 1rem; line-height: 1.7; }
+                  .article-content h2 { font-size: 1.5rem; margin-top: 2rem; margin-bottom: 0.875rem; }
+                  .article-content h3 { font-size: 1.25rem; margin-top: 1.75rem; margin-bottom: 0.75rem; }
+                  .article-content h4 { font-size: 1.0625rem; margin-top: 1.5rem; margin-bottom: 0.5rem; }
+                  .article-content p { font-size: 1rem; margin-bottom: 1rem; }
+                  .article-content li { font-size: 0.9375rem; margin-bottom: 0.375rem; }
+                  .article-content ul, .article-content ol { padding-left: 1.5rem; margin: 1rem 0; }
                 }
-              `}} />
+              `
+                }}
+              />
               <div dangerouslySetInnerHTML={{ __html: article.content }} />
             </article>
 
@@ -311,19 +374,14 @@ export default function ArticlePage() {
               <div className="flex items-center justify-between flex-wrap gap-4">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center text-white font-bold text-base">
-                    {article.author.split(' ').map(n => n[0]).join('')}
+                    {article.author.split(" ").map((n) => n[0]).join("")}
                   </div>
                   <div>
                     <div className="font-semibold text-base text-neutral-900">{article.author}</div>
-                    {article.author_title && (
-                      <div className="text-sm text-neutral-600">{article.author_title}</div>
-                    )}
+                    {article.author_title && <div className="text-sm text-neutral-600">{article.author_title}</div>}
                   </div>
                 </div>
-                <button
-                  onClick={handleShare}
-                  className="btn btn-outline text-sm"
-                >
+                <button onClick={handleShare} className="btn btn-outline text-sm">
                   <Share2 className="w-4 h-4 mr-2" />
                   Share Article
                 </button>
@@ -368,9 +426,7 @@ export default function ArticlePage() {
                     <h4 className="text-lg font-semibold mb-2 group-hover:text-primary-600 transition-colors line-clamp-2">
                       {related.title}
                     </h4>
-                    <p className="text-neutral-600 text-sm line-clamp-2">
-                      {related.excerpt}
-                    </p>
+                    <p className="text-neutral-600 text-sm line-clamp-2">{related.excerpt}</p>
                   </Link>
                 ))}
               </div>
