@@ -19,7 +19,10 @@ import {
   Shield,
   Target,
 } from "lucide-react";
+
 import SEO from "../components/SEO";
+import StructuredData from "../components/StructuredData";
+
 import { prequalificationQuestions } from "../constants/prequalificationQuestions";
 import PrequalificationWizard from "../components/contact/PrequalificationWizard";
 import EmailCapture from "../components/contact/EmailCapture";
@@ -43,28 +46,52 @@ export default function ContactPage() {
       setTimeout(() => {
         calendarRef.current?.scrollIntoView({
           behavior: "smooth",
-          block: "start"
+          block: "start",
         });
       }, 300);
     }
   }, [currentStep]);
 
+  // SEO fields (keep in one place so both SEO + schema stay consistent)
+  const seoTitle = "Contact Us - Prequalify for R&D Tax Credits in 3 Minutes";
+  const seoDescription =
+    "Get prequalified for healthcare R&D tax credits in under 3 minutes. Free consultation with ROI Blueprint experts. Serving medical and ABA practices nationwide. Call (855) 764-2583.";
+  const seoKeywords =
+    "R&D tax credit prequalification, healthcare practice consultation, free R&D assessment, medical practice tax credits, ABA practice tax credits, IRS Section 41, R&D documentation, healthcare R&D consulting, contact ROI Blueprint";
+  const canonicalPath = "/contact";
+
   return (
     <div>
+      {/* Meta SEO */}
       <SEO
-        title="Contact Us - Prequalify for R&D Tax Credits in 3 Minutes"
-        description="Get prequalified for healthcare R&D tax credits in under 3 minutes. Free consultation with ROI Blueprint experts. Serving medical and ABA practices nationwide. Call (855) 764-2583."
-        keywords="R&D tax credit prequalification, healthcare practice consultation, free R&D assessment, medical practice tax credits, contact ROI Blueprint"
-        canonicalUrl="/contact"
+        title={seoTitle}
+        description={seoDescription}
+        keywords={seoKeywords}
+        canonicalUrl={canonicalPath}
+        ogType="website"
+        // Optional: set a dedicated OG image for this page if you have one.
+        // ogImage="/og/contact.png"
       />
+
+      {/* Page-level JSON-LD schema (WebPage only) */}
+      <StructuredData
+        type="webpage"
+        pageTitle={seoTitle}
+        pageDescription={seoDescription}
+        pageUrl={canonicalPath}
+      />
+
       {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 lg:py-32" style={{
-        paddingTop: "8rem",
-        background: `
-          linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.85) 100%),
-          url('https://www.pixelstalk.net/wp-content/uploads/2016/10/Blueprint-Wallpaper-for-Desktop.jpg') center/cover no-repeat
-        `
-      }}>
+      <section
+        className="relative overflow-hidden py-20 lg:py-32"
+        style={{
+          paddingTop: "8rem",
+          background: `
+            linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.85) 100%),
+            url('https://www.pixelstalk.net/wp-content/uploads/2016/10/Blueprint-Wallpaper-for-Desktop.jpg') center/cover no-repeat
+          `,
+        }}
+      >
         <div className="container relative z-10">
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             {/* Left Side - Text Content */}
@@ -80,13 +107,13 @@ export default function ContactPage() {
               </h1>
 
               <p className="text-xl lg:text-2xl text-neutral-300 mb-6 leading-relaxed">
-                Join 120+ healthcare practices already saving $30K-50K annually through our
-                proven ROI Blueprint™ methodology. Your transformation starts with one conversation.
+                Join 120+ healthcare practices already saving $30K-50K annually through our proven ROI Blueprint™
+                methodology. Your transformation starts with one conversation.
               </p>
 
               <p className="text-lg text-neutral-400 mb-12 leading-relaxed">
-                Have questions or want to see if your practice qualifies for R&D documentation and potential
-                credits? Complete a quick prequalification survey to get started.
+                Have questions or want to see if your practice qualifies for R&D documentation and potential credits?
+                Complete a quick prequalification survey to get started.
               </p>
 
               {/* Trust indicators */}
@@ -153,10 +180,7 @@ export default function ContactPage() {
                 )}
 
                 {currentStep === "email" && (
-                  <EmailCapture
-                    onSuccess={() => setCurrentStep("prequalification")}
-                    onBack={resetFlow}
-                  />
+                  <EmailCapture onSuccess={() => setCurrentStep("prequalification")} onBack={resetFlow} />
                 )}
 
                 {currentStep === "prequalification" && (
@@ -192,13 +216,8 @@ export default function ContactPage() {
                         </div>
                       </div>
                     </div>
-                    <p className="text-neutral-600 mb-6">
-                      Use the calendar below to schedule your consultation ↓
-                    </p>
-                    <button
-                      onClick={resetFlow}
-                      className="text-success-600 hover:text-success-700 underline font-semibold"
-                    >
+                    <p className="text-neutral-600 mb-6">Use the calendar below to schedule your consultation ↓</p>
+                    <button onClick={resetFlow} className="text-success-600 hover:text-success-700 underline font-semibold">
                       Start Over
                     </button>
                   </div>
@@ -209,9 +228,7 @@ export default function ContactPage() {
                     <div className="w-24 h-24 bg-gradient-to-br from-warning-500 to-warning-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl">
                       <AlertTriangle className="w-12 h-12 text-white" />
                     </div>
-                    <h3 className="text-2xl font-bold text-warning-800 mb-4">
-                      Thank You for Your Interest
-                    </h3>
+                    <h3 className="text-2xl font-bold text-warning-800 mb-4">Thank You for Your Interest</h3>
                     <div className="bg-warning-50 rounded-2xl p-6 mb-6">
                       <p className="text-warning-800">{disqualificationMessage}</p>
                     </div>
@@ -264,52 +281,53 @@ export default function ContactPage() {
       )}
 
       {/* Calendar Section */}
-      {(currentStep === "initial" || currentStep === "prequalification" || currentStep === "qualified" || currentStep === "disqualified") && (
+      {(currentStep === "initial" ||
+        currentStep === "prequalification" ||
+        currentStep === "qualified" ||
+        currentStep === "disqualified") && (
         <section ref={calendarRef} className="py-16 bg-neutral-50">
           <div className="container">
             <div className="max-w-7xl mx-auto">
-              {/* Calendar Section */}
-            <div className="bg-white rounded-3xl p-8 shadow-xl border border-neutral-200">
-              <div className="text-center mb-8">
-                <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-                  <Calendar className="w-10 h-10 text-white" />
-                </div>
-                <h3 className="text-3xl font-bold text-neutral-900 mb-4">
-                  {currentStep === "qualified" ? "Schedule Your ROI Consultation" : "Ready to Schedule?"}
-                </h3>
-                <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
-                  {currentStep === "qualified" 
-                    ? "Book your personalized consultation to discuss your $30K-50K savings opportunity"
-                    : "Complete the quick assessment above to unlock calendar scheduling"
-                  }
-                </p>
-              </div>
-              
-              {currentStep === "qualified" ? (
-                <CalComEmbed />
-              ) : (
-                <div className="text-center py-12">
-                  <div className="w-32 h-32 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-8">
-                    <Calendar className="w-16 h-16 text-neutral-400" />
+              <div className="bg-white rounded-3xl p-8 shadow-xl border border-neutral-200">
+                <div className="text-center mb-8">
+                  <div className="w-20 h-20 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                    <Calendar className="w-10 h-10 text-white" />
                   </div>
-                  <div className="bg-primary-50 rounded-2xl p-8 max-w-md mx-auto">
-                    <div className="flex items-center justify-center gap-3 mb-4">
-                      <Clock className="w-6 h-6 text-primary-600" />
-                      <span className="font-bold text-primary-800 text-lg">Quick Assessment Required</span>
+                  <h3 className="text-3xl font-bold text-neutral-900 mb-4">
+                    {currentStep === "qualified" ? "Schedule Your ROI Consultation" : "Ready to Schedule?"}
+                  </h3>
+                  <p className="text-xl text-neutral-600 max-w-2xl mx-auto">
+                    {currentStep === "qualified"
+                      ? "Book your personalized consultation to discuss your $30K-50K savings opportunity"
+                      : "Complete the quick assessment above to unlock calendar scheduling"}
+                  </p>
+                </div>
+
+                {currentStep === "qualified" ? (
+                  <CalComEmbed />
+                ) : (
+                  <div className="text-center py-12">
+                    <div className="w-32 h-32 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-8">
+                      <Calendar className="w-16 h-16 text-neutral-400" />
                     </div>
-                    <p className="text-primary-700 mb-6">
-                      Complete the 3-minute assessment above to unlock calendar scheduling and see your potential savings.
-                    </p>
-                    <button
-                      onClick={startPrequalification}
-                      className="bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300"
-                    >
-                      Start Assessment
-                    </button>
+                    <div className="bg-primary-50 rounded-2xl p-8 max-w-md mx-auto">
+                      <div className="flex items-center justify-center gap-3 mb-4">
+                        <Clock className="w-6 h-6 text-primary-600" />
+                        <span className="font-bold text-primary-800 text-lg">Quick Assessment Required</span>
+                      </div>
+                      <p className="text-primary-700 mb-6">
+                        Complete the 3-minute assessment above to unlock calendar scheduling and see your potential savings.
+                      </p>
+                      <button
+                        onClick={startPrequalification}
+                        className="bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300"
+                      >
+                        Start Assessment
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
             </div>
           </div>
         </section>
@@ -321,75 +339,83 @@ export default function ContactPage() {
           <div className="container">
             <div className="max-w-6xl mx-auto">
               <div className="grid lg:grid-cols-2 gap-12">
-
-              {/* Contact Form */}
-              <div className="bg-white rounded-3xl p-8">
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <MessageSquare className="w-8 h-8 text-white" />
+                {/* Contact Form */}
+                <div className="bg-white rounded-3xl p-8">
+                  <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                      <MessageSquare className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-neutral-900 mb-2">Send Us a Message</h3>
+                    <p className="text-neutral-600">We'll respond within 24 hours</p>
                   </div>
-                  <h3 className="text-2xl font-bold text-neutral-900 mb-2">Send Us a Message</h3>
-                  <p className="text-neutral-600">We'll respond within 24 hours</p>
+
+                  <StandaloneContactForm />
                 </div>
 
-                <StandaloneContactForm />
-              </div>
-
-              {/* Why Choose Us */}
-              <div className="bg-white rounded-3xl p-8">
-                <div className="text-center mb-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <Award className="w-8 h-8 text-white" />
+                {/* Why Choose Us */}
+                <div className="bg-white rounded-3xl p-8">
+                  <div className="text-center mb-8">
+                    <div className="w-16 h-16 bg-gradient-to-br from-primary-500 to-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                      <Award className="w-8 h-8 text-white" />
+                    </div>
+                    <h3 className="text-2xl font-bold text-neutral-900 mb-2">Why Choose ROI BLUEPRINT™</h3>
+                    <p className="text-neutral-600">Proven results for healthcare practices</p>
                   </div>
-                  <h3 className="text-2xl font-bold text-neutral-900 mb-2">Why Choose ROI BLUEPRINT™</h3>
-                  <p className="text-neutral-600">Proven results for healthcare practices</p>
+
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-primary-500 text-white rounded-lg flex items-center justify-center mt-1">
+                        <CheckCircle className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-neutral-900 mb-1">Healthcare-Only Focus</div>
+                        <p className="text-neutral-600 text-sm">
+                          Exclusively serving healthcare practices with specialized expertise
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-primary-500 text-white rounded-lg flex items-center justify-center mt-1">
+                        <TrendingUp className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-neutral-900 mb-1">Proven ROI Methodology</div>
+                        <p className="text-neutral-600 text-sm">
+                          $5M+ in R&D credits identified with 20-35% efficiency improvements
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-primary-500 text-white rounded-lg flex items-center justify-center mt-1">
+                        <Shield className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-neutral-900 mb-1">Complete Compliance</div>
+                        <p className="text-neutral-600 text-sm">
+                          IRS-compliant documentation with full audit protection
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-4">
+                      <div className="w-8 h-8 bg-primary-500 text-white rounded-lg flex items-center justify-center mt-1">
+                        <Users className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <div className="font-bold text-neutral-900 mb-1">Expert Team</div>
+                        <p className="text-neutral-600 text-sm">
+                          Licensed CPAs, EAs, and healthcare professionals
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-
-                <div className="space-y-4">
-                  <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 bg-primary-500 text-white rounded-lg flex items-center justify-center mt-1">
-                      <CheckCircle className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-neutral-900 mb-1">Healthcare-Only Focus</div>
-                      <p className="text-neutral-600 text-sm">Exclusively serving healthcare practices with specialized expertise</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 bg-primary-500 text-white rounded-lg flex items-center justify-center mt-1">
-                      <TrendingUp className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-neutral-900 mb-1">Proven ROI Methodology</div>
-                      <p className="text-neutral-600 text-sm">$5M+ in R&D credits identified with 20-35% efficiency improvements</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 bg-primary-500 text-white rounded-lg flex items-center justify-center mt-1">
-                      <Shield className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-neutral-900 mb-1">Complete Compliance</div>
-                      <p className="text-neutral-600 text-sm">IRS-compliant documentation with full audit protection</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4">
-                    <div className="w-8 h-8 bg-primary-500 text-white rounded-lg flex items-center justify-center mt-1">
-                      <Users className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <div className="font-bold text-neutral-900 mb-1">Expert Team</div>
-                      <p className="text-neutral-600 text-sm">Licensed CPAs, EAs, and healthcare professionals</p>
-                    </div>
-                  </div>
-                </div>
+                {/* /Why Choose Us */}
               </div>
             </div>
           </div>
-        </div>
         </section>
       )}
     </div>
