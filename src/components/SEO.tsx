@@ -4,10 +4,16 @@ interface SEOProps {
   title?: string;
   description?: string;
   keywords?: string;
-  ogImage?: string;
+
+  ogImage?: string;      // can be "/path.png" OR "https://..."
   ogType?: string;
+
   twitterCard?: string;
   canonicalUrl?: string;
+
+  // Optional: for admin/login pages, etc.
+  noIndex?: boolean;
+  noFollow?: boolean;
 }
 
 export default function SEO({
@@ -17,51 +23,71 @@ export default function SEO({
   ogImage = "/roi_blueprint_v2h_w1200.png",
   ogType = "website",
   twitterCard = "summary_large_image",
-  canonicalUrl
+  canonicalUrl,
+  noIndex = false,
+  noFollow = false
 }: SEOProps) {
-  const baseUrl = "https://roiblueprint.com";
+  // Use ONE canonical host everywhere to avoid duplicates
+  const baseUrl = "https://www.roiblueprint.com";
+
   const fullTitle = title.includes("ROI Blueprint") ? title : `${title} | ROI Blueprint`;
   const url = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
+
+  const resolveImageUrl = (img: string) => {
+    if (!img) return undefined;
+    if (/^https?:\/\//i.test(img)) return img;
+    return `${baseUrl}${img.startsWith("/") ? img : `/${img}`}`;
+  };
 
   useEffect(() => {
     document.title = fullTitle;
 
-    const updateMetaTag = (property: string, content: string, isProperty = false) => {
-      const attribute = isProperty ? "property" : "name";
-      let element = document.querySelector(`meta[${attribute}="${property}"]`);
-
-      if (!element) {
-        element = document.createElement("meta");
-        element.setAttribute(attribute, property);
-        document.head.appendChild(element);
+    const upsertMeta = (attr: "name" | "property", key: string, content: string) => {
+      let el = document.querySelector(`meta[${attr}="${key}"]`);
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute(attr, key);
+        document.head.appendChild(el);
       }
-
-      element.setAttribute("content", content);
+      el.setAttribute("content", content);
     };
 
-    updateMetaTag("description", description);
-    updateMetaTag("keywords", keywords);
+    // Basic
+    upsertMeta("name", "description", description);
+    upsertMeta("name", "keywords", keywords);
 
-    updateMetaTag("og:title", fullTitle, true);
-    updateMetaTag("og:description", description, true);
-    updateMetaTag("og:type", ogType, true);
-    updateMetaTag("og:url", url, true);
-    updateMetaTag("og:image", `${baseUrl}${ogImage}`, true);
-    updateMetaTag("og:site_name", "ROI Blueprint", true);
+    // Robots
+    const robots = [noIndex ? "noindex" : "index", noFollow ? "nofollow" : "follow"].join(", ");
+    upsertMeta("name", "robots", robots);
 
-    updateMetaTag("twitter:card", twitterCard, true);
-    updateMetaTag("twitter:title", fullTitle, true);
-    updateMetaTag("twitter:description", description, true);
-    updateMetaTag("twitter:image", `${baseUrl}${ogImage}`, true);
+    // Open Graph
+    upsertMeta("property", "og:title", fullTitle);
+    upsertMeta("property", "og:description", description);
+    upsertMeta("property", "og:type", ogType);
+    upsertMeta("property", "og:url", url);
 
-    let canonicalElement = document.querySelector('link[rel="canonical"]');
-    if (!canonicalElement) {
-      canonicalElement = document.createElement("link");
-      canonicalElement.setAttribute("rel", "canonical");
-      document.head.appendChild(canonicalElement);
+    const ogImg = resolveImageUrl(ogImage);
+    if (ogImg) upsertMeta("property", "og:image", ogImg);
+
+    upsertMeta("property", "og:site_name", "ROI Blueprint");
+
+    // Twitter (IMPORTANT: Twitter uses name="", not property="")
+    upsertMeta("name", "twitter:card", twitterCard);
+    upsertMeta("name", "twitter:title", fullTitle);
+    upsertMeta("name", "twitter:description", description);
+
+    const twImg = resolveImageUrl(ogImage);
+    if (twImg) upsertMeta("name", "twitter:image", twImg);
+
+    // Canonical
+    let canonicalEl = document.querySelector('link[rel="canonical"]');
+    if (!canonicalEl) {
+      canonicalEl = document.createElement("link");
+      canonicalEl.setAttribute("rel", "canonical");
+      document.head.appendChild(canonicalEl);
     }
-    canonicalElement.setAttribute("href", url);
-  }, [fullTitle, description, keywords, ogImage, ogType, twitterCard, url, baseUrl]);
+    canonicalEl.setAttribute("href", url);
+  }, [fullTitle, description, keywords, ogImage, ogType, twitterCard, url, noIndex, noFollow]);
 
   return null;
 }
