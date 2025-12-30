@@ -161,7 +161,6 @@ export default function HomePage() {
         keywords="R&D tax credits healthcare, medical practice R&D, ABA therapy tax credits, healthcare innovation, research and development tax incentives, IRS Section 41, healthcare practice optimization"
         canonicalUrl="/"
       />
-      <StructuredData type="organization" />
       {/* Hero Section */}
       <section className="hero" style={{
         paddingTop: "6rem",
