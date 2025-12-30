@@ -1,33 +1,56 @@
-import { useState, FormEvent } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
-import { Lock, Mail, AlertCircle } from 'lucide-react';
+// src/pages/LoginPage.tsx
+import React, { useState, FormEvent } from "react";
+import { useNavigate } from "react-router-dom";
+import { Lock, Mail, AlertCircle } from "lucide-react";
+import SEO from "../components/SEO";
+import StructuredData from "../components/StructuredData";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
   const { signIn } = useAuth();
   const navigate = useNavigate();
 
+  const pageTitle = "Admin Login | ROI Blueprint";
+  const pageDescription =
+    "Secure admin login for ROI Blueprint. Authorized access only.";
+
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     const { error } = await signIn(email, password);
 
     if (error) {
-      setError(error.message || 'Failed to sign in');
+      setError(error.message || "Failed to sign in");
       setLoading(false);
     } else {
-      navigate('/admin');
+      navigate("/admin");
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 flex items-center justify-center px-4 py-12">
+      <SEO
+        title={pageTitle}
+        description={pageDescription}
+        canonicalUrl="/login"
+        ogType="website"
+      />
+
+      {/* ✅ WebPage structured data (fine even for private pages; omit if you prefer) */}
+      <StructuredData
+        type="webpage"
+        pageTitle={pageTitle}
+        pageDescription={pageDescription}
+        pageUrl="/login"
+      />
+
       <div className="max-w-md w-full">
         <div className="bg-white rounded-2xl shadow-xl p-8">
           <div className="text-center mb-8">
@@ -35,7 +58,9 @@ export default function LoginPage() {
               <Lock className="w-8 h-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-slate-900">Admin Login</h1>
-            <p className="text-slate-600 mt-2">Sign in to access the admin panel</p>
+            <p className="text-slate-600 mt-2">
+              Sign in to access the admin panel
+            </p>
           </div>
 
           {error && (
@@ -47,7 +72,10 @@ export default function LoginPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Email
               </label>
               <div className="relative">
@@ -60,12 +88,16 @@ export default function LoginPage() {
                   required
                   className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all"
                   placeholder="admin@example.com"
+                  autoComplete="email"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-slate-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-slate-700 mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -78,6 +110,7 @@ export default function LoginPage() {
                   required
                   className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-slate-900 focus:border-transparent outline-none transition-all"
                   placeholder="Enter your password"
+                  autoComplete="current-password"
                 />
               </div>
             </div>
@@ -87,7 +120,7 @@ export default function LoginPage() {
               disabled={loading}
               className="w-full bg-slate-900 text-white py-3 rounded-xl font-medium hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
         </div>
