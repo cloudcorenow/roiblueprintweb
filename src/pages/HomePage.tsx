@@ -71,8 +71,8 @@ export default function HomePage() {
         }
       } else if (event.data && typeof event.data === "object") {
         // Some players send objects directly
-        // @ts-expect-error - runtime check is enough here
-        if (event.data?.event === "ended" || event.data?.ended === true) {
+        const data = event.data as Record<string, unknown>;
+        if (data["event"] === "ended" || data["ended"] === true) {
           setIsVideoModalOpen(false);
           setTimeout(() => navigate("/contact"), 300);
         }
@@ -382,7 +382,11 @@ export default function HomePage() {
           <FAQAccordion faqs={faqs.slice(0, 3)} />
 
           <div className="text-center mt-8">
-            <Link to="/faq" className="btn" style={{ backgroundColor: "white", color: "black", border: "2px solid #89c726" }}>
+            <Link
+              to="/faq"
+              className="btn"
+              style={{ backgroundColor: "white", color: "black", border: "2px solid #89c726" }}
+            >
               See More
             </Link>
           </div>
