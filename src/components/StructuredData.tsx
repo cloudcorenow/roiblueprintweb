@@ -5,7 +5,6 @@ interface StructuredDataProps {
   pageTitle?: string;
   pageDescription?: string;
   pageUrl?: string;
-  breadcrumbItems?: Array<{ name: string; url: string }>;
   faqItems?: Array<{ question: string; answer: string }>;
 }
 
@@ -27,7 +26,6 @@ export default function StructuredData({
   pageUrl,
   faqItems
 }: StructuredDataProps) {
-  // Optional: SERVICE schema (only on service pages)
   const serviceSchema = useMemo(
     () => ({
       "@context": "https://schema.org",
@@ -45,7 +43,6 @@ export default function StructuredData({
     []
   );
 
-  // Optional: FAQ schema (only when faqItems exist and the page contains visible Q&A)
   const faqSchema = useMemo(() => {
     if (!faqItems?.length) return null;
     return {
@@ -54,15 +51,11 @@ export default function StructuredData({
       mainEntity: faqItems.map((faq) => ({
         "@type": "Question",
         name: faq.question,
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: faq.answer
-        }
+        acceptedAnswer: { "@type": "Answer", text: faq.answer }
       }))
     };
   }, [faqItems]);
 
-  // Optional: WebPage schema
   const webpageSchema = useMemo(() => {
     const url = absUrl(pageUrl);
     if (!url) return null;
@@ -112,6 +105,12 @@ export default function StructuredData({
     }
 
     script.textContent = JSON.stringify(schema);
+
+    // ✅ Remove only this page-level schema on unmount
+    return () => {
+      const el = document.getElementById(scriptId);
+      if (el) el.remove();
+    };
   }, [schema, scriptId]);
 
   return null;
