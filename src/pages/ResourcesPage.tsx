@@ -1,13 +1,21 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Calendar, Clock, User, ArrowRight, Search, Tag, FileText, TrendingUp } from "lucide-react";
-import { BlogPost } from '../types/blog';
-import { blogService } from '../utils/blogService';
-import GuideAccessModal from '../components/GuideAccessModal';
-import SEO from '../components/SEO';
+import { Calendar, Clock, User, ArrowRight, Search, Tag, FileText } from "lucide-react";
+import { BlogPost } from "../types/blog";
+import { blogService } from "../utils/blogService";
+import GuideAccessModal from "../components/GuideAccessModal";
+import SEO from "../components/SEO";
+import StructuredData from "../components/StructuredData";
 
-
-const categories = ["All", "Tax Planning", "Small Business", "Bookkeeping", "Financial Planning", "Business Formation", "Tax Preparation"];
+const categories = [
+  "All",
+  "Tax Planning",
+  "Small Business",
+  "Bookkeeping",
+  "Financial Planning",
+  "Business Formation",
+  "Tax Preparation"
+];
 
 export default function ResourcesPage() {
   const navigate = useNavigate();
@@ -17,7 +25,7 @@ export default function ResourcesPage() {
   const [loading, setLoading] = useState(true);
   const [showGuideModal, setShowGuideModal] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [newsletterStatus, setNewsletterStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [newsletterStatus, setNewsletterStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [newsletterMessage, setNewsletterMessage] = useState("");
 
   useEffect(() => {
@@ -26,7 +34,7 @@ export default function ResourcesPage() {
         const data = await blogService.getPublishedPosts();
         setPosts(data);
       } catch (error) {
-        console.error('Error loading posts:', error);
+        console.error("Error loading posts:", error);
       } finally {
         setLoading(false);
       }
@@ -38,69 +46,80 @@ export default function ResourcesPage() {
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!newsletterEmail || !newsletterEmail.includes('@')) {
-      setNewsletterStatus('error');
-      setNewsletterMessage('Please enter a valid email address');
+    if (!newsletterEmail || !newsletterEmail.includes("@")) {
+      setNewsletterStatus("error");
+      setNewsletterMessage("Please enter a valid email address");
       return;
     }
 
-    setNewsletterStatus('submitting');
-    setNewsletterMessage('');
+    setNewsletterStatus("submitting");
+    setNewsletterMessage("");
 
     try {
-      const response = await fetch('/api/newsletter', {
-        method: 'POST',
+      const response = await fetch("/api/newsletter", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({
           email: newsletterEmail,
-          source: 'resources-newsletter'
-        }),
+          source: "resources-newsletter"
+        })
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        setNewsletterStatus('error');
-        setNewsletterMessage(data.error || 'Something went wrong. Please try again.');
+        setNewsletterStatus("error");
+        setNewsletterMessage(data.error || "Something went wrong. Please try again.");
         setTimeout(() => {
-          setNewsletterStatus('idle');
-          setNewsletterMessage('');
+          setNewsletterStatus("idle");
+          setNewsletterMessage("");
         }, 3000);
         return;
       }
 
-      setNewsletterStatus('success');
-      setNewsletterMessage('Thank you for subscribing! We\'ll keep you updated.');
-      setNewsletterEmail('');
+      setNewsletterStatus("success");
+      setNewsletterMessage("Thank you for subscribing! We'll keep you updated.");
+      setNewsletterEmail("");
 
       setTimeout(() => {
-        setNewsletterStatus('idle');
-        setNewsletterMessage('');
+        setNewsletterStatus("idle");
+        setNewsletterMessage("");
       }, 3000);
     } catch (error) {
-      console.error('Error submitting newsletter:', error);
-      setNewsletterStatus('error');
-      setNewsletterMessage('Something went wrong. Please try again.');
+      console.error("Error submitting newsletter:", error);
+      setNewsletterStatus("error");
+      setNewsletterMessage("Something went wrong. Please try again.");
       setTimeout(() => {
-        setNewsletterStatus('idle');
-        setNewsletterMessage('');
+        setNewsletterStatus("idle");
+        setNewsletterMessage("");
       }, 3000);
     }
   };
 
   const allPosts = posts;
 
-  const filteredPosts = allPosts.filter(post => {
+  const filteredPosts = allPosts.filter((post) => {
     const matchesCategory = selectedCategory === "All" || post.category === selectedCategory;
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch =
+      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      post.excerpt.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesSearch;
   });
 
-  const featuredPosts = filteredPosts.filter(post => post.featured);
-  const regularPosts = filteredPosts.filter(post => !post.featured);
+  const featuredPosts = filteredPosts.filter((post) => post.featured);
+  const regularPosts = filteredPosts.filter((post) => !post.featured);
+
+  // ✅ Schema items for CollectionPage / ItemList (Option B)
+  const schemaItems = filteredPosts.map((post) => ({
+    name: post.title,
+    url: `/resources/${post.id}`,
+    image: post.image,
+    description: post.excerpt,
+    datePublished: post.published_at || post.created_at,
+    authorName: post.author
+  }));
 
   return (
     <div>
@@ -110,25 +129,41 @@ export default function ResourcesPage() {
         keywords="R&D tax credit guide, healthcare practice resources, medical practice optimization, tax credit resources, free R&D consultation"
         canonicalUrl="/resources"
       />
+
+      {/* ✅ CollectionPage schema for /resources */}
+      <StructuredData
+        type="collection"
+        pageTitle="Resources & Expert Insights"
+        pageDescription="Free R&D tax credit guides, healthcare practice optimization resources, and expert insights."
+        pageUrl="/resources"
+        blogItems={schemaItems}
+      />
+
       {/* Hero Section */}
-      <section className="hero" style={{
-        minHeight: "60vh",
-        paddingTop: "8rem",
-        background: `
-          linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.85) 100%),
-          url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat
-        `
-      }}>
+      <section
+        className="hero"
+        style={{
+          minHeight: "60vh",
+          paddingTop: "8rem",
+          background: `
+            linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 50%, rgba(51, 65, 85, 0.85) 100%),
+            url('https://images.unsplash.com/photo-1553877522-43269d4ea984?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80') center/cover no-repeat
+          `
+        }}
+      >
         <div className="container">
           <div className="hero-content">
             <h1>Resources & Expert Insights</h1>
             <p>
-              Comprehensive guides, expert insights, and industry knowledge to help you
-              maximize your business opportunities through strategic tax planning and
-              operational optimization.
+              Comprehensive guides, expert insights, and industry knowledge to help you maximize your business
+              opportunities through strategic tax planning and operational optimization.
             </p>
             <div className="text-center mt-8">
-              <a href="#newsletter" className="btn shadow-strong" style={{ backgroundColor: 'transparent', color: 'white', border: '2px solid #89c726' }}>
+              <a
+                href="#newsletter"
+                className="btn shadow-strong"
+                style={{ backgroundColor: "transparent", color: "white", border: "2px solid #89c726" }}
+              >
                 Subscribe for Updates and Tools
                 <ArrowRight className="w-5 h-5 ml-2" />
               </a>
@@ -146,8 +181,8 @@ export default function ResourcesPage() {
               <h2>Featured Resources</h2>
             </div>
             <p>
-              Our most comprehensive guides and insights to help you understand
-              and leverage tax incentives and business optimization strategies.
+              Our most comprehensive guides and insights to help you understand and leverage tax incentives and
+              business optimization strategies.
             </p>
           </div>
 
@@ -158,17 +193,13 @@ export default function ResourcesPage() {
                   <FileText className="w-12 h-12" />
                 </div>
                 <div className="flex-1 text-center md:text-left">
-                  <h3 className="mb-3 group-hover:text-primary-600 transition-colors">
-                    R&D Tax Credit Complete Guide
-                  </h3>
+                  <h3 className="mb-3 group-hover:text-primary-600 transition-colors">R&amp;D Tax Credit Complete Guide</h3>
                   <p className="text-neutral-600 mb-6">
-                    Everything you need to know about qualifying for and maximizing your
-                    Research & Development tax credits. This comprehensive resource covers qualification criteria, documentation requirements, and optimization strategies.
+                    Everything you need to know about qualifying for and maximizing your Research &amp; Development tax
+                    credits. This comprehensive resource covers qualification criteria, documentation requirements, and
+                    optimization strategies.
                   </p>
-                  <button
-                    onClick={() => setShowGuideModal(true)}
-                    className="btn btn-primary shadow-strong"
-                  >
+                  <button onClick={() => setShowGuideModal(true)} className="btn btn-primary shadow-strong">
                     Read Complete Guide
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </button>
@@ -183,10 +214,10 @@ export default function ResourcesPage() {
       <section className="section" style={{ backgroundColor: "#f8fafc", paddingTop: "3rem", paddingBottom: "2rem" }}>
         <div className="container">
           <div className="text-center mb-8">
-            <h2>Expert Articles & Insights</h2>
+            <h2>Expert Articles &amp; Insights</h2>
             <p>Stay informed with the latest strategies and industry insights from our experts.</p>
           </div>
-          
+
           <div className="flex flex-col lg:flex-row gap-6 items-center justify-between mb-8">
             {/* Search Bar */}
             <div className="relative flex-1 max-w-md">
@@ -228,7 +259,7 @@ export default function ResourcesPage() {
               <div className="w-1 h-8 bg-primary-500 rounded-full"></div>
               <h3>Featured Articles</h3>
             </div>
-            
+
             <div className="grid md:grid-cols-2 gap-8">
               {featuredPosts.map((post) => (
                 <Link
@@ -257,7 +288,9 @@ export default function ResourcesPage() {
                     </div>
                     <div className="flex items-center gap-1">
                       <Calendar className="w-4 h-4" />
-                      {post.published_at ? new Date(post.published_at).toLocaleDateString() : new Date(post.created_at).toLocaleDateString()}
+                      {post.published_at
+                        ? new Date(post.published_at).toLocaleDateString()
+                        : new Date(post.created_at).toLocaleDateString()}
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
@@ -265,9 +298,7 @@ export default function ResourcesPage() {
                     </div>
                   </div>
 
-                  <h4 className="mb-3 group-hover:text-primary-600 transition-colors">
-                    {post.title}
-                  </h4>
+                  <h4 className="mb-3 group-hover:text-primary-600 transition-colors">{post.title}</h4>
                   <p className="text-neutral-600 mb-4">{post.excerpt}</p>
 
                   <div className="flex items-center text-primary-600 font-medium group-hover:gap-2 transition-all">
@@ -290,7 +321,7 @@ export default function ResourcesPage() {
                 <div className="w-1 h-8 bg-secondary-500 rounded-full"></div>
                 <h3>Latest Articles</h3>
               </div>
-              
+
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {regularPosts.map((post) => (
                   <Link
@@ -305,23 +336,23 @@ export default function ResourcesPage() {
                         className="w-full h-40 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                       <div className="absolute top-3 left-3">
-                        <span className="modern-badge modern-badge-secondary text-xs">
-                          {post.category}
-                        </span>
+                        <span className="modern-badge modern-badge-secondary text-xs">{post.category}</span>
                       </div>
                     </div>
 
                     <div className="flex items-center gap-3 text-xs text-neutral-500 mb-3">
                       <span>{post.author}</span>
                       <span>•</span>
-                      <span>{post.published_at ? new Date(post.published_at).toLocaleDateString() : new Date(post.created_at).toLocaleDateString()}</span>
+                      <span>
+                        {post.published_at
+                          ? new Date(post.published_at).toLocaleDateString()
+                          : new Date(post.created_at).toLocaleDateString()}
+                      </span>
                       <span>•</span>
                       <span>{post.read_time}</span>
                     </div>
 
-                    <h5 className="mb-2 group-hover:text-primary-600 transition-colors">
-                      {post.title}
-                    </h5>
+                    <h5 className="mb-2 group-hover:text-primary-600 transition-colors">{post.title}</h5>
                     <p className="text-neutral-600 text-sm mb-4 line-clamp-3">{post.excerpt}</p>
 
                     <ArrowRight className="w-4 h-4 text-primary-600 group-hover:translate-x-1 transition-transform" />
@@ -337,9 +368,7 @@ export default function ResourcesPage() {
                 <Search className="w-8 h-8 text-neutral-400" />
               </div>
               <h3 className="text-xl font-semibold text-neutral-700 mb-2">No articles found</h3>
-              <p className="text-neutral-500 mb-4">
-                Try adjusting your search terms or category filter.
-              </p>
+              <p className="text-neutral-500 mb-4">Try adjusting your search terms or category filter.</p>
               <button
                 onClick={() => {
                   setSearchTerm("");
@@ -375,7 +404,7 @@ export default function ResourcesPage() {
               justifyContent: "center",
               maxWidth: "600px",
               margin: "0 auto",
-              flexWrap: "wrap",
+              flexWrap: "wrap"
             }}
           >
             <input
@@ -383,7 +412,7 @@ export default function ResourcesPage() {
               placeholder="Enter your email address"
               value={newsletterEmail}
               onChange={(e) => setNewsletterEmail(e.target.value)}
-              disabled={newsletterStatus === 'submitting'}
+              disabled={newsletterStatus === "submitting"}
               style={{
                 flex: 1,
                 padding: "1rem 1.5rem",
@@ -392,21 +421,21 @@ export default function ResourcesPage() {
                 minWidth: "250px",
                 backgroundColor: "white",
                 color: "var(--neutral-700)",
-                fontSize: "1rem",
+                fontSize: "1rem"
               }}
             />
             <button
               type="submit"
-              disabled={newsletterStatus === 'submitting'}
+              disabled={newsletterStatus === "submitting"}
               className="btn"
               style={{
                 backgroundColor: "#60a5fa",
                 color: "white",
                 border: "none",
-                opacity: newsletterStatus === 'submitting' ? 0.7 : 1,
+                opacity: newsletterStatus === "submitting" ? 0.7 : 1
               }}
             >
-              {newsletterStatus === 'submitting' ? 'Subscribing...' : 'Subscribe'}
+              {newsletterStatus === "submitting" ? "Subscribing..." : "Subscribe"}
               <ArrowRight className="w-4 h-4 ml-2" />
             </button>
           </form>
@@ -416,8 +445,8 @@ export default function ResourcesPage() {
                 marginTop: "1.5rem",
                 padding: "1rem",
                 borderRadius: "8px",
-                backgroundColor: newsletterStatus === 'success' ? '#dcfce7' : '#fee2e2',
-                color: newsletterStatus === 'success' ? '#166534' : '#991b1b',
+                backgroundColor: newsletterStatus === "success" ? "#dcfce7" : "#fee2e2",
+                color: newsletterStatus === "success" ? "#166534" : "#991b1b",
                 maxWidth: "600px",
                 margin: "1.5rem auto 0"
               }}
@@ -434,10 +463,10 @@ export default function ResourcesPage() {
           <div className="card" style={{ textAlign: "center", maxWidth: "600px", margin: "0 auto" }}>
             <h2>Need Personalized Guidance?</h2>
             <p>
-              While our resources provide valuable insights, every business situation is unique.
-              Let's discuss your specific needs and opportunities.
+              While our resources provide valuable insights, every business situation is unique. Let&apos;s discuss your
+              specific needs and opportunities.
             </p>
-            <Link to="/contact#contact-form" className="btn shadow-strong" style={{ backgroundColor: '#ade5f8', color: '#004aad' }}>
+            <Link to="/contact#contact-form" className="btn shadow-strong" style={{ backgroundColor: "#ade5f8", color: "#004aad" }}>
               Schedule a Consultation
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
@@ -450,7 +479,7 @@ export default function ResourcesPage() {
         onClose={() => setShowGuideModal(false)}
         onSuccess={() => {
           setShowGuideModal(false);
-          navigate('/rd-tax-credit-guide');
+          navigate("/rd-tax-credit-guide");
         }}
         guideName="rd-tax-credit"
         guideTitle="R&D Tax Credit Complete Guide"
