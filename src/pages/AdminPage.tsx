@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Download, Mail, Trash2, LogOut, RefreshCw, Shield, AlertTriangle } from "lucide-react";
+import {
+  Download,
+  Mail,
+  Trash2,
+  LogOut,
+  RefreshCw,
+  Shield,
+  AlertTriangle,
+} from "lucide-react";
+import SEO from "../components/SEO";
+import StructuredData from "../components/StructuredData";
 import BlogAdmin from "../components/BlogAdmin";
 import { useAuth } from "../contexts/AuthContext";
 
@@ -33,29 +43,33 @@ interface FormSubmission {
 
 const formatDateTime = (dateString: string): string => {
   const date = new Date(dateString);
-  return date.toLocaleString('en-US', {
-    month: '2-digit',
-    day: '2-digit',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    timeZone: 'America/Los_Angeles',
-    timeZoneName: 'short',
+  return date.toLocaleString("en-US", {
+    month: "2-digit",
+    day: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    timeZone: "America/Los_Angeles",
+    timeZoneName: "short",
   });
 };
 
 export default function AdminPage() {
   const navigate = useNavigate();
   const { signOut, user } = useAuth();
+
   const [emails, setEmails] = useState<GuideAccessEmail[]>([]);
-  const [subscriptions, setSubscriptions] = useState<NewsletterSubscription[]>([]);
+  const [subscriptions, setSubscriptions] = useState<NewsletterSubscription[]>(
+    []
+  );
   const [formSubmissions, setFormSubmissions] = useState<FormSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
@@ -67,56 +81,67 @@ export default function AdminPage() {
 
   const loadEmails = async () => {
     try {
-      const response = await fetch('/api/guide-access');
+      const response = await fetch("/api/guide-access");
       if (response.ok) {
         const data = await response.json();
         setEmails(data);
       }
-    } catch (error) {
-      console.error('Error loading guide access emails:', error);
-      setError('Failed to load guide access emails');
+    } catch (err) {
+      console.error("Error loading guide access emails:", err);
+      setError("Failed to load guide access emails");
     }
   };
 
-  const prequalificationEmails = emails.filter(e => e.guide_name === 'prequalification-assessment');
-  const guideDownloadEmails = emails.filter(e => e.guide_name !== 'prequalification-assessment');
-
   const loadSubscriptions = async () => {
     try {
-      const response = await fetch('/api/newsletter');
+      const response = await fetch("/api/newsletter");
       if (response.ok) {
         const data = await response.json();
         setSubscriptions(data);
       }
-    } catch (error) {
-      console.error('Error loading newsletter subscriptions:', error);
-      setError('Failed to load newsletter subscriptions');
+    } catch (err) {
+      console.error("Error loading newsletter subscriptions:", err);
+      setError("Failed to load newsletter subscriptions");
     }
   };
 
   const loadFormSubmissions = async () => {
     try {
-      const response = await fetch('/api/form-submissions');
+      const response = await fetch("/api/form-submissions");
       if (response.ok) {
         const data = await response.json();
         setFormSubmissions(data);
       }
-    } catch (error) {
-      console.error('Error loading form submissions:', error);
-      setError('Failed to load form submissions');
+    } catch (err) {
+      console.error("Error loading form submissions:", err);
+      setError("Failed to load form submissions");
     }
   };
 
-  const handleDownloadPrequalification = () => {
-    const text = prequalificationEmails.map(e =>
-      `${e.email} | Access Count: ${e.access_count} | First Submitted: ${formatDateTime(e.created_at)} | Last Accessed: ${formatDateTime(e.last_accessed_at)}`
-    ).join('\n');
+  const prequalificationEmails = emails.filter(
+    (e) => e.guide_name === "prequalification-assessment"
+  );
+  const guideDownloadEmails = emails.filter(
+    (e) => e.guide_name !== "prequalification-assessment"
+  );
 
-    const blob = new Blob([text], { type: 'text/plain' });
+  const handleDownloadPrequalification = () => {
+    const text = prequalificationEmails
+      .map(
+        (e) =>
+          `${e.email} | Access Count: ${e.access_count} | First Submitted: ${formatDateTime(
+            e.created_at
+          )} | Last Accessed: ${formatDateTime(e.last_accessed_at)}`
+      )
+      .join("\n");
+
+    const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `prequalification-emails-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `prequalification-emails-${
+      new Date().toISOString().split("T")[0]
+    }.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -124,15 +149,22 @@ export default function AdminPage() {
   };
 
   const handleDownload = () => {
-    const text = guideDownloadEmails.map(e =>
-      `${e.email} | Guide: ${e.guide_name} | Access Count: ${e.access_count} | Created: ${formatDateTime(e.created_at)}`
-    ).join('\n');
+    const text = guideDownloadEmails
+      .map(
+        (e) =>
+          `${e.email} | Guide: ${e.guide_name} | Access Count: ${
+            e.access_count
+          } | Created: ${formatDateTime(e.created_at)}`
+      )
+      .join("\n");
 
-    const blob = new Blob([text], { type: 'text/plain' });
+    const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `guide-access-emails-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `guide-access-emails-${
+      new Date().toISOString().split("T")[0]
+    }.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -140,15 +172,22 @@ export default function AdminPage() {
   };
 
   const handleDownloadSubscriptions = () => {
-    const text = subscriptions.map(s =>
-      `${s.email} | Source: ${s.source} | Subscribed: ${formatDateTime(s.created_at)}`
-    ).join('\n');
+    const text = subscriptions
+      .map(
+        (s) =>
+          `${s.email} | Source: ${s.source} | Subscribed: ${formatDateTime(
+            s.created_at
+          )}`
+      )
+      .join("\n");
 
-    const blob = new Blob([text], { type: 'text/plain' });
+    const blob = new Blob([text], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `newsletter-subscriptions-${new Date().toISOString().split('T')[0]}.txt`;
+    a.download = `newsletter-subscriptions-${
+      new Date().toISOString().split("T")[0]
+    }.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -156,98 +195,115 @@ export default function AdminPage() {
   };
 
   const handleDeleteGuideAccess = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this email?')) return;
+    if (!confirm("Are you sure you want to delete this email?")) return;
 
     try {
       const response = await fetch(`/api/guide-access?id=${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
         await loadEmails();
       } else {
-        setError('Failed to delete email');
+        setError("Failed to delete email");
       }
-    } catch (error) {
-      console.error('Error deleting email:', error);
-      setError('Failed to delete email');
+    } catch (err) {
+      console.error("Error deleting email:", err);
+      setError("Failed to delete email");
     }
   };
 
   const handleDeleteSubscription = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this subscription?')) return;
+    if (!confirm("Are you sure you want to delete this subscription?")) return;
 
     try {
       const response = await fetch(`/api/newsletter?id=${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
         await loadSubscriptions();
       } else {
-        setError('Failed to delete subscription');
+        setError("Failed to delete subscription");
       }
-    } catch (error) {
-      console.error('Error deleting subscription:', error);
-      setError('Failed to delete subscription');
+    } catch (err) {
+      console.error("Error deleting subscription:", err);
+      setError("Failed to delete subscription");
     }
   };
 
   const handleToggleBlock = async (id: string, currentStatus: boolean) => {
     try {
-      const response = await fetch('/api/form-submissions', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/form-submissions", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, is_blocked: !currentStatus }),
       });
 
       if (response.ok) {
         await loadFormSubmissions();
       } else {
-        setError('Failed to update block status');
+        setError("Failed to update block status");
       }
-    } catch (error) {
-      console.error('Error updating block status:', error);
-      setError('Failed to update block status');
+    } catch (err) {
+      console.error("Error updating block status:", err);
+      setError("Failed to update block status");
     }
   };
 
   const handleDeleteFormSubmission = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this form submission record?')) return;
+    if (!confirm("Are you sure you want to delete this form submission record?"))
+      return;
 
     try {
       const response = await fetch(`/api/form-submissions?id=${id}`, {
-        method: 'DELETE',
+        method: "DELETE",
       });
 
       if (response.ok) {
         await loadFormSubmissions();
       } else {
-        setError('Failed to delete form submission');
+        setError("Failed to delete form submission");
       }
-    } catch (error) {
-      console.error('Error deleting form submission:', error);
-      setError('Failed to delete form submission');
+    } catch (err) {
+      console.error("Error deleting form submission:", err);
+      setError("Failed to delete form submission");
     }
   };
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/login');
+    navigate("/login");
   };
+
+  const pageTitle = "Admin Dashboard | ROI Blueprint";
+  const pageDescription =
+    "ROI Blueprint admin dashboard for managing guide access, prequalification leads, newsletter subscriptions, and form security.";
 
   return (
     <div style={{ paddingTop: "5rem", minHeight: "100vh", backgroundColor: "#f8fafc" }}>
+      <SEO
+        title={pageTitle}
+        description={pageDescription}
+        canonicalUrl="/admin"
+        ogType="website"
+        noindex
+      />
+      {/* Admin pages usually should not be indexed; WebPage schema is optional */}
+      <StructuredData
+        type="webpage"
+        pageTitle={pageTitle}
+        pageDescription={pageDescription}
+        pageUrl="/admin"
+      />
+
       <div className="container" style={{ marginBottom: "3rem" }}>
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-neutral-900">Admin Dashboard</h1>
             <p className="text-sm text-neutral-600 mt-1">Logged in as: {user?.email}</p>
           </div>
-          <button
-            onClick={handleSignOut}
-            className="btn btn-outline flex items-center gap-2"
-          >
+          <button onClick={handleSignOut} className="btn btn-outline flex items-center gap-2">
             <LogOut className="w-4 h-4" />
             Sign Out
           </button>
@@ -259,6 +315,7 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Prequalification */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -271,7 +328,7 @@ export default function AdminPage() {
                 className="btn btn-outline flex items-center gap-2"
                 disabled={loading}
               >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 Refresh
               </button>
               {prequalificationEmails.length > 0 && (
@@ -310,11 +367,14 @@ export default function AdminPage() {
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="font-medium text-neutral-900">{entry.email}</p>
-                        <p className="text-sm text-success-700 font-semibold">Prequalification Assessment</p>
+                        <p className="text-sm text-success-700 font-semibold">
+                          Prequalification Assessment
+                        </p>
                         <p className="text-xs text-neutral-500 mt-1">
-                          Started {entry.access_count} time{entry.access_count > 1 ? 's' : ''}
+                          Started {entry.access_count} time{entry.access_count > 1 ? "s" : ""}
                         </p>
                       </div>
+
                       <div className="text-right flex items-start gap-3">
                         <div>
                           <p className="text-xs text-neutral-500">
@@ -346,6 +406,7 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Guide Access */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -358,14 +419,11 @@ export default function AdminPage() {
                 className="btn btn-outline flex items-center gap-2"
                 disabled={loading}
               >
-                <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 Refresh
               </button>
               {guideDownloadEmails.length > 0 && (
-                <button
-                  onClick={handleDownload}
-                  className="btn btn-primary flex items-center gap-2"
-                >
+                <button onClick={handleDownload} className="btn btn-primary flex items-center gap-2">
                   <Download className="w-4 h-4" />
                   Download as Text
                 </button>
@@ -390,10 +448,7 @@ export default function AdminPage() {
               </p>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {guideDownloadEmails.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="p-4 bg-neutral-50 rounded-lg border border-neutral-200"
-                  >
+                  <div key={entry.id} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="font-medium text-neutral-900">{entry.email}</p>
@@ -401,9 +456,7 @@ export default function AdminPage() {
                         <p className="text-xs text-neutral-500 mt-1">Access count: {entry.access_count}</p>
                       </div>
                       <div className="flex items-start gap-3">
-                        <p className="text-xs text-neutral-500">
-                          {formatDateTime(entry.created_at)}
-                        </p>
+                        <p className="text-xs text-neutral-500">{formatDateTime(entry.created_at)}</p>
                         <button
                           onClick={() => handleDeleteGuideAccess(entry.id)}
                           className="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-red-100 rounded"
@@ -421,11 +474,12 @@ export default function AdminPage() {
 
           <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
             <p className="text-sm text-green-800">
-              <strong>Status:</strong> Guide access emails are now stored in the D1 database and synced automatically.
+              <strong>Status:</strong> Guide access emails are stored in the D1 database and synced automatically.
             </p>
           </div>
         </div>
 
+        {/* Form Submission Security */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -447,17 +501,17 @@ export default function AdminPage() {
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-neutral-600 mb-4">
-                Total tracked: <strong>{formSubmissions.length}</strong> |
-                Blocked: <strong className="text-error-600">{formSubmissions.filter(s => s.is_blocked).length}</strong>
+                Total tracked: <strong>{formSubmissions.length}</strong> | Blocked:{" "}
+                <strong className="text-error-600">
+                  {formSubmissions.filter((s) => s.is_blocked).length}
+                </strong>
               </p>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {formSubmissions.map((submission) => (
                   <div
                     key={submission.id}
                     className={`p-4 rounded-lg border ${
-                      submission.is_blocked
-                        ? 'bg-error-50 border-error-200'
-                        : 'bg-neutral-50 border-neutral-200'
+                      submission.is_blocked ? "bg-error-50 border-error-200" : "bg-neutral-50 border-neutral-200"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4">
@@ -472,13 +526,18 @@ export default function AdminPage() {
                           )}
                         </div>
                         <div className="text-xs text-neutral-600 space-y-1">
-                          <p>Form: <strong>{submission.form_type}</strong></p>
-                          <p>Submissions: <strong>{submission.submission_count}</strong></p>
+                          <p>
+                            Form: <strong>{submission.form_type}</strong>
+                          </p>
+                          <p>
+                            Submissions: <strong>{submission.submission_count}</strong>
+                          </p>
                           <p>IP: {submission.ip_address}</p>
                           <p>First: {formatDateTime(submission.created_at)}</p>
                           <p>Last: {formatDateTime(submission.last_submission_at)}</p>
                         </div>
                       </div>
+
                       <div className="flex items-center gap-3">
                         <label className="flex items-center gap-2 cursor-pointer group">
                           <input
@@ -491,6 +550,7 @@ export default function AdminPage() {
                             Block
                           </span>
                         </label>
+
                         <button
                           onClick={() => handleDeleteFormSubmission(submission.id)}
                           className="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-red-100 rounded"
@@ -514,6 +574,7 @@ export default function AdminPage() {
           </div>
         </div>
 
+        {/* Newsletter */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -550,19 +611,14 @@ export default function AdminPage() {
               </p>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {subscriptions.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="p-4 bg-neutral-50 rounded-lg border border-neutral-200"
-                  >
+                  <div key={entry.id} className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="font-medium text-neutral-900">{entry.email}</p>
                         <p className="text-sm text-neutral-600">Source: {entry.source}</p>
                       </div>
                       <div className="flex items-start gap-3">
-                        <p className="text-xs text-neutral-500">
-                          {formatDateTime(entry.created_at)}
-                        </p>
+                        <p className="text-xs text-neutral-500">{formatDateTime(entry.created_at)}</p>
                         <button
                           onClick={() => handleDeleteSubscription(entry.id)}
                           className="text-red-600 hover:text-red-800 transition-colors p-1 hover:bg-red-100 rounded"
@@ -580,7 +636,7 @@ export default function AdminPage() {
 
           <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
             <p className="text-sm text-green-800">
-              <strong>Status:</strong> Newsletter subscriptions are now stored in the D1 database and synced automatically.
+              <strong>Status:</strong> Newsletter subscriptions are stored in the D1 database and synced automatically.
             </p>
           </div>
         </div>
