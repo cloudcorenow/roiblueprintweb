@@ -1,7 +1,7 @@
+Sitemap: https://www.roiblueprint.com/sitemap.xml
+
 User-agent: *
 Allow: /
-
-Sitemap: https://www.roiblueprint.com/sitemap.xml
 
 User-agent: GPTBot
 Disallow: /
@@ -14,3 +14,4 @@ Disallow: /
 
 User-agent: ClaudeBot
 Disallow: /
+
