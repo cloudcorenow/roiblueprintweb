@@ -16,7 +16,10 @@ export default function GuideAccessModal({
   guideName = 'rd-tax-credit',
   guideTitle = 'R&D Tax Credit Complete Guide'
 }: GuideAccessModalProps) {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
@@ -29,7 +32,27 @@ export default function GuideAccessModal({
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/api/guide-access', {
+      const emailResponse = await fetch('/api/send-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName,
+          lastName,
+          email,
+          phone,
+          message: `Requested ${guideTitle}`,
+          formType: 'guide',
+        }),
+      });
+
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.json();
+        throw new Error(errorData.error || 'Failed to send request');
+      }
+
+      const guideResponse = await fetch('/api/guide-access', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,15 +63,14 @@ export default function GuideAccessModal({
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to save email');
+      if (!guideResponse.ok) {
+        console.warn('Failed to save guide access, but continuing with download');
       }
 
-      console.log('Guide Access Email Submitted:', { email, guide_name: guideName });
+      console.log('Guide Access Request Submitted:', { firstName, lastName, email, phone, guide_name: guideName });
 
       setSuccess(true);
 
-      // Trigger PDF download
       const pdfUrl = 'https://pub-d6d31077bf1c45ddbede359b95106359.r2.dev/PDF/ROI-Blueprint-GUIDE.pdf';
       const link = document.createElement('a');
       link.href = pdfUrl;
@@ -64,7 +86,7 @@ export default function GuideAccessModal({
     } catch (err: any) {
       const errorMessage = err?.message || 'An error occurred. Please try again.';
       setError(errorMessage);
-      console.error('Error saving email:', err);
+      console.error('Error submitting guide request:', err);
     } finally {
       setIsSubmitting(false);
     }
@@ -72,7 +94,10 @@ export default function GuideAccessModal({
 
   const handleClose = () => {
     if (!isSubmitting) {
+      setFirstName('');
+      setLastName('');
       setEmail('');
+      setPhone('');
       setError('');
       setSuccess(false);
       onClose();
@@ -116,11 +141,45 @@ export default function GuideAccessModal({
                 Access Your Free Guide
               </h2>
               <p className="text-neutral-600">
-                Enter your email to access the <strong>{guideTitle}</strong> and stay updated with our latest insights.
+                Enter your information to access the <strong>{guideTitle}</strong> and stay updated with our latest insights.
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-neutral-700 mb-2">
+                    First Name
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="John"
+                    required
+                    disabled={isSubmitting}
+                    className="form-input w-full disabled:opacity-50"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-neutral-700 mb-2">
+                    Last Name
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe"
+                    required
+                    disabled={isSubmitting}
+                    className="form-input w-full disabled:opacity-50"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-2">
                   Email Address
@@ -131,6 +190,22 @@ export default function GuideAccessModal({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your.email@example.com"
+                  required
+                  disabled={isSubmitting}
+                  className="form-input w-full disabled:opacity-50"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-neutral-700 mb-2">
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  placeholder="(555) 123-4567"
                   required
                   disabled={isSubmitting}
                   className="form-input w-full disabled:opacity-50"
@@ -154,7 +229,7 @@ export default function GuideAccessModal({
               </button>
 
               <p className="text-xs text-neutral-500 text-center">
-                We respect your privacy. Your email will only be used to send you valuable insights and updates.
+                We respect your privacy. Your information will only be used to send you valuable insights and updates.
               </p>
             </form>
           </>
