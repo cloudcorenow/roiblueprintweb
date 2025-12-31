@@ -5,15 +5,28 @@ interface SEOProps {
   description?: string;
   keywords?: string;
 
-  ogImage?: string;      // can be "/path.png" OR "https://..."
+  ogImage?: string; // can be "/path.png" OR "https://..."
   ogType?: string;
 
   twitterCard?: string;
+
+  /**
+   * Preferred: pass a path like "/" or "/contact" (optionally with trailing slash).
+   * If a full URL is accidentally passed, we will normalize it back to the canonical host.
+   */
   canonicalUrl?: string;
 
   // Optional: for admin/login pages, etc.
   noIndex?: boolean;
   noFollow?: boolean;
+
+  /**
+   * Production defaults:
+   * - Canonicals should NOT include query params (utm, gclid, etc.)
+   * - Pick one trailing-slash policy and enforce it consistently.
+   */
+  includeQueryInCanonical?: boolean; // default false
+  trailingSlash?: "always" | "never" | "ignore"; // default "always"
 }
 
 export default function SEO({
@@ -25,18 +38,62 @@ export default function SEO({
   twitterCard = "summary_large_image",
   canonicalUrl,
   noIndex = false,
-  noFollow = false
+  noFollow = false,
+  includeQueryInCanonical = false,
+  trailingSlash = "always"
 }: SEOProps) {
-  // Use ONE canonical host everywhere to avoid duplicates
+  // ✅ Single canonical host everywhere to avoid www/non-www duplication.
   const baseUrl = "https://www.roiblueprint.com";
 
   const fullTitle = title.includes("ROI Blueprint") ? title : `${title} | ROI Blueprint`;
-  const url = canonicalUrl ? `${baseUrl}${canonicalUrl}` : baseUrl;
+
+  const normalizePath = (pathname: string) => {
+    if (!pathname) return "/";
+    // Ensure leading slash
+    let p = pathname.startsWith("/") ? pathname : `/${pathname}`;
+
+    // Strip hash fragments if they exist (shouldn't be in canonicals)
+    p = p.split("#")[0];
+
+    // Optionally enforce trailing slash policy
+    if (trailingSlash === "always") {
+      if (p !== "/" && !p.endsWith("/")) p = `${p}/`;
+    } else if (trailingSlash === "never") {
+      if (p !== "/" && p.endsWith("/")) p = p.slice(0, -1);
+    }
+
+    return p;
+  };
+
+  const buildCanonical = (input?: string) => {
+    if (!input) return baseUrl;
+
+    // If a full URL was provided, normalize it back to canonical host
+    if (/^https?:\/\//i.test(input)) {
+      try {
+        const u = new URL(input);
+        const path = normalizePath(u.pathname || "/");
+        const q = includeQueryInCanonical ? u.search : "";
+        return `${baseUrl}${path}${q}`;
+      } catch {
+        return baseUrl;
+      }
+    }
+
+    // Input is a path (maybe missing leading slash, maybe includes query)
+    const [rawPath, rawQuery] = input.split("?");
+    const path = normalizePath(rawPath || "/");
+    const q = includeQueryInCanonical && rawQuery ? `?${rawQuery}` : "";
+    return `${baseUrl}${path}${q}`;
+  };
+
+  const url = buildCanonical(canonicalUrl);
 
   const resolveImageUrl = (img: string) => {
     if (!img) return undefined;
     if (/^https?:\/\//i.test(img)) return img;
-    return `${baseUrl}${img.startsWith("/") ? img : `/${img}`}`;
+    const p = img.startsWith("/") ? img : `/${img}`;
+    return `${baseUrl}${p}`;
   };
 
   useEffect(() => {
@@ -54,6 +111,7 @@ export default function SEO({
 
     // Basic
     upsertMeta("name", "description", description);
+    // NOTE: Google ignores meta keywords; harmless but not relied upon.
     upsertMeta("name", "keywords", keywords);
 
     // Robots
@@ -65,19 +123,24 @@ export default function SEO({
     upsertMeta("property", "og:description", description);
     upsertMeta("property", "og:type", ogType);
     upsertMeta("property", "og:url", url);
-
-    const ogImg = resolveImageUrl(ogImage);
-    if (ogImg) upsertMeta("property", "og:image", ogImg);
-
     upsertMeta("property", "og:site_name", "ROI Blueprint");
 
-    // Twitter (IMPORTANT: Twitter uses name="", not property="")
+    const ogImg = resolveImageUrl(ogImage);
+    if (ogImg) {
+      upsertMeta("property", "og:image", ogImg);
+      upsertMeta("property", "og:image:alt", "ROI Blueprint");
+    }
+
+    // Twitter (Twitter uses name="", not property="")
     upsertMeta("name", "twitter:card", twitterCard);
     upsertMeta("name", "twitter:title", fullTitle);
     upsertMeta("name", "twitter:description", description);
 
     const twImg = resolveImageUrl(ogImage);
-    if (twImg) upsertMeta("name", "twitter:image", twImg);
+    if (twImg) {
+      upsertMeta("name", "twitter:image", twImg);
+      upsertMeta("name", "twitter:image:alt", "ROI Blueprint");
+    }
 
     // Canonical
     let canonicalEl = document.querySelector('link[rel="canonical"]');
@@ -87,7 +150,17 @@ export default function SEO({
       document.head.appendChild(canonicalEl);
     }
     canonicalEl.setAttribute("href", url);
-  }, [fullTitle, description, keywords, ogImage, ogType, twitterCard, url, noIndex, noFollow]);
+  }, [
+    fullTitle,
+    description,
+    keywords,
+    ogImage,
+    ogType,
+    twitterCard,
+    url,
+    noIndex,
+    noFollow
+  ]);
 
   return null;
 }
