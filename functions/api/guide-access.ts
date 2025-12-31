@@ -15,7 +15,13 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       );
     }
 
-    const { email, guide_name = 'rd-tax-credit' } = await context.request.json();
+    const {
+      email,
+      first_name = '',
+      last_name = '',
+      phone = '',
+      guide_name = 'rd-tax-credit'
+    } = await context.request.json();
 
     if (!email) {
       return Response.json({ error: 'Email is required' }, { status: 400 });
@@ -27,15 +33,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
       .first();
 
     if (existing) {
-    await context.env.DB
-  .prepare('UPDATE guide_access_emails SET access_count = access_count + 1, last_accessed_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now") WHERE email = ? AND guide_name = ?')
-  .bind(email, guide_name)
-  .run();
-
+      await context.env.DB
+        .prepare('UPDATE guide_access_emails SET access_count = access_count + 1, last_accessed_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now"), first_name = ?, last_name = ?, phone = ? WHERE email = ? AND guide_name = ?')
+        .bind(first_name, last_name, phone, email, guide_name)
+        .run();
     } else {
       await context.env.DB
-        .prepare('INSERT INTO guide_access_emails (id, email, guide_name) VALUES (?, ?, ?)')
-        .bind(crypto.randomUUID(), email, guide_name)
+        .prepare('INSERT INTO guide_access_emails (id, email, first_name, last_name, phone, guide_name) VALUES (?, ?, ?, ?, ?, ?)')
+        .bind(crypto.randomUUID(), email, first_name, last_name, phone, guide_name)
         .run();
     }
 
