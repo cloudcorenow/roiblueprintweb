@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Plus, Edit, Trash2, Eye, EyeOff, Star } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye, EyeOff, Star, Upload, Image as ImageIcon, X as XIcon } from 'lucide-react';
 import { BlogPost, BlogPostInput } from '../types/blog';
 import { blogService } from '../utils/blogService';
 
@@ -9,6 +9,9 @@ const BlogAdmin = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [currentPost, setCurrentPost] = useState<BlogPost | null>(null);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [imagePreview, setImagePreview] = useState<string>('');
+  const [uploadMode, setUploadMode] = useState<'upload' | 'url'>('upload');
   const [formData, setFormData] = useState<BlogPostInput>({
     title: '',
     slug: '',
@@ -89,6 +92,7 @@ const BlogAdmin = () => {
       published: post.published,
       featured: post.featured,
     });
+    setImagePreview(post.image);
     setIsEditing(true);
   };
 
@@ -105,9 +109,53 @@ const BlogAdmin = () => {
     }
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to upload image');
+      }
+
+      setFormData(prev => ({ ...prev, image: data.url }));
+      setImagePreview(data.url);
+      alert('Image uploaded successfully!');
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert(error instanceof Error ? error.message : 'Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleImageUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const url = e.target.value;
+    setFormData(prev => ({ ...prev, image: url }));
+    setImagePreview(url);
+  };
+
+  const clearImage = () => {
+    setFormData(prev => ({ ...prev, image: '' }));
+    setImagePreview('');
+  };
+
   const resetForm = () => {
     setCurrentPost(null);
     setIsEditing(false);
+    setImagePreview('');
+    setUploadMode('upload');
     setFormData({
       title: '',
       slug: '',
@@ -289,17 +337,119 @@ const BlogAdmin = () => {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-brand-navy mb-2">
-                  Featured Image URL *
+                  Featured Image *
                 </label>
-                <input
-                  type="url"
-                  name="image"
-                  value={formData.image}
-                  onChange={handleInputChange}
-                  required
-                  placeholder="https://images.unsplash.com/..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
-                />
+
+                <div className="mb-3 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setUploadMode('upload')}
+                    className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                      uploadMode === 'upload'
+                        ? 'bg-brand-navy text-white'
+                        : 'bg-gray-200 text-brand-navy hover:bg-gray-300'
+                    }`}
+                  >
+                    <Upload size={16} />
+                    Upload Image
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setUploadMode('url')}
+                    className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
+                      uploadMode === 'url'
+                        ? 'bg-brand-navy text-white'
+                        : 'bg-gray-200 text-brand-navy hover:bg-gray-300'
+                    }`}
+                  >
+                    <ImageIcon size={16} />
+                    Image URL
+                  </button>
+                </div>
+
+                {uploadMode === 'upload' ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <label
+                        htmlFor="image-upload"
+                        className="flex items-center gap-2 px-6 py-3 bg-brand-gold text-white rounded-lg hover:bg-gold-700 transition-colors cursor-pointer disabled:opacity-50"
+                      >
+                        <Upload size={20} />
+                        {uploading ? 'Uploading...' : 'Choose Image'}
+                      </label>
+                      <input
+                        id="image-upload"
+                        type="file"
+                        accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+                        onChange={handleImageUpload}
+                        disabled={uploading}
+                        className="hidden"
+                      />
+                      {formData.image && (
+                        <button
+                          type="button"
+                          onClick={clearImage}
+                          className="text-red-600 hover:text-red-800 transition-colors"
+                        >
+                          <XIcon size={20} />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      Supported formats: JPEG, PNG, WebP, GIF (Max 5MB)
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="url"
+                        value={formData.image}
+                        onChange={handleImageUrlChange}
+                        placeholder="https://images.unsplash.com/..."
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
+                      />
+                      {formData.image && (
+                        <button
+                          type="button"
+                          onClick={clearImage}
+                          className="text-red-600 hover:text-red-800 transition-colors"
+                        >
+                          <XIcon size={20} />
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500">
+                      Enter the full URL of the image
+                    </p>
+                  </div>
+                )}
+
+                {imagePreview && (
+                  <div className="mt-4">
+                    <p className="text-sm font-medium text-brand-navy mb-2">Preview:</p>
+                    <div className="relative w-full h-48 border border-gray-300 rounded-lg overflow-hidden">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                        onError={() => {
+                          setImagePreview('');
+                          alert('Failed to load image. Please check the URL or try a different image.');
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {!formData.image && (
+                  <input
+                    type="hidden"
+                    name="image"
+                    value=""
+                    required
+                  />
+                )}
               </div>
 
               <div className="flex items-center space-x-6">
