@@ -206,6 +206,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           <h2>R&D Tax Credit Guide Request</h2>
           <p><strong>Name:</strong> ${data.firstName} ${data.lastName}</p>
           <p><strong>Email:</strong> ${data.email}</p>
+          ${data.phone ? `<p><strong>Phone:</strong> ${data.phone}</p>` : ''}
           <p>Please send the R&D Tax Credit Guide to this email address.</p>
         `;
         break;
