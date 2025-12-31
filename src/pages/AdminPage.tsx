@@ -1,3 +1,4 @@
+// src/pages/AdminPage.tsx
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -7,7 +8,7 @@ import {
   LogOut,
   RefreshCw,
   Shield,
-  AlertTriangle,
+  AlertTriangle
 } from "lucide-react";
 import SEO from "../components/SEO";
 import StructuredData from "../components/StructuredData";
@@ -51,7 +52,7 @@ const formatDateTime = (dateString: string): string => {
     minute: "2-digit",
     second: "2-digit",
     timeZone: "America/Los_Angeles",
-    timeZoneName: "short",
+    timeZoneName: "short"
   });
 };
 
@@ -60,9 +61,7 @@ export default function AdminPage() {
   const { signOut, user } = useAuth();
 
   const [emails, setEmails] = useState<GuideAccessEmail[]>([]);
-  const [subscriptions, setSubscriptions] = useState<NewsletterSubscription[]>(
-    []
-  );
+  const [subscriptions, setSubscriptions] = useState<NewsletterSubscription[]>([]);
   const [formSubmissions, setFormSubmissions] = useState<FormSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -118,12 +117,8 @@ export default function AdminPage() {
     }
   };
 
-  const prequalificationEmails = emails.filter(
-    (e) => e.guide_name === "prequalification-assessment"
-  );
-  const guideDownloadEmails = emails.filter(
-    (e) => e.guide_name !== "prequalification-assessment"
-  );
+  const prequalificationEmails = emails.filter((e) => e.guide_name === "prequalification-assessment");
+  const guideDownloadEmails = emails.filter((e) => e.guide_name !== "prequalification-assessment");
 
   const handleDownloadPrequalification = () => {
     const text = prequalificationEmails
@@ -139,9 +134,7 @@ export default function AdminPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `prequalification-emails-${
-      new Date().toISOString().split("T")[0]
-    }.txt`;
+    a.download = `prequalification-emails-${new Date().toISOString().split("T")[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -152,31 +145,8 @@ export default function AdminPage() {
     const text = guideDownloadEmails
       .map(
         (e) =>
-          `${e.email} | Guide: ${e.guide_name} | Access Count: ${
-            e.access_count
-          } | Created: ${formatDateTime(e.created_at)}`
-      )
-      .join("\n");
-
-    const blob = new Blob([text], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `guide-access-emails-${
-      new Date().toISOString().split("T")[0]
-    }.txt`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
-
-  const handleDownloadSubscriptions = () => {
-    const text = subscriptions
-      .map(
-        (s) =>
-          `${s.email} | Source: ${s.source} | Subscribed: ${formatDateTime(
-            s.created_at
+          `${e.email} | Guide: ${e.guide_name} | Access Count: ${e.access_count} | Created: ${formatDateTime(
+            e.created_at
           )}`
       )
       .join("\n");
@@ -185,9 +155,23 @@ export default function AdminPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `newsletter-subscriptions-${
-      new Date().toISOString().split("T")[0]
-    }.txt`;
+    a.download = `guide-access-emails-${new Date().toISOString().split("T")[0]}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleDownloadSubscriptions = () => {
+    const text = subscriptions
+      .map((s) => `${s.email} | Source: ${s.source} | Subscribed: ${formatDateTime(s.created_at)}`)
+      .join("\n");
+
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `newsletter-subscriptions-${new Date().toISOString().split("T")[0]}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -198,9 +182,7 @@ export default function AdminPage() {
     if (!confirm("Are you sure you want to delete this email?")) return;
 
     try {
-      const response = await fetch(`/api/guide-access?id=${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(`/api/guide-access?id=${id}`, { method: "DELETE" });
 
       if (response.ok) {
         await loadEmails();
@@ -217,9 +199,7 @@ export default function AdminPage() {
     if (!confirm("Are you sure you want to delete this subscription?")) return;
 
     try {
-      const response = await fetch(`/api/newsletter?id=${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(`/api/newsletter?id=${id}`, { method: "DELETE" });
 
       if (response.ok) {
         await loadSubscriptions();
@@ -237,7 +217,7 @@ export default function AdminPage() {
       const response = await fetch("/api/form-submissions", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, is_blocked: !currentStatus }),
+        body: JSON.stringify({ id, is_blocked: !currentStatus })
       });
 
       if (response.ok) {
@@ -252,13 +232,10 @@ export default function AdminPage() {
   };
 
   const handleDeleteFormSubmission = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this form submission record?"))
-      return;
+    if (!confirm("Are you sure you want to delete this form submission record?")) return;
 
     try {
-      const response = await fetch(`/api/form-submissions?id=${id}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(`/api/form-submissions?id=${id}`, { method: "DELETE" });
 
       if (response.ok) {
         await loadFormSubmissions();
@@ -287,8 +264,9 @@ export default function AdminPage() {
         description={pageDescription}
         canonicalUrl="/admin"
         ogType="website"
-        noindex
+        noIndex
       />
+
       {/* Admin pages usually should not be indexed; WebPage schema is optional */}
       <StructuredData
         type="webpage"
@@ -323,11 +301,7 @@ export default function AdminPage() {
               <h2 className="text-2xl font-bold">Prequalification Submissions</h2>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={loadData}
-                className="btn btn-outline flex items-center gap-2"
-                disabled={loading}
-              >
+              <button onClick={loadData} className="btn btn-outline flex items-center gap-2" disabled={loading}>
                 <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 Refresh
               </button>
@@ -360,16 +334,11 @@ export default function AdminPage() {
               </p>
               <div className="max-h-96 overflow-y-auto space-y-2">
                 {prequalificationEmails.map((entry) => (
-                  <div
-                    key={entry.id}
-                    className="p-4 bg-success-50 rounded-lg border border-success-200"
-                  >
+                  <div key={entry.id} className="p-4 bg-success-50 rounded-lg border border-success-200">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <p className="font-medium text-neutral-900">{entry.email}</p>
-                        <p className="text-sm text-success-700 font-semibold">
-                          Prequalification Assessment
-                        </p>
+                        <p className="text-sm text-success-700 font-semibold">Prequalification Assessment</p>
                         <p className="text-xs text-neutral-500 mt-1">
                           Started {entry.access_count} time{entry.access_count > 1 ? "s" : ""}
                         </p>
@@ -377,12 +346,8 @@ export default function AdminPage() {
 
                       <div className="text-right flex items-start gap-3">
                         <div>
-                          <p className="text-xs text-neutral-500">
-                            First: {formatDateTime(entry.created_at)}
-                          </p>
-                          <p className="text-xs text-neutral-500">
-                            Last: {formatDateTime(entry.last_accessed_at)}
-                          </p>
+                          <p className="text-xs text-neutral-500">First: {formatDateTime(entry.created_at)}</p>
+                          <p className="text-xs text-neutral-500">Last: {formatDateTime(entry.last_accessed_at)}</p>
                         </div>
                         <button
                           onClick={() => handleDeleteGuideAccess(entry.id)}
@@ -414,11 +379,7 @@ export default function AdminPage() {
               <h2 className="text-2xl font-bold">Guide Access Emails</h2>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={loadData}
-                className="btn btn-outline flex items-center gap-2"
-                disabled={loading}
-              >
+              <button onClick={loadData} className="btn btn-outline flex items-center gap-2" disabled={loading}>
                 <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 Refresh
               </button>
@@ -546,9 +507,7 @@ export default function AdminPage() {
                             onChange={() => handleToggleBlock(submission.id, submission.is_blocked)}
                             className="w-5 h-5 rounded border-2 border-neutral-300 text-error-600 focus:ring-2 focus:ring-error-500 cursor-pointer"
                           />
-                          <span className="text-sm font-medium text-neutral-700 group-hover:text-error-600">
-                            Block
-                          </span>
+                          <span className="text-sm font-medium text-neutral-700 group-hover:text-error-600">Block</span>
                         </label>
 
                         <button
@@ -583,10 +542,7 @@ export default function AdminPage() {
             </div>
             <div className="flex gap-3">
               {subscriptions.length > 0 && (
-                <button
-                  onClick={handleDownloadSubscriptions}
-                  className="btn btn-primary flex items-center gap-2"
-                >
+                <button onClick={handleDownloadSubscriptions} className="btn btn-primary flex items-center gap-2">
                   <Download className="w-4 h-4" />
                   Download as Text
                 </button>
