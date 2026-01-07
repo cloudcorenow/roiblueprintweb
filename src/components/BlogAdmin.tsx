@@ -24,6 +24,7 @@ const BlogAdmin = () => {
     read_time: '5 min read',
     published: false,
     featured: false,
+    published_at: new Date().toISOString().slice(0, 16),
   });
 
   useEffect(() => {
@@ -91,6 +92,7 @@ const BlogAdmin = () => {
       read_time: post.read_time,
       published: post.published,
       featured: post.featured,
+      published_at: post.published_at ? new Date(post.published_at).toISOString().slice(0, 16) : new Date().toISOString().slice(0, 16),
     });
     setImagePreview(post.image);
     setIsEditing(true);
@@ -168,6 +170,7 @@ const BlogAdmin = () => {
       read_time: '5 min read',
       published: false,
       featured: false,
+      published_at: new Date().toISOString().slice(0, 16),
     });
   };
 
@@ -303,6 +306,20 @@ const BlogAdmin = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="5 min read"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
+                  Published Date *
+                </label>
+                <input
+                  type="datetime-local"
+                  name="published_at"
+                  value={formData.published_at}
+                  onChange={handleInputChange}
+                  required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
@@ -514,7 +531,7 @@ const BlogAdmin = () => {
                     Status
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Date
+                    Published Date
                   </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Actions
@@ -567,7 +584,7 @@ const BlogAdmin = () => {
                         </span>
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500">
-                        {new Date(post.created_at).toLocaleDateString()}
+                        {post.published_at ? new Date(post.published_at).toLocaleString() : 'Not set'}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end space-x-2">
