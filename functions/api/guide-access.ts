@@ -44,7 +44,30 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
         .run();
     }
 
-    return Response.json({ success: true });
+    let submissionId = null;
+
+    if (guide_name === 'prequalification-assessment') {
+      const existingSubmission = await context.env.DB
+        .prepare('SELECT id FROM form_submissions WHERE email = ? AND form_type = ?')
+        .bind(email, 'prequalification')
+        .first();
+
+      if (existingSubmission) {
+        submissionId = existingSubmission.id;
+        await context.env.DB
+          .prepare('UPDATE form_submissions SET submission_count = submission_count + 1, last_submission_at = datetime("now"), status = ? WHERE id = ?')
+          .bind('started', submissionId)
+          .run();
+      } else {
+        submissionId = crypto.randomUUID();
+        await context.env.DB
+          .prepare('INSERT INTO form_submissions (id, email, form_type, ip_address, status) VALUES (?, ?, ?, ?, ?)')
+          .bind(submissionId, email, 'prequalification', ip, 'started')
+          .run();
+      }
+    }
+
+    return Response.json({ success: true, submissionId });
   } catch (error) {
     console.error('Error saving guide access:', error);
     return Response.json({ error: 'Failed to save guide access' }, { status: 500 });
