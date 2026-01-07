@@ -97,7 +97,6 @@ export default function SEO({
   };
 
   useEffect(() => {
-    console.log('[SEO] useEffect running, canonicalUrl:', canonicalUrl, 'final url:', url);
     document.title = fullTitle;
 
     const upsertMeta = (attr: "name" | "property", key: string, content: string) => {
@@ -112,7 +111,6 @@ export default function SEO({
 
     // Basic
     upsertMeta("name", "description", description);
-    // NOTE: Google ignores meta keywords; harmless but not relied upon.
     upsertMeta("name", "keywords", keywords);
 
     // Robots
@@ -125,11 +123,14 @@ export default function SEO({
     upsertMeta("property", "og:type", ogType);
     upsertMeta("property", "og:url", url);
     upsertMeta("property", "og:site_name", "ROI Blueprint");
+    upsertMeta("property", "og:locale", "en_US");
 
     const ogImg = resolveImageUrl(ogImage);
     if (ogImg) {
       upsertMeta("property", "og:image", ogImg);
-      upsertMeta("property", "og:image:alt", "ROI Blueprint");
+      upsertMeta("property", "og:image:width", "1200");
+      upsertMeta("property", "og:image:height", "630");
+      upsertMeta("property", "og:image:alt", "ROI Blueprint - Healthcare R&D Tax Credit Consultants");
     }
 
     // Twitter (Twitter uses name="", not property="")
@@ -140,24 +141,21 @@ export default function SEO({
     const twImg = resolveImageUrl(ogImage);
     if (twImg) {
       upsertMeta("name", "twitter:image", twImg);
-      upsertMeta("name", "twitter:image:alt", "ROI Blueprint");
+      upsertMeta("name", "twitter:image:alt", "ROI Blueprint - Healthcare R&D Tax Credit Consultants");
     }
+
+    // Additional meta tags for better SEO
+    upsertMeta("name", "author", "ROI Blueprint");
+    upsertMeta("name", "theme-color", "#ffffff");
 
     // Canonical
     let canonicalEl = document.querySelector('link[rel="canonical"]');
-    console.log('[SEO] Found existing canonical?', !!canonicalEl);
     if (!canonicalEl) {
       canonicalEl = document.createElement("link");
       canonicalEl.setAttribute("rel", "canonical");
       document.head.appendChild(canonicalEl);
-      console.log('[SEO] Created new canonical element');
     }
     canonicalEl.setAttribute("href", url);
-    console.log('[SEO] Set canonical href to:', url);
-
-    // Verify it's in the DOM
-    const check = document.querySelector('link[rel="canonical"]');
-    console.log('[SEO] Verification - canonical in DOM:', check, 'href:', check?.getAttribute('href'));
   }, [
     fullTitle,
     description,
