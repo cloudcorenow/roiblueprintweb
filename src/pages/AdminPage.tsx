@@ -8,7 +8,8 @@ import {
   LogOut,
   RefreshCw,
   Shield,
-  AlertTriangle
+  AlertTriangle,
+  Send
 } from "lucide-react";
 import SEO from "../components/SEO";
 import StructuredData from "../components/StructuredData";
@@ -65,6 +66,8 @@ export default function AdminPage() {
   const [formSubmissions, setFormSubmissions] = useState<FormSubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sendingReminders, setSendingReminders] = useState(false);
+  const [reminderMessage, setReminderMessage] = useState<string | null>(null);
 
   useEffect(() => {
     loadData();
@@ -253,6 +256,31 @@ export default function AdminPage() {
     navigate("/login");
   };
 
+  const handleSendReminders = async () => {
+    if (!confirm("Send reminder emails to all users who started but didn't finish the assessment?")) return;
+
+    setSendingReminders(true);
+    setReminderMessage(null);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/send-assessment-reminders", { method: "POST" });
+      const result = await response.json();
+
+      if (response.ok) {
+        setReminderMessage(result.message || `Successfully sent ${result.details?.sent || 0} reminder emails`);
+        await loadData();
+      } else {
+        setError(result.error || "Failed to send reminders");
+      }
+    } catch (err) {
+      console.error("Error sending reminders:", err);
+      setError("Failed to send reminders");
+    } finally {
+      setSendingReminders(false);
+    }
+  };
+
   const pageTitle = "Admin Dashboard | ROI Blueprint";
   const pageDescription =
     "ROI Blueprint admin dashboard for managing guide access, prequalification leads, newsletter subscriptions, and form security.";
@@ -293,6 +321,12 @@ export default function AdminPage() {
           </div>
         )}
 
+        {reminderMessage && (
+          <div className="card mb-6 bg-green-50 border-green-200">
+            <p className="text-green-800">{reminderMessage}</p>
+          </div>
+        )}
+
         {/* Prequalification */}
         <div className="card">
           <div className="flex items-center justify-between mb-6">
@@ -304,6 +338,14 @@ export default function AdminPage() {
               <button onClick={loadData} className="btn btn-outline flex items-center gap-2" disabled={loading}>
                 <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
                 Refresh
+              </button>
+              <button
+                onClick={handleSendReminders}
+                className="btn btn-success flex items-center gap-2"
+                disabled={sendingReminders || loading}
+              >
+                <Send className={`w-4 h-4 ${sendingReminders ? "animate-pulse" : ""}`} />
+                {sendingReminders ? "Sending..." : "Send Reminders"}
               </button>
               {prequalificationEmails.length > 0 && (
                 <button
@@ -367,6 +409,7 @@ export default function AdminPage() {
           <div className="mt-6 p-4 bg-success-50 rounded-lg border border-success-200">
             <p className="text-sm text-success-800">
               <strong>Status:</strong> Prequalification emails are captured when prospects start the assessment process.
+              Use the "Send Reminders" button to email users who started but didn't finish (only sends to those who started 1+ hours ago and haven't received a reminder in 24 hours).
             </p>
           </div>
         </div>
