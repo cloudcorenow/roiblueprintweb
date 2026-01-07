@@ -273,7 +273,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 border-bottom: 1px solid #e5e7eb;
               }
               .header img {
-                max-width: 200px;
+                max-width: 350px;
                 height: auto;
               }
               .content {
