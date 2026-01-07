@@ -1,14 +1,17 @@
 import React from "react";
 import { ArrowRight, CheckCircle } from "lucide-react";
 import Turnstile from "../Turnstile";
+import GoogleReCaptcha from "../GoogleReCaptcha";
 import { ContactFormData, ContactFormErrors } from "../../types/contact";
 import { validateContactForm } from "../../utils/contactValidation";
+import { submitToSalesforce } from "../../utils/salesforceService";
 
 const StandaloneContactForm: React.FC = () => {
   const [formData, setFormData] = React.useState<ContactFormData>({
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     company: "",
     industry: "",
     message: "",
@@ -18,6 +21,7 @@ const StandaloneContactForm: React.FC = () => {
   const [success, setSuccess] = React.useState(false);
   const [botField, setBotField] = React.useState("");
   const [turnstileToken, setTurnstileToken] = React.useState("");
+  const [recaptchaToken, setRecaptchaToken] = React.useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -46,6 +50,15 @@ const StandaloneContactForm: React.FC = () => {
 
     try {
       setSubmitting(true);
+
+      if (recaptchaToken) {
+        try {
+          await submitToSalesforce(formData, recaptchaToken);
+        } catch (salesforceError) {
+          console.error("Salesforce submission error:", salesforceError);
+        }
+      }
+
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -63,8 +76,9 @@ const StandaloneContactForm: React.FC = () => {
       }
 
       setSuccess(true);
-      setFormData({ firstName: "", lastName: "", email: "", company: "", industry: "", message: "" });
+      setFormData({ firstName: "", lastName: "", email: "", phone: "", company: "", industry: "", message: "" });
       setTurnstileToken("");
+      setRecaptchaToken("");
     } catch (err) {
       console.error("Form submission error:", err);
       const message = err instanceof Error ? err.message : "There was an error submitting your form. Please try again.";
@@ -151,6 +165,24 @@ const StandaloneContactForm: React.FC = () => {
           </div>
 
           <div>
+            <label htmlFor="standalone-phone" className="block text-sm font-medium text-neutral-700 mb-2">
+              Phone Number *
+            </label>
+            <input
+              type="tel"
+              id="standalone-phone"
+              name="phone"
+              required
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+            />
+            {errors.phone && <p className="text-xs text-error-600 mt-1">{errors.phone}</p>}
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
             <label htmlFor="standalone-company" className="block text-sm font-medium text-neutral-700 mb-2">
               Practice Name *
             </label>
@@ -165,27 +197,27 @@ const StandaloneContactForm: React.FC = () => {
             />
             {errors.company && <p className="text-xs text-error-600 mt-1">{errors.company}</p>}
           </div>
-        </div>
 
-        <div>
-          <label htmlFor="standalone-industry" className="block text-sm font-medium text-neutral-700 mb-2">
-            Practice Type *
-          </label>
-          <select
-            id="standalone-industry"
-            name="industry"
-            required
-            value={formData.industry}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-          >
-            <option value="">Select your practice type</option>
-            <option value="aba">ABA Practice</option>
-            <option value="medical">Medical Practice</option>
-            <option value="dental">Dental Practice</option>
-            <option value="other">Other Healthcare</option>
-          </select>
-          {errors.industry && <p className="text-xs text-error-600 mt-1">{errors.industry}</p>}
+          <div>
+            <label htmlFor="standalone-industry" className="block text-sm font-medium text-neutral-700 mb-2">
+              Practice Type *
+            </label>
+            <select
+              id="standalone-industry"
+              name="industry"
+              required
+              value={formData.industry}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+            >
+              <option value="">Select your practice type</option>
+              <option value="aba">ABA Practice</option>
+              <option value="medical">Medical Practice</option>
+              <option value="dental">Dental Practice</option>
+              <option value="other">Other Healthcare</option>
+            </select>
+            {errors.industry && <p className="text-xs text-error-600 mt-1">{errors.industry}</p>}
+          </div>
         </div>
 
         <div>
@@ -204,6 +236,12 @@ const StandaloneContactForm: React.FC = () => {
           {errors.message && <p className="text-xs text-error-600 mt-1">{errors.message}</p>}
         </div>
 
+        <GoogleReCaptcha
+          onVerify={setRecaptchaToken}
+          onError={() => setErrors({ message: "reCAPTCHA verification failed. Please try again." } as ContactFormErrors)}
+          onExpire={() => setRecaptchaToken("")}
+        />
+
         <Turnstile
           onVerify={setTurnstileToken}
           onError={() => setErrors({ message: "Verification failed. Please try again." } as ContactFormErrors)}
@@ -212,7 +250,7 @@ const StandaloneContactForm: React.FC = () => {
 
         <button
           type="submit"
-          disabled={submitting || (import.meta.env.VITE_TURNSTILE_SITE_KEY && !turnstileToken)}
+          disabled={submitting || (import.meta.env.VITE_TURNSTILE_SITE_KEY && !turnstileToken) || (import.meta.env.VITE_RECAPTCHA_SITE_KEY && !recaptchaToken)}
           className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? (
