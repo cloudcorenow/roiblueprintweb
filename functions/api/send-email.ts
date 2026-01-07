@@ -245,6 +245,136 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
 
     const result = await response.json();
 
+    if (data.formType === 'contact') {
+      const confirmationHtml = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <style>
+              body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+                line-height: 1.6;
+                color: #333333;
+                margin: 0;
+                padding: 0;
+                background-color: #f4f4f4;
+              }
+              .container {
+                max-width: 600px;
+                margin: 0 auto;
+                background-color: #ffffff;
+              }
+              .header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                padding: 40px 20px;
+                text-align: center;
+              }
+              .header h1 {
+                color: #ffffff;
+                margin: 0;
+                font-size: 28px;
+                font-weight: 700;
+              }
+              .content {
+                padding: 40px 30px;
+              }
+              .content h2 {
+                color: #333333;
+                font-size: 24px;
+                margin-top: 0;
+                margin-bottom: 20px;
+              }
+              .content p {
+                color: #555555;
+                font-size: 16px;
+                margin-bottom: 20px;
+              }
+              .download-section {
+                background-color: #f8f9fa;
+                border-radius: 12px;
+                padding: 30px;
+                text-align: center;
+                margin: 30px 0;
+              }
+              .download-section h3 {
+                color: #333333;
+                font-size: 20px;
+                margin-top: 0;
+                margin-bottom: 15px;
+              }
+              .download-button {
+                display: inline-block;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: #ffffff !important;
+                text-decoration: none;
+                padding: 16px 32px;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 16px;
+                margin-top: 15px;
+                transition: transform 0.2s;
+              }
+              .download-button:hover {
+                transform: translateY(-2px);
+              }
+              .footer {
+                background-color: #f8f9fa;
+                padding: 30px;
+                text-align: center;
+                color: #666666;
+                font-size: 14px;
+              }
+              .footer a {
+                color: #667eea;
+                text-decoration: none;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>ROI Blueprint</h1>
+              </div>
+              <div class="content">
+                <h2>Thank You for Reaching Out!</h2>
+                <p>Hi ${data.firstName},</p>
+                <p>Thank you for contacting ROI Blueprint. We've received your message and our team will reach out to you shortly to discuss how we can help maximize your R&D tax credits.</p>
+
+                <div class="download-section">
+                  <h3>Your Free R&D Tax Credit Guide</h3>
+                  <p style="margin-bottom: 20px;">In the meantime, we've prepared a comprehensive guide to help you understand R&D tax credits and how they can benefit your practice.</p>
+                  <a href="https://pub-d6d31077bf1c45ddbede359b95106359.r2.dev/PDF/ROI-Blueprint-GUIDE.pdf" class="download-button" download>Download Your Free Guide</a>
+                </div>
+
+                <p>If you have any immediate questions, feel free to reply to this email or call us directly.</p>
+                <p>Best regards,<br><strong>The ROI Blueprint Team</strong></p>
+              </div>
+              <div class="footer">
+                <p>ROI Blueprint | R&D Tax Credit Specialists</p>
+                <p><a href="https://roiblueprint.com">Visit our website</a></p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${RESEND_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: 'ROI Blueprint <noreply@notifications.roiblueprint.com>',
+          to: [data.email],
+          subject: 'Thank You for Contacting ROI Blueprint - Your Free Guide',
+          html: confirmationHtml,
+        }),
+      });
+    }
+
     return Response.json(
       { success: true, messageId: result.id },
       {
