@@ -68,6 +68,7 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
   const [sendingReminders, setSendingReminders] = useState(false);
   const [reminderMessage, setReminderMessage] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<'prequalification' | 'guide-access' | 'newsletter' | 'form-security' | 'blog'>('prequalification');
 
   useEffect(() => {
     loadData();
@@ -327,7 +328,80 @@ export default function AdminPage() {
           </div>
         )}
 
+        {/* Filter Tabs */}
+        <div className="card mb-6">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveFilter('prequalification')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeFilter === 'prequalification'
+                  ? 'bg-success-600 text-white shadow-md'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Prequalification ({prequalificationEmails.length})
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveFilter('guide-access')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeFilter === 'guide-access'
+                  ? 'bg-primary-600 text-white shadow-md'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Guide Access ({guideDownloadEmails.length})
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveFilter('newsletter')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeFilter === 'newsletter'
+                  ? 'bg-secondary-600 text-white shadow-md'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4" />
+                Newsletter ({subscriptions.length})
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveFilter('form-security')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeFilter === 'form-security'
+                  ? 'bg-error-600 text-white shadow-md'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <Shield className="w-4 h-4" />
+                Form Security ({formSubmissions.length})
+              </div>
+            </button>
+
+            <button
+              onClick={() => setActiveFilter('blog')}
+              className={`px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeFilter === 'blog'
+                  ? 'bg-neutral-800 text-white shadow-md'
+                  : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
+              }`}
+            >
+              Blog Management
+            </button>
+          </div>
+        </div>
+
         {/* Prequalification */}
+        {activeFilter === 'prequalification' && (
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -413,8 +487,10 @@ export default function AdminPage() {
             </p>
           </div>
         </div>
+        )}
 
         {/* Guide Access */}
+        {activeFilter === 'guide-access' && (
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -482,8 +558,10 @@ export default function AdminPage() {
             </p>
           </div>
         </div>
+        )}
 
         {/* Form Submission Security */}
+        {activeFilter === 'form-security' && (
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -575,8 +653,10 @@ export default function AdminPage() {
             </p>
           </div>
         </div>
+        )}
 
         {/* Newsletter */}
+        {activeFilter === 'newsletter' && (
         <div className="card">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
@@ -639,9 +719,10 @@ export default function AdminPage() {
             </p>
           </div>
         </div>
+        )}
       </div>
 
-      <BlogAdmin />
+      {activeFilter === 'blog' && <BlogAdmin />}
     </div>
   );
 }
