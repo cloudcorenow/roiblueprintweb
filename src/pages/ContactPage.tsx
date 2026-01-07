@@ -204,7 +204,7 @@ export default function ContactPage() {
 
                 {currentStep === "email" && (
                   <EmailCapture
-                    onSuccess={(id) => {
+                    onSuccess={(id: string) => {
                       setSubmissionId(id);
                       setCurrentStep("prequalification");
                     }}
