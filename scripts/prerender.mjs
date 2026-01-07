@@ -112,7 +112,17 @@ async function fetchBlogPosts() {
   }
 }
 
-function generateHTML(route) {
+function extractAssetTags(viteHtml) {
+  const cssMatches = viteHtml.match(/<link[^>]*rel="stylesheet"[^>]*href="([^"]*)"[^>]*>/g) || [];
+  const jsMatches = viteHtml.match(/<script[^>]*type="module"[^>]*src="([^"]*)"[^>]*><\/script>/g) || [];
+
+  return {
+    css: cssMatches.join('\n    '),
+    js: jsMatches.join('\n    ')
+  };
+}
+
+function generateHTML(route, assetTags) {
   const ogImage = route.image || 'https://www.roiblueprint.com/roi_blueprint_v2h_w1200.png';
   const ogType = route.type || 'website';
 
@@ -204,10 +214,13 @@ function generateHTML(route) {
 
     <!-- Cloudflare Turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+
+    <!-- Vite Generated Assets -->
+    ${assetTags.css}
   </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
+    ${assetTags.js}
   </body>
 </html>`;
 }
@@ -221,6 +234,19 @@ function ensureDirectoryExists(filePath) {
 
 console.log('🚀 Starting static route prerendering...\n');
 
+const viteIndexPath = path.join(distDir, 'index.html');
+if (!fs.existsSync(viteIndexPath)) {
+  console.error('❌ Error: dist/index.html not found. Run vite build first.');
+  process.exit(1);
+}
+
+const viteHtml = fs.readFileSync(viteIndexPath, 'utf8');
+const assetTags = extractAssetTags(viteHtml);
+
+console.log('📦 Extracted Vite asset tags');
+console.log(`  - CSS files: ${(assetTags.css.match(/href="/g) || []).length}`);
+console.log(`  - JS files: ${(assetTags.js.match(/src="/g) || []).length}\n`);
+
 routes.forEach(route => {
   let outputPath;
 
@@ -231,7 +257,7 @@ routes.forEach(route => {
   }
 
   ensureDirectoryExists(outputPath);
-  const html = generateHTML(route);
+  const html = generateHTML(route, assetTags);
   fs.writeFileSync(outputPath, html, 'utf8');
 
   console.log(`✓ Generated: ${route.path}`);
@@ -258,7 +284,7 @@ if (blogPosts.length > 0) {
 
     const outputPath = path.join(distDir, 'resources', post.slug, 'index.html');
     ensureDirectoryExists(outputPath);
-    const html = generateHTML(postRoute);
+    const html = generateHTML(postRoute, assetTags);
     fs.writeFileSync(outputPath, html, 'utf8');
 
     console.log(`  ✓ Generated: /resources/${post.slug}`);
