@@ -19,7 +19,7 @@ export const blogService = {
 
       const db = getD1();
       const result = await db
-        .prepare('SELECT * FROM blog_posts ORDER BY created_at DESC')
+        .prepare('SELECT * FROM blog_posts ORDER BY published_at DESC, created_at DESC')
         .all();
 
       if (!result.success) {
@@ -91,7 +91,7 @@ export const blogService = {
 
       const db = getD1();
       const result = await db
-        .prepare('SELECT * FROM blog_posts WHERE id = ? AND published = 1')
+        .prepare('SELECT * FROM blog_posts WHERE id = ?')
         .bind(id)
         .first();
 
@@ -167,8 +167,8 @@ export const blogService = {
         .prepare(`
           INSERT INTO blog_posts (
             id, title, slug, excerpt, content, category, author,
-            author_title, image, read_time, published, featured
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            author_title, image, read_time, published, featured, published_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `)
         .bind(
           id,
@@ -182,7 +182,8 @@ export const blogService = {
           post.image,
           post.read_time,
           post.published ? 1 : 0,
-          post.featured ? 1 : 0
+          post.featured ? 1 : 0,
+          post.published_at || new Date().toISOString()
         )
         .run();
 
@@ -191,7 +192,12 @@ export const blogService = {
         throw new Error(result.error);
       }
 
-      return await this.getPostById(id);
+      const createdPost = await db
+        .prepare('SELECT * FROM blog_posts WHERE id = ?')
+        .bind(id)
+        .first();
+
+      return createdPost ? convertRowToBlogPost(createdPost) : null;
     } catch (error) {
       console.error('Error in createPost:', error);
       throw error;
