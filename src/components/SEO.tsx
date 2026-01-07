@@ -26,7 +26,7 @@ interface SEOProps {
    * - Pick one trailing-slash policy and enforce it consistently.
    */
   includeQueryInCanonical?: boolean; // default false
-  trailingSlash?: "always" | "never" | "ignore"; // default "always"
+  trailingSlash?: "always" | "never" | "ignore"; // default "never"
 }
 
 export default function SEO({
@@ -40,7 +40,7 @@ export default function SEO({
   noIndex = false,
   noFollow = false,
   includeQueryInCanonical = false,
-  trailingSlash = "always"
+  trailingSlash = "never"
 }: SEOProps) {
   // ✅ Single canonical host everywhere to avoid www/non-www duplication.
   const baseUrl = "https://www.roiblueprint.com";
