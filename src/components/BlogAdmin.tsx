@@ -206,12 +206,12 @@ const BlogAdmin = () => {
           className="bg-white rounded-xl shadow-lg p-8 mb-8"
         >
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-brand-navy">
+            <h2 className="text-2xl font-bold text-primary-600">
               {currentPost ? 'Edit Post' : 'Create New Post'}
             </h2>
             <button
               onClick={resetForm}
-              className="text-brand-navy/60 hover:text-brand-navy"
+              className="text-neutral-600 hover:text-primary-600"
             >
               Cancel
             </button>
@@ -220,7 +220,7 @@ const BlogAdmin = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-brand-navy mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Title *
                 </label>
                 <input
@@ -229,12 +229,12 @@ const BlogAdmin = () => {
                   value={formData.title}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-brand-navy mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Slug *
                 </label>
                 <input
@@ -243,12 +243,12 @@ const BlogAdmin = () => {
                   value={formData.slug}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-brand-navy mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Excerpt *
                 </label>
                 <textarea
@@ -257,12 +257,12 @@ const BlogAdmin = () => {
                   onChange={handleInputChange}
                   required
                   rows={3}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-brand-navy mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Content * (Markdown supported)
                 </label>
                 <textarea
@@ -271,12 +271,12 @@ const BlogAdmin = () => {
                   onChange={handleInputChange}
                   required
                   rows={12}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent font-mono text-sm"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono text-sm"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-brand-navy mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Category *
                 </label>
                 <select
@@ -284,7 +284,7 @@ const BlogAdmin = () => {
                   value={formData.category}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 >
                   {categories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
@@ -293,7 +293,7 @@ const BlogAdmin = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-brand-navy mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Read Time *
                 </label>
                 <input
@@ -303,12 +303,12 @@ const BlogAdmin = () => {
                   onChange={handleInputChange}
                   required
                   placeholder="5 min read"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-brand-navy mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Author *
                 </label>
                 <input
@@ -317,12 +317,12 @@ const BlogAdmin = () => {
                   value={formData.author}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-brand-navy mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Author Title
                 </label>
                 <input
@@ -331,12 +331,12 @@ const BlogAdmin = () => {
                   value={formData.author_title}
                   onChange={handleInputChange}
                   placeholder="CPA"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                 />
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-brand-navy mb-2">
+                <label className="block text-sm font-medium text-neutral-700 mb-2">
                   Featured Image *
                 </label>
 
@@ -346,8 +346,8 @@ const BlogAdmin = () => {
                     onClick={() => setUploadMode('upload')}
                     className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
                       uploadMode === 'upload'
-                        ? 'bg-brand-navy text-white'
-                        : 'bg-gray-200 text-brand-navy hover:bg-gray-300'
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-200 text-primary-600 hover:bg-gray-300'
                     }`}
                   >
                     <Upload size={16} />
@@ -358,8 +358,8 @@ const BlogAdmin = () => {
                     onClick={() => setUploadMode('url')}
                     className={`px-4 py-2 rounded-lg flex items-center gap-2 transition-colors ${
                       uploadMode === 'url'
-                        ? 'bg-brand-navy text-white'
-                        : 'bg-gray-200 text-brand-navy hover:bg-gray-300'
+                        ? 'bg-primary-600 text-white'
+                        : 'bg-gray-200 text-primary-600 hover:bg-gray-300'
                     }`}
                   >
                     <ImageIcon size={16} />
@@ -372,7 +372,7 @@ const BlogAdmin = () => {
                     <div className="flex items-center gap-3">
                       <label
                         htmlFor="image-upload"
-                        className="flex items-center gap-2 px-6 py-3 bg-brand-gold text-white rounded-lg hover:bg-gold-700 transition-colors cursor-pointer disabled:opacity-50"
+                        className="flex items-center gap-2 px-6 py-3 bg-secondary-500 text-white rounded-lg hover:bg-secondary-600 transition-colors cursor-pointer disabled:opacity-50 font-semibold"
                       >
                         <Upload size={20} />
                         {uploading ? 'Uploading...' : 'Choose Image'}
@@ -407,7 +407,7 @@ const BlogAdmin = () => {
                         value={formData.image}
                         onChange={handleImageUrlChange}
                         placeholder="https://images.unsplash.com/..."
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-navy focus:border-transparent"
+                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
                       />
                       {formData.image && (
                         <button
@@ -427,7 +427,7 @@ const BlogAdmin = () => {
 
                 {imagePreview && (
                   <div className="mt-4">
-                    <p className="text-sm font-medium text-brand-navy mb-2">Preview:</p>
+                    <p className="text-sm font-medium text-neutral-700 mb-2">Preview:</p>
                     <div className="relative w-full h-48 border border-gray-300 rounded-lg overflow-hidden">
                       <img
                         src={imagePreview}
@@ -459,9 +459,9 @@ const BlogAdmin = () => {
                     name="published"
                     checked={formData.published}
                     onChange={handleInputChange}
-                    className="w-5 h-5 text-brand-navy rounded focus:ring-2 focus:ring-brand-navy"
+                    className="w-5 h-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
                   />
-                  <span className="text-sm font-medium text-brand-navy">Published</span>
+                  <span className="text-sm font-medium text-neutral-700">Published</span>
                 </label>
 
                 <label className="flex items-center space-x-2 cursor-pointer">
@@ -470,9 +470,9 @@ const BlogAdmin = () => {
                     name="featured"
                     checked={formData.featured}
                     onChange={handleInputChange}
-                    className="w-5 h-5 text-brand-navy rounded focus:ring-2 focus:ring-brand-navy"
+                    className="w-5 h-5 text-primary-600 rounded focus:ring-2 focus:ring-primary-500"
                   />
-                  <span className="text-sm font-medium text-brand-navy">Featured</span>
+                  <span className="text-sm font-medium text-neutral-700">Featured</span>
                 </label>
               </div>
             </div>
@@ -481,14 +481,14 @@ const BlogAdmin = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="bg-brand-gold text-white px-8 py-3 rounded-lg hover:bg-gold-700 transition-colors disabled:opacity-50"
+                className="bg-secondary-500 text-white px-8 py-3 rounded-lg hover:bg-secondary-600 transition-colors disabled:opacity-50 font-semibold"
               >
                 {loading ? 'Saving...' : (currentPost ? 'Update Post' : 'Create Post')}
               </button>
               <button
                 type="button"
                 onClick={resetForm}
-                className="bg-gray-200 text-brand-navy px-8 py-3 rounded-lg hover:bg-gray-300 transition-colors"
+                className="bg-gray-200 text-neutral-700 px-8 py-3 rounded-lg hover:bg-gray-300 transition-colors"
               >
                 Cancel
               </button>
@@ -533,11 +533,11 @@ const BlogAdmin = () => {
                     <tr key={post.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
-                          <div className="text-sm font-medium text-brand-navy">
+                          <div className="text-sm font-medium text-neutral-900">
                             {post.title}
                           </div>
                           {post.featured && (
-                            <Star size={16} className="text-brand-gold fill-brand-gold" />
+                            <Star size={16} className="text-warning-500 fill-warning-500" />
                           )}
                         </div>
                       </td>
@@ -573,7 +573,7 @@ const BlogAdmin = () => {
                         <div className="flex justify-end space-x-2">
                           <button
                             onClick={() => handleEdit(post)}
-                            className="text-brand-navy hover:text-brand-gold transition-colors"
+                            className="text-primary-600 hover:text-primary-700 transition-colors"
                           >
                             <Edit size={18} />
                           </button>
