@@ -35,10 +35,33 @@ export default function ContactPage() {
     "initial" | "email" | "prequalification" | "qualified" | "disqualified" | "contact"
   >("initial");
   const [disqualificationMessage, setDisqualificationMessage] = useState("");
+  const [submissionId, setSubmissionId] = useState("");
   const calendarRef = useRef<HTMLElement>(null);
 
   const startPrequalification = () => setCurrentStep("email");
-  const resetFlow = () => setCurrentStep("initial");
+  const resetFlow = () => {
+    setCurrentStep("initial");
+    setSubmissionId("");
+  };
+
+  const markAssessmentComplete = async (result: 'qualified' | 'disqualified', metadata?: any) => {
+    if (!submissionId) return;
+
+    try {
+      await fetch('/api/form-submissions', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: submissionId,
+          status: 'completed',
+          result,
+          metadata
+        })
+      });
+    } catch (error) {
+      console.error('Error marking assessment complete:', error);
+    }
+  };
 
   // Scroll to calendar when user becomes qualified
   useEffect(() => {
@@ -180,14 +203,24 @@ export default function ContactPage() {
                 )}
 
                 {currentStep === "email" && (
-                  <EmailCapture onSuccess={() => setCurrentStep("prequalification")} onBack={resetFlow} />
+                  <EmailCapture
+                    onSuccess={(id) => {
+                      setSubmissionId(id);
+                      setCurrentStep("prequalification");
+                    }}
+                    onBack={resetFlow}
+                  />
                 )}
 
                 {currentStep === "prequalification" && (
                   <PrequalificationWizard
                     questions={prequalificationQuestions}
-                    onQualified={() => setCurrentStep("qualified")}
+                    onQualified={() => {
+                      markAssessmentComplete('qualified');
+                      setCurrentStep("qualified");
+                    }}
                     onDisqualified={(msg) => {
+                      markAssessmentComplete('disqualified', { reason: msg });
                       setDisqualificationMessage(msg);
                       setCurrentStep("disqualified");
                     }}
