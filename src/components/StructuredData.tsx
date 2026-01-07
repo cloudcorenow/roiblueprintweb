@@ -9,8 +9,13 @@ interface BlogItem {
   authorName?: string;
 }
 
+interface BreadcrumbItem {
+  name: string;
+  url: string;
+}
+
 interface StructuredDataProps {
-  type?: "service" | "faq" | "webpage" | "collection";
+  type?: "service" | "faq" | "webpage" | "collection" | "article";
 
   pageTitle?: string;
   pageDescription?: string;
@@ -23,6 +28,15 @@ interface StructuredDataProps {
 
   faqItems?: Array<{ question: string; answer: string }>;
   blogItems?: BlogItem[];
+  breadcrumbs?: BreadcrumbItem[];
+
+  // For article type
+  articleTitle?: string;
+  articleDescription?: string;
+  articleImage?: string;
+  articleDatePublished?: string;
+  articleDateModified?: string;
+  articleAuthor?: string;
 
   /**
    * Production defaults:
@@ -92,6 +106,13 @@ export default function StructuredData({
   pageUrl,
   faqItems,
   blogItems,
+  breadcrumbs,
+  articleTitle,
+  articleDescription,
+  articleImage,
+  articleDatePublished,
+  articleDateModified,
+  articleAuthor,
   trailingSlash = "always",
   instanceKey
 }: StructuredDataProps) {
@@ -208,6 +229,56 @@ export default function StructuredData({
   }, [faqItems, pageAbsUrl]);
 
   /**
+   * BreadcrumbList schema (for navigation hierarchy)
+   */
+  const breadcrumbSchema = useMemo(() => {
+    if (!breadcrumbs?.length) return null;
+
+    const itemListElement = breadcrumbs.map((crumb, idx) => ({
+      "@type": "ListItem",
+      position: idx + 1,
+      name: crumb.name,
+      item: absUrl(crumb.url, trailingSlash)
+    }));
+
+    return {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      itemListElement
+    };
+  }, [breadcrumbs, trailingSlash]);
+
+  /**
+   * Article schema (for blog posts and articles)
+   */
+  const articleSchema = useMemo(() => {
+    if (!articleTitle || !pageAbsUrl) return null;
+
+    const schema: Record<string, any> = {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "@id": `${pageAbsUrl}#article`,
+      headline: articleTitle,
+      description: articleDescription || pageDescription,
+      url: pageAbsUrl,
+      isPartOf: { "@id": websiteId },
+      publisher: { "@id": orgId }
+    };
+
+    if (articleImage) schema.image = absAssetUrl(articleImage);
+    if (articleDatePublished) schema.datePublished = articleDatePublished;
+    if (articleDateModified) schema.dateModified = articleDateModified;
+    if (articleAuthor) {
+      schema.author = {
+        "@type": "Person",
+        name: articleAuthor
+      };
+    }
+
+    return schema;
+  }, [articleTitle, articleDescription, articleImage, articleDatePublished, articleDateModified, articleAuthor, pageAbsUrl, pageDescription, websiteId, orgId]);
+
+  /**
    * CollectionPage + ItemList (for /resources)
    */
   const collectionSchema = useMemo(() => {
@@ -270,6 +341,7 @@ export default function StructuredData({
     // Base graph elements (safe to include on most pages)
     const graph: any[] = [organizationSchema, websiteSchema];
     if (webpageSchema) graph.push(webpageSchema);
+    if (breadcrumbSchema) graph.push(breadcrumbSchema);
 
     switch (type) {
       case "service":
@@ -299,6 +371,13 @@ export default function StructuredData({
           schema: { "@context": "https://schema.org", "@graph": graph }
         };
 
+      case "article":
+        if (articleSchema) graph.push(articleSchema);
+        return {
+          scriptId: `structured-data-article${suffix}`,
+          schema: { "@context": "https://schema.org", "@graph": graph }
+        };
+
       default:
         return { scriptId: "", schema: null };
     }
@@ -310,7 +389,9 @@ export default function StructuredData({
     webpageSchema,
     serviceSchema,
     faqSchema,
-    collectionSchema
+    collectionSchema,
+    articleSchema,
+    breadcrumbSchema
   ]);
 
   useEffect(() => {
