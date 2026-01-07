@@ -24,9 +24,9 @@ export async function onRequest(context: {
     const baseUrl = 'https://www.roiblueprint.com';
     let path = url.pathname;
 
-    // Normalize path - ensure trailing slash except for root
-    if (path !== '/' && !path.endsWith('/')) {
-      path = `${path}/`;
+    // Normalize path - remove trailing slash except for root
+    if (path !== '/' && path.endsWith('/')) {
+      path = path.slice(0, -1);
     }
 
     const canonicalUrl = `${baseUrl}${path}`;
