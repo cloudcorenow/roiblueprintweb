@@ -1,8 +1,8 @@
 import React from "react";
 import { ArrowLeft, ArrowRight, Mail, AlertTriangle, User, Phone as PhoneIcon } from "lucide-react";
 
-interface EmailCaptureProps {
-  onSuccess: () => void;
+export interface EmailCaptureProps {
+  onSuccess: (submissionId: string) => void;
   onBack: () => void;
 }
 
@@ -20,7 +20,7 @@ const EmailCapture: React.FC<EmailCaptureProps> = ({ onSuccess, onBack }) => {
     setIsSubmitting(true);
 
     try {
-      await Promise.all([
+      const [guideResponse] = await Promise.all([
         fetch("/api/guide-access", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -46,8 +46,11 @@ const EmailCapture: React.FC<EmailCaptureProps> = ({ onSuccess, onBack }) => {
         }),
       ]);
 
+      const guideData = await guideResponse.json();
+      const submissionId = guideData.submissionId || '';
+
       setTimeout(() => {
-        onSuccess();
+        onSuccess(submissionId);
       }, 500);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "An error occurred. Please try again.";
