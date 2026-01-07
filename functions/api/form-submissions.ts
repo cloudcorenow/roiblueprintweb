@@ -44,18 +44,55 @@ export const onRequestPatch: PagesFunction<Env> = async (context) => {
       return Response.json({ error: 'Database not configured' }, { status: 500 });
     }
 
-    const { id, is_blocked } = await context.request.json();
+    const body = await context.request.json();
+    const { id, is_blocked, status, result, metadata } = body;
 
-    if (!id || typeof is_blocked !== 'boolean') {
+    if (!id) {
       return Response.json(
-        { error: 'Invalid request. id and is_blocked are required' },
+        { error: 'Invalid request. id is required' },
         { status: 400 }
       );
     }
 
+    const updates: string[] = [];
+    const values: any[] = [];
+
+    if (typeof is_blocked === 'boolean') {
+      updates.push('is_blocked = ?');
+      values.push(is_blocked ? 1 : 0);
+    }
+
+    if (status) {
+      updates.push('status = ?');
+      values.push(status);
+    }
+
+    if (result !== undefined) {
+      updates.push('result = ?');
+      values.push(result);
+    }
+
+    if (status === 'completed') {
+      updates.push('completed_at = datetime("now")');
+    }
+
+    if (metadata) {
+      updates.push('metadata = ?');
+      values.push(typeof metadata === 'string' ? metadata : JSON.stringify(metadata));
+    }
+
+    if (updates.length === 0) {
+      return Response.json(
+        { error: 'No valid fields to update' },
+        { status: 400 }
+      );
+    }
+
+    values.push(id);
+
     await DB
-      .prepare('UPDATE form_submissions SET is_blocked = ? WHERE id = ?')
-      .bind(is_blocked ? 1 : 0, id)
+      .prepare(`UPDATE form_submissions SET ${updates.join(', ')} WHERE id = ?`)
+      .bind(...values)
       .run();
 
     return Response.json({ success: true });
