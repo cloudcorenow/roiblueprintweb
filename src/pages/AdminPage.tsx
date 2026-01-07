@@ -377,7 +377,7 @@ export default function AdminPage() {
               onClick={() => setActiveFilter('form-security')}
               className={`px-6 py-3 rounded-lg font-semibold transition-all ${
                 activeFilter === 'form-security'
-                  ? 'bg-error-600 text-white shadow-md'
+                  ? 'bg-red-600 text-white shadow-md'
                   : 'bg-neutral-100 text-neutral-700 hover:bg-neutral-200'
               }`}
             >
