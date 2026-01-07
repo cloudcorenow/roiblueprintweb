@@ -97,6 +97,7 @@ export default function SEO({
   };
 
   useEffect(() => {
+    console.log('[SEO] useEffect running, canonicalUrl:', canonicalUrl, 'final url:', url);
     document.title = fullTitle;
 
     const upsertMeta = (attr: "name" | "property", key: string, content: string) => {
@@ -144,12 +145,19 @@ export default function SEO({
 
     // Canonical
     let canonicalEl = document.querySelector('link[rel="canonical"]');
+    console.log('[SEO] Found existing canonical?', !!canonicalEl);
     if (!canonicalEl) {
       canonicalEl = document.createElement("link");
       canonicalEl.setAttribute("rel", "canonical");
       document.head.appendChild(canonicalEl);
+      console.log('[SEO] Created new canonical element');
     }
     canonicalEl.setAttribute("href", url);
+    console.log('[SEO] Set canonical href to:', url);
+
+    // Verify it's in the DOM
+    const check = document.querySelector('link[rel="canonical"]');
+    console.log('[SEO] Verification - canonical in DOM:', check, 'href:', check?.getAttribute('href'));
   }, [
     fullTitle,
     description,
