@@ -18,3 +18,4 @@ bucket_name = "roibfiles"
 # Environment variables
 [vars]
 ENVIRONMENT = "production"
+VITE_RECAPTCHA_SITE_KEY = "0x4AAAAAACFtJXmzLmbaJlOa"
