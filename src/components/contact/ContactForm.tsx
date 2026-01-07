@@ -1,8 +1,10 @@
 import React from "react";
 import { ArrowLeft, ArrowRight, CheckCircle, AlertTriangle } from "lucide-react";
 import Turnstile from "../Turnstile";
+import GoogleReCaptcha from "../GoogleReCaptcha";
 import { ContactFormData, ContactFormErrors } from "../../types/contact";
 import { validateContactForm } from "../../utils/contactValidation";
+import { submitToSalesforce } from "../../utils/salesforceService";
 
 interface ContactFormProps {
   onBack: () => void;
@@ -13,6 +15,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
     firstName: "",
     lastName: "",
     email: "",
+    phone: "",
     company: "",
     industry: "",
     message: "",
@@ -22,6 +25,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
   const [success, setSuccess] = React.useState(false);
   const [botField, setBotField] = React.useState("");
   const [turnstileToken, setTurnstileToken] = React.useState("");
+  const [recaptchaToken, setRecaptchaToken] = React.useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -50,6 +54,15 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
 
     try {
       setSubmitting(true);
+
+      if (recaptchaToken) {
+        try {
+          await submitToSalesforce(formData, recaptchaToken);
+        } catch (salesforceError) {
+          console.error("Salesforce submission error:", salesforceError);
+        }
+      }
+
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,8 +80,9 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
       }
 
       setSuccess(true);
-      setFormData({ firstName: "", lastName: "", email: "", company: "", industry: "", message: "" });
+      setFormData({ firstName: "", lastName: "", email: "", phone: "", company: "", industry: "", message: "" });
       setTurnstileToken("");
+      setRecaptchaToken("");
     } catch (err) {
       console.error("Form submission error:", err);
       const message = err instanceof Error ? err.message : "There was an error submitting your form. Please try again.";
@@ -182,53 +196,102 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
             )}
           </div>
           <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-neutral-700 mb-2">
+              Phone Number *
+            </label>
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              required
+              value={formData.phone}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+            />
+            {errors.phone && (
+              <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" />
+                {errors.phone}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
             <label htmlFor="company" className="block text-sm font-medium text-neutral-700 mb-2">
-              Company Name
+              Company Name *
             </label>
             <input
               type="text"
               id="company"
               name="company"
+              required
               value={formData.company}
               onChange={handleInputChange}
               className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
             />
+            {errors.company && (
+              <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" />
+                {errors.company}
+              </p>
+            )}
+          </div>
+          <div>
+            <label htmlFor="industry" className="block text-sm font-medium text-neutral-700 mb-2">
+              Practice Type *
+            </label>
+            <select
+              id="industry"
+              name="industry"
+              required
+              value={formData.industry}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+            >
+              <option value="">Select Practice Type</option>
+              <option value="aba">ABA Practice</option>
+              <option value="medical">Medical Practice</option>
+              <option value="dental">Dental Practice</option>
+              <option value="other">Other Healthcare</option>
+            </select>
+            {errors.industry && (
+              <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" />
+                {errors.industry}
+              </p>
+            )}
           </div>
         </div>
 
         <div>
-          <label htmlFor="industry" className="block text-sm font-medium text-neutral-700 mb-2">
-            Industry
-          </label>
-          <select
-            id="industry"
-            name="industry"
-            value={formData.industry}
-            onChange={handleInputChange}
-            className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-          >
-            <option value="">Select Industry</option>
-            <option value="medical">Medical/Healthcare</option>
-            <option value="manufacturing">Manufacturing</option>
-            <option value="aba">ABA Therapy</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-
-        <div>
           <label htmlFor="message" className="block text-sm font-medium text-neutral-700 mb-2">
-            How can we help you?
+            How can we help you? *
           </label>
           <textarea
             id="message"
             name="message"
             rows={4}
+            required
             value={formData.message}
             onChange={handleInputChange}
             placeholder="Tell us about your needs..."
             className="w-full px-3 py-2 border border-neutral-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm resize-none"
           />
+          {errors.message && (
+            <p className="mt-1 text-xs text-red-600 flex items-center gap-1">
+              <AlertTriangle className="w-3 h-3" />
+              {errors.message}
+            </p>
+          )}
         </div>
+
+        <GoogleReCaptcha
+          onVerify={setRecaptchaToken}
+          onError={() => setErrors({ message: "reCAPTCHA verification failed. Please try again." } as ContactFormErrors)}
+          onExpire={() => setRecaptchaToken("")}
+        />
 
         <Turnstile
           onVerify={setTurnstileToken}
@@ -239,7 +302,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
         <button
           type="submit"
           className="w-full bg-primary-500 hover:bg-primary-600 text-white font-bold py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl disabled:opacity-50"
-          disabled={submitting || (import.meta.env.VITE_TURNSTILE_SITE_KEY && !turnstileToken)}
+          disabled={submitting || (import.meta.env.VITE_TURNSTILE_SITE_KEY && !turnstileToken) || (import.meta.env.VITE_RECAPTCHA_SITE_KEY && !recaptchaToken)}
         >
           {submitting ? (
             <>
