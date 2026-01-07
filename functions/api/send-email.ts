@@ -267,15 +267,14 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 background-color: #ffffff;
               }
               .header {
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #ffffff;
                 padding: 40px 20px;
                 text-align: center;
+                border-bottom: 1px solid #e5e7eb;
               }
-              .header h1 {
-                color: #ffffff;
-                margin: 0;
-                font-size: 28px;
-                font-weight: 700;
+              .header img {
+                max-width: 200px;
+                height: auto;
               }
               .content {
                 padding: 40px 30px;
@@ -306,7 +305,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
               }
               .download-button {
                 display: inline-block;
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background: #22c55e;
                 color: #ffffff !important;
                 text-decoration: none;
                 padding: 16px 32px;
@@ -314,9 +313,10 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 font-weight: 600;
                 font-size: 16px;
                 margin-top: 15px;
-                transition: transform 0.2s;
+                transition: all 0.2s;
               }
               .download-button:hover {
+                background: #16a34a;
                 transform: translateY(-2px);
               }
               .footer {
@@ -335,7 +335,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           <body>
             <div class="container">
               <div class="header">
-                <h1>ROI Blueprint</h1>
+                <img src="https://imagedelivery.net/s0JEtwqnLquT1GUYjPcg5Q/a77feddf-b703-4338-b92a-eaf7ce7f7a00/public" alt="ROI Blueprint Logo">
               </div>
               <div class="content">
                 <h2>Thank You for Reaching Out!</h2>
