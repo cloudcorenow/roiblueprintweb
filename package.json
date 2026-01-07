@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "npx vite",
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit && vite build && node scripts/prerender.mjs",
     "lint": "eslint .",
     "preview": "npx vite preview",
     "tw:audit": "node scripts/tw-audit.mjs"
