@@ -28,4 +28,5 @@ export interface BlogPostInput {
   read_time: string;
   published?: boolean;
   featured?: boolean;
+  published_at?: string;
 }
