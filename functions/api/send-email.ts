@@ -345,7 +345,7 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
                 <div class="download-section">
                   <h3>Your Free R&D Tax Credit Guide</h3>
                   <p style="margin-bottom: 20px;">In the meantime, we've prepared a comprehensive guide to help you understand R&D tax credits and how they can benefit your practice.</p>
-                  <a href="https://pub-d6d31077bf1c45ddbede359b95106359.r2.dev/PDF/ROI-Blueprint-GUIDE.pdf" class="download-button" download>Download Your Free Guide</a>
+                  <a href="https://pub-d6d31077bf1c45ddbede359b95106359.r2.dev/PDF/ROI-Blueprint-Healthcare-RandD-Consultants.pdf" class="download-button" download>Download Your Guide</a>
                 </div>
 
                 <p>If you have any immediate questions, feel free to reply to this email or call us directly.</p>
