@@ -12,7 +12,7 @@ interface ContactFormData {
   company?: string;
   industry?: string;
   message: string;
-  formType: 'contact' | 'guide' | 'newsletter';
+  formType: 'contact' | 'guide' | 'newsletter' | 'prequalification';
   turnstileToken?: string;
   honeypot?: string;
 }
@@ -208,6 +208,17 @@ export const onRequestPost: PagesFunction<Env> = async (context) => {
           <p><strong>Email:</strong> ${data.email}</p>
           ${data.phone ? `<p><strong>Phone:</strong> ${data.phone}</p>` : ''}
           <p>Please send the R&D Tax Credit Guide to this email address.</p>
+        `;
+        break;
+
+      case 'prequalification':
+        subject = `Prequalification Assessment Started - ${data.firstName} ${data.lastName}`;
+        htmlContent = `
+          <h2>Prequalification Assessment Started</h2>
+          <p><strong>Name:</strong> ${data.firstName} ${data.lastName}</p>
+          <p><strong>Email:</strong> ${data.email}</p>
+          ${data.phone ? `<p><strong>Phone:</strong> ${data.phone}</p>` : ''}
+          <p>This lead has started the prequalification assessment and is interested in learning more.</p>
         `;
         break;
 
