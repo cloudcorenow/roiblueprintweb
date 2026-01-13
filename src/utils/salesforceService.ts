@@ -16,7 +16,7 @@ export const submitToSalesforce = async (
   const formDataToSubmit = new FormData();
 
   formDataToSubmit.append("oid", "00Dfo000005V72K");
-  formDataToSubmit.append("retURL", window.location.origin + "/contact?submitted=true");
+  formDataToSubmit.append("retURL", window.location.origin + "/thank-you");
 
   formDataToSubmit.append("first_name", formData.firstName);
   formDataToSubmit.append("last_name", formData.lastName);
@@ -26,6 +26,8 @@ export const submitToSalesforce = async (
 
   const practiceType = PRACTICE_TYPE_MAPPING[formData.industry] || formData.industry;
   formDataToSubmit.append("00NVp0000060P2z", practiceType);
+
+  formDataToSubmit.append("description", formData.message);
 
   const captchaSettings = {
     keyname: "SalesforceWebtoLead",
