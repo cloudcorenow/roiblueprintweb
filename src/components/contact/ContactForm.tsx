@@ -56,7 +56,7 @@ const ContactForm: React.FC<ContactFormProps> = ({ onBack }) => {
       setSubmitting(true);
 
       try {
-        await submitToSalesforce(formData, recaptchaToken);
+        await submitToSalesforce(formData);
       } catch (salesforceError) {
         console.error("Salesforce submission error:", salesforceError);
       }
