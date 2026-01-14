@@ -52,7 +52,7 @@ const StandaloneContactForm: React.FC = () => {
       setSubmitting(true);
 
       try {
-        await submitToSalesforce(formData, recaptchaToken);
+        await submitToSalesforce(formData);
       } catch (salesforceError) {
         console.error("Salesforce submission error:", salesforceError);
       }
