@@ -51,12 +51,10 @@ const StandaloneContactForm: React.FC = () => {
     try {
       setSubmitting(true);
 
-      if (recaptchaToken) {
-        try {
-          await submitToSalesforce(formData, recaptchaToken);
-        } catch (salesforceError) {
-          console.error("Salesforce submission error:", salesforceError);
-        }
+      try {
+        await submitToSalesforce(formData, recaptchaToken);
+      } catch (salesforceError) {
+        console.error("Salesforce submission error:", salesforceError);
       }
 
       const response = await fetch("/api/send-email", {
