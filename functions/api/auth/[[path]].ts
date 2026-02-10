@@ -8,12 +8,94 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type, Authorization',
 };
 
-async function hashPassword(password: string): Promise<string> {
+const PBKDF2_ITERATIONS = 210_000;
+const DERIVED_KEY_LENGTH = 32; // 256 bits
+
+function bufferToHex(buffer: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buffer))
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function hexToBytes(hex: string): Uint8Array {
+  if (hex.length % 2 !== 0) {
+    throw new Error('Invalid hex string');
+  }
+
+  const bytes = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2) {
+    bytes[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  }
+  return bytes;
+}
+
+async function deriveKey(password: string, salt: Uint8Array): Promise<ArrayBuffer> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  const passwordBuffer = encoder.encode(password);
+
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw',
+    passwordBuffer,
+    { name: 'PBKDF2' },
+    false,
+    ['deriveBits']
+  );
+
+  return crypto.subtle.deriveBits(
+    {
+      name: 'PBKDF2',
+      salt,
+      iterations: PBKDF2_ITERATIONS,
+      hash: 'SHA-256'
+    },
+    keyMaterial,
+    DERIVED_KEY_LENGTH * 8
+  );
+}
+
+async function createPasswordHash(password: string): Promise<string> {
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+  const derivedBits = await deriveKey(password, saltBytes);
+
+  const saltHex = bufferToHex(saltBytes);
+  const hashHex = bufferToHex(derivedBits);
+
+  return `${saltHex}:${hashHex}`;
+}
+
+async function verifyPassword(password: string, storedValue: string): Promise<boolean> {
+  const [saltHex, expectedHash] = storedValue.split(':');
+
+  if (!saltHex || !expectedHash) {
+    // Fallback for legacy SHA-256 hashes stored without a salt
+    const encoder = new TextEncoder();
+    const data = encoder.encode(password);
+    const legacyHashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const legacyHash = bufferToHex(legacyHashBuffer);
+
+    return legacyHash === storedValue;
+  }
+
+  try {
+    const saltBytes = hexToBytes(saltHex);
+    const derivedBits = await deriveKey(password, saltBytes);
+    const hashHex = bufferToHex(derivedBits);
+
+    // Use timing-safe comparison
+    if (hashHex.length !== expectedHash.length) {
+      return false;
+    }
+
+    let mismatch = 0;
+    for (let i = 0; i < hashHex.length; i += 1) {
+      mismatch |= hashHex.charCodeAt(i) ^ expectedHash.charCodeAt(i);
+    }
+
+    return mismatch === 0;
+  } catch (error) {
+    console.error('Failed to verify password hash', error);
+    return false;
+  }
 }
 
 async function generateToken(): Promise<string> {
@@ -59,11 +141,9 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         });
       }
 
-      const passwordHash = await hashPassword(password);
-
       const user = await env.DB.prepare(
-        'SELECT id, email FROM users WHERE email = ? AND password_hash = ?'
-      ).bind(email, passwordHash).first<{ id: string; email: string }>();
+        'SELECT id, email, password_hash FROM users WHERE email = ?'
+      ).bind(email).first<{ id: string; email: string; password_hash: string }>();
 
       if (!user) {
         return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
@@ -72,9 +152,18 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         });
       }
 
-  await env.DB.prepare(
-  'UPDATE users SET last_login_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now") WHERE id = ?'
-).bind(user.id).run();
+      const passwordIsValid = await verifyPassword(password, user.password_hash);
+
+      if (!passwordIsValid) {
+        return new Response(JSON.stringify({ error: 'Invalid credentials' }), {
+          status: 401,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+
+      await env.DB.prepare(
+        'UPDATE users SET last_login_at = strftime("%Y-%m-%dT%H:%M:%fZ", "now") WHERE id = ?'
+      ).bind(user.id).run();
 
 
       const token = await generateToken();
@@ -159,7 +248,7 @@ export const onRequest: PagesFunction<Env> = async (context) => {
         });
       }
 
-      const passwordHash = await hashPassword(password);
+      const passwordHash = await createPasswordHash(password);
 
       await env.DB.prepare(
         'INSERT INTO users (email, password_hash) VALUES (?, ?)'
